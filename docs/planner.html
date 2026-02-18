@@ -1,0 +1,2286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sleeve Events – Room Planner</title>
+
+  <!-- =========================
+       STYLE / THEME
+       - Premium minimal aesthetic
+       - Dark + Light modes via CSS variables
+       ========================= -->
+  <style>
+    :root{
+      --bg:#0b1020;
+      --surface:#0f172a;
+      --surface-2:#0b1229;
+      --panel:#0b1229;
+      --border:#22304a;
+      --text:#e9eefb;
+      --muted:#a9b4cf;
+      --accent:#a855f7;
+      --accent-2:#7c3aed;
+      --warn:#fbbf24;
+      --good:#34d399;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+      --radius-2:12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+
+      --grid-major: rgba(255,255,255,.09);
+      --grid-minor: rgba(255,255,255,.045);
+
+      --handle: rgba(251,191,36,.95);
+      --selection: rgba(251,191,36,.9);
+      --shadow-soft: 0 8px 20px rgba(0,0,0,.25);
+    }
+
+    [data-theme="light"]{
+      --bg:#f6f7fb;
+      --surface:#ffffff;
+      --surface-2:#f4f6fb;
+      --panel:#ffffff;
+      --border:#d7deee;
+      --text:#101828;
+      --muted:#52607a;
+      --shadow:0 12px 24px rgba(16,24,40,.08);
+
+      --grid-major: rgba(16,24,40,.10);
+      --grid-minor: rgba(16,24,40,.05);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      background: radial-gradient(1200px 600px at 30% -10%, rgba(168,85,247,.25), transparent 60%),
+                  radial-gradient(900px 600px at 110% 20%, rgba(59,130,246,.18), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+      overflow:hidden;
+    }
+
+    /* =========================
+       LAYOUT
+       ========================= */
+    .app{
+      height:100%;
+      display:grid;
+      grid-template-rows: 62px 1fr;
+      grid-template-columns: 1fr 360px;
+      gap:12px;
+      padding:12px;
+    }
+
+    .topbar{
+      grid-column:1 / span 2;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), transparent), var(--surface);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:10px 12px;
+      backdrop-filter: blur(10px);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width: 220px;
+    }
+
+    .logo{
+      width:36px;height:36px;
+      border-radius:12px;
+      background: radial-gradient(circle at 30% 30%, rgba(168,85,247,.95), rgba(124,58,237,.7));
+      box-shadow: 0 10px 18px rgba(168,85,247,.22);
+      border:1px solid rgba(255,255,255,.12);
+    }
+
+    .brand h1{
+      font-size:14px;
+      margin:0;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      line-height:1.1;
+    }
+    .brand .sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:2px;
+    }
+
+    .toolbar{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      appearance:none;
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0)), var(--surface-2);
+      color:var(--text);
+      padding:8px 10px;
+      border-radius: 999px;
+      font-weight:650;
+      font-size:12px;
+      letter-spacing:.02em;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      cursor:pointer;
+      box-shadow: var(--shadow-soft);
+      user-select:none;
+    }
+    .btn:hover{filter:brightness(1.03)}
+    .btn:active{transform: translateY(1px)}
+    .btn.primary{
+      border-color: rgba(168,85,247,.45);
+      background: linear-gradient(135deg, rgba(76,29,149,.95), rgba(124,58,237,.95));
+      color:#fff;
+      box-shadow: 0 18px 26px rgba(124,58,237,.22);
+    }
+    .btn.ghost{background: transparent; box-shadow:none}
+    .btn.on{
+      border-color: rgba(168,85,247,.9);
+      box-shadow: 0 0 0 3px rgba(168,85,247,.18);
+    }
+    .btn.warn{
+      border-color: rgba(251,191,36,.55);
+      box-shadow: 0 0 0 3px rgba(251,191,36,.16);
+    }
+
+    .pill{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius: 999px;
+      border:1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--muted);
+      font-size:12px;
+      box-shadow: var(--shadow-soft);
+      user-select:none;
+      max-width: 520px;
+    }
+    .pill strong{color:var(--text)}
+    .pill code{font-family:var(--mono); font-size:11px; color:var(--text)}
+
+    .stage{
+      grid-row:2;
+      grid-column:1;
+      border-radius: var(--radius);
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.04), transparent), var(--surface);
+      box-shadow: var(--shadow);
+      position:relative;
+      overflow:hidden;
+      min-width:0;
+    }
+
+    .sidebar{
+      grid-row:2;
+      grid-column:2;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      border-radius: var(--radius);
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.04), transparent), var(--surface);
+      box-shadow: var(--shadow);
+      overflow:auto;
+      padding:12px;
+    }
+
+    .panel{
+      border-radius: var(--radius-2);
+      border:1px solid var(--border);
+      background: var(--panel);
+      padding:12px;
+    }
+
+    .panel h2{
+      margin:0 0 10px;
+      font-size:12px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-bottom:10px;
+    }
+    .field label{font-size:12px; color:var(--muted)}
+    .field input,.field textarea, .field select{
+      width:100%;
+      border-radius: 12px;
+      border:1px solid var(--border);
+      background: var(--surface-2);
+      color:var(--text);
+      padding:10px 10px;
+      font-size:13px;
+      outline:none;
+    }
+    .field textarea{min-height:84px; resize:vertical}
+
+    .grid2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .palette{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .card{
+      border-radius: 14px;
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), transparent), var(--surface-2);
+      padding:10px;
+      cursor:pointer;
+      user-select:none;
+      box-shadow: var(--shadow-soft);
+    }
+    .card:hover{filter:brightness(1.03)}
+    .card .t{font-weight:750; font-size:13px}
+    .card .m{font-size:12px; color:var(--muted); margin-top:4px}
+
+    .kv{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size:12px;
+      margin:6px 0;
+      color:var(--muted);
+    }
+    .kv strong{color:var(--text); font-family:var(--mono); font-weight:700; font-size:11px}
+
+    .small{font-size:12px; color:var(--muted); line-height:1.35}
+
+    .divider{
+      height:1px;
+      background: var(--border);
+      margin:10px 0;
+      opacity:.8;
+    }
+
+    /* =========================
+       CANVAS
+       ========================= */
+    #canvas{
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    .hint{
+      position:absolute;
+      left:12px;
+      bottom:12px;
+      padding:10px 12px;
+      border-radius: 14px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.18);
+      backdrop-filter: blur(10px);
+      color: var(--text);
+      box-shadow: var(--shadow);
+      max-width: 560px;
+      pointer-events:none;
+    }
+    [data-theme="light"] .hint{background: rgba(255,255,255,.72)}
+    .hint .k{font-family:var(--mono); font-size:11px; color:var(--muted)}
+
+    /* =========================
+       PRINT / EXPORT MODE
+       - Hide UI when printing
+       ========================= */
+    body.exporting .topbar,
+    body.exporting .sidebar{display:none !important}
+    body.exporting .app{grid-template-rows: 1fr; grid-template-columns: 1fr; padding:0; gap:0}
+    body.exporting .stage{border-radius:0; border:none; box-shadow:none}
+
+    @media (max-width: 1100px){
+      .app{grid-template-columns: 1fr}
+      .topbar{grid-column:1}
+      .sidebar{grid-column:1; grid-row:3}
+      .app{grid-template-rows: 62px 60vh 1fr}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app" id="app">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>SLEEVE EVENTS</h1>
+          <div class="sub">Official Room Planner • Single‑file Edition</div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <button class="btn" id="btnTheme" title="Toggle dark/light">Theme</button>
+        <button class="btn" id="btnGrid" title="Toggle grid">Grid</button>
+        <button class="btn" id="btnSnap" title="Toggle snap">Snap</button>
+        <button class="btn" id="btnSetScale" title="Set scale by clicking two points">Set Scale</button>
+        <button class="btn" id="btnBg" title="Upload background image">Background</button>
+        <button class="btn" id="btnLockBg" title="Lock background pan/zoom">Lock BG</button>
+        <button class="btn" id="btnSaveLocal" title="Save to this browser">Save Local</button>
+        <button class="btn" id="btnLoadLocal" title="Load from this browser">Load Local</button>
+        <button class="btn" id="btnDownload" title="Download project JSON">Download</button>
+        <button class="btn" id="btnUpload" title="Upload project JSON">Upload</button>
+        <button class="btn" id="btnExportPng" title="Export a high‑res PNG">Export PNG</button>
+        <button class="btn primary" id="btnExportPdf" title="Export a clean PDF">Export PDF</button>
+      </div>
+    </div>
+
+    <div class="stage">
+      <canvas id="canvas"></canvas>
+      <div class="hint" id="hint">
+        <div style="font-weight:750; letter-spacing:.02em">Controls</div>
+        <div class="small" style="margin-top:6px">
+          <span class="k">Pan</span>: Space + drag • <span class="k">Zoom</span>: Trackpad/Mousewheel • <span class="k">Select</span>: click • <span class="k">Multi-select</span>: Shift+click • <span class="k">Duplicate</span>: ⌘/Ctrl+D • <span class="k">Delete</span>: Del/Backspace
+        </div>
+        <div class="small" style="margin-top:6px" id="scaleHint">Scale not set yet — use <b>Set Scale</b> to get accurate feet/in dimensions.</div>
+      </div>
+    </div>
+
+    <aside class="sidebar">
+      <div class="panel">
+        <h2>Project</h2>
+        <div class="field">
+          <label>Event Name</label>
+          <input id="eventName" placeholder="e.g., Ava's Bat Mitzvah" />
+        </div>
+        <div class="field">
+          <label>Notes</label>
+          <textarea id="eventNotes" placeholder="Add notes, power needs, timeline, special instructions…"></textarea>
+        </div>
+
+        <div class="divider"></div>
+        <div class="grid2">
+          <div class="field">
+            <label>Snap Step</label>
+            <select id="snapStep">
+              <option value="1">1 ft</option>
+              <option value="2">2 ft</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Room Size (optional)</label>
+            <select id="roomPreset">
+              <option value="">Freeform</option>
+              <option value="40x30">40×30 ft</option>
+              <option value="60x40">60×40 ft</option>
+              <option value="80x60">80×60 ft</option>
+              <option value="100x80">100×80 ft</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="kv"><span>Scale</span><strong id="scaleReadout">Uncalibrated</strong></div>
+        <div class="kv"><span>Zoom</span><strong id="zoomReadout">100%</strong></div>
+      </div>
+
+      <div class="panel">
+        <h2>Object Palette</h2>
+        <div class="palette" id="palette"></div>
+        <div class="small" style="margin-top:10px">Tip: drag from palette into the canvas, or click a palette item to drop at center.</div>
+      </div>
+
+      <div class="panel">
+        <h2>Selected</h2>
+        <div class="small" id="selectedNone">No selection.</div>
+        <div id="selectedUI" style="display:none">
+          <div class="field">
+            <label>Label</label>
+            <input id="selLabel" placeholder="Object label" />
+          </div>
+          <div class="grid2">
+            <button class="btn" id="btnDuplicate">Duplicate</button>
+            <button class="btn warn" id="btnDelete">Delete</button>
+          </div>
+          <div class="divider"></div>
+          <div class="kv"><span>Size</span><strong id="selSize">—</strong></div>
+          <div class="kv"><span>Rotation</span><strong id="selRot">—</strong></div>
+          <div class="kv"><span>Position</span><strong id="selPos">—</strong></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Gear Summary</h2>
+        <div class="small" id="gearSummary">Place objects to generate a summary.</div>
+      </div>
+
+      <div class="panel">
+        <h2>Export Notes</h2>
+        <div class="small">
+          PNG/PDF export hides UI automatically. PDF export embeds a high‑resolution image of the plan (background + objects + labels + grid if enabled).
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Squarespace Embed Tip</h2>
+        <div class="small">
+          If Squarespace's code editor gets glitchy with large HTML, host this <b>planner.html</b> on GitHub Pages (or any static host) and embed via an <b>iframe</b>.
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Hidden file inputs -->
+  <input id="fileBg" type="file" accept="image/png,image/jpeg" style="display:none" />
+  <input id="fileJson" type="file" accept="application/json" style="display:none" />
+
+  <!-- =========================
+       APP SCRIPT
+       - Vanilla JS only
+       - Modular structure inside file
+       ========================= -->
+  <script>
+  ;(() => {
+    "use strict";
+
+    /* =========================================================
+       UTILITIES
+       ========================================================= */
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const rafThrottle = (fn) => {
+      let queued = false;
+      return (...args) => {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(() => {
+          queued = false;
+          fn(...args);
+        });
+      };
+    };
+
+    const uid = () => (Math.random().toString(16).slice(2) + Date.now().toString(16)).slice(0, 16);
+
+    function downloadBlob(filename, blob){
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 250);
+    }
+
+    function formatFeetIn(feetFloat){
+      if (!isFinite(feetFloat)) return "—";
+      const sign = feetFloat < 0 ? "-" : "";
+      const abs = Math.abs(feetFloat);
+      const ft = Math.floor(abs + 1e-9);
+      const inches = Math.round((abs - ft) * 12);
+      if (inches === 12) return `${sign}${ft+1}′ 0″`;
+      return `${sign}${ft}′ ${inches}″`;
+    }
+
+    function parseFeetInput(str){
+      // Accept: "12", "12ft", "12'", "12'6", "12' 6\"", "12.5"
+      const s = String(str || "").trim();
+      if (!s) return NaN;
+      // 12.5
+      if (/^\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+      // 12'6" / 12' 6
+      const m = s.match(/^(\d+(?:\.\d+)?)\s*(?:ft|\')\s*(\d+(?:\.\d+)?)?\s*(?:in|\")?$/i);
+      if (m){
+        const ft = parseFloat(m[1]);
+        const inch = m[2] ? parseFloat(m[2]) : 0;
+        return ft + (inch/12);
+      }
+      // 6" only
+      const mi = s.match(/^(\d+(?:\.\d+)?)\s*(?:in|\")$/i);
+      if (mi) return parseFloat(mi[1]) / 12;
+      return NaN;
+    }
+
+    function roundToStep(valueFeet, stepFeet){
+      if (!isFinite(valueFeet) || !isFinite(stepFeet) || stepFeet <= 0) return valueFeet;
+      return Math.round(valueFeet / stepFeet) * stepFeet;
+    }
+
+    function pointRotate(px, py, cx, cy, ang){
+      const s = Math.sin(ang), c = Math.cos(ang);
+      const x = px - cx, y = py - cy;
+      return { x: x*c - y*s + cx, y: x*s + y*c + cy };
+    }
+
+    function toRadians(deg){ return deg * Math.PI / 180; }
+    function toDegrees(rad){ return rad * 180 / Math.PI; }
+
+    /* =========================================================
+       STATE
+       ========================================================= */
+    const State = {
+      version: 1,
+      meta: {
+        eventName: "",
+        notes: "",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      ui: {
+        theme: (localStorage.getItem('se_theme') || 'dark'),
+        grid: true,
+        snap: true,
+        snapStepFt: 1,
+        backgroundLocked: false,
+      },
+      scale: {
+        // pixels per foot. Default is arbitrary until set.
+        pxPerFoot: 20,
+        calibrated: false,
+      },
+      view: {
+        // world -> screen transform, maintained as camera
+        zoom: 1,
+        minZoom: 0.2,
+        maxZoom: 6,
+        panX: 0,
+        panY: 0,
+      },
+      room: {
+        // optional logical room size in feet; if set, we draw a boundary
+        enabled: false,
+        widthFt: 60,
+        heightFt: 40,
+      },
+      background: {
+        image: null,
+        src: null,
+        // background transform in world space
+        offsetX: 0,
+        offsetY: 0,
+        scale: 1,
+      },
+      objects: [],
+      selection: {
+        ids: [],
+      },
+      interaction: {
+        tool: 'select', // 'select' | 'setScale'
+        pointerDown: false,
+        dragging: false,
+        dragMode: null, // 'move' | 'resize' | 'rotate' | 'pan' | 'bg'
+        activeId: null,
+        start: {x:0,y:0},
+        last: {x:0,y:0},
+        // for object manipulation
+        objStart: null,
+        // for scale tool
+        scaleP1: null,
+        scaleP2: null,
+        hoverHandle: null,
+      }
+    };
+
+    /* =========================================================
+       OBJECT DEFINITIONS / PALETTE
+       - Sizes are in feet (real world)
+       - Convert to pixels via scale.pxPerFoot
+       ========================================================= */
+    const PaletteDefs = [
+      {
+        key: 'dj_booth',
+        title: 'DJ Booth',
+        note: '6 ft default',
+        default: { wFt: 6, hFt: 2.5 },
+        style: { fillA: '#4c1d95', fillB: '#8b5cf6', text: 'DJ' },
+        gear: { 'DJ Booth': 1 }
+      },
+      {
+        key: 'speaker_pair',
+        title: 'Speaker Pair',
+        note: '2 speakers',
+        default: { wFt: 2.2, hFt: 2.2 },
+        style: { fillA: '#0ea5e9', fillB: '#0369a1', text: 'SPK×2' },
+        gear: { 'Speaker (pair)': 1 }
+      },
+      {
+        key: 'dance_floor',
+        title: 'Dance Floor',
+        note: '12×12 ft',
+        default: { wFt: 12, hFt: 12 },
+        style: { fillA: '#f97316', fillB: '#ea580c', text: 'DANCE' },
+        gear: { 'Dance Floor': 1 }
+      },
+      {
+        key: 'photobooth',
+        title: 'Photobooth',
+        note: '8×8 ft',
+        default: { wFt: 8, hFt: 8 },
+        style: { fillA: '#22c55e', fillB: '#16a34a', text: 'PHOTO' },
+        gear: { 'Photobooth': 1 }
+      },
+      {
+        key: 'round_table_48',
+        title: 'Round Table',
+        note: '48"',
+        default: { wFt: 4, hFt: 4, round: true },
+        style: { fillA: '#10b981', fillB: '#0f766e', text: '48"' },
+        gear: { 'Round Table (48")': 1 }
+      },
+      {
+        key: 'round_table_60',
+        title: 'Round Table',
+        note: '60"',
+        default: { wFt: 5, hFt: 5, round: true },
+        style: { fillA: '#10b981', fillB: '#0f766e', text: '60"' },
+        gear: { 'Round Table (60")': 1 }
+      },
+      {
+        key: 'round_table_72',
+        title: 'Round Table',
+        note: '72"',
+        default: { wFt: 6, hFt: 6, round: true },
+        style: { fillA: '#10b981', fillB: '#0f766e', text: '72"' },
+        gear: { 'Round Table (72")': 1 }
+      },
+      {
+        key: 'rect_table_6',
+        title: 'Rect Table',
+        note: '6 ft',
+        default: { wFt: 6, hFt: 2.5 },
+        style: { fillA: '#059669', fillB: '#0f766e', text: 'TABLE' },
+        gear: { 'Rect Table (6ft)': 1 }
+      },
+      {
+        key: 'bar',
+        title: 'Bar',
+        note: '8×3 ft',
+        default: { wFt: 8, hFt: 3 },
+        style: { fillA: '#ef4444', fillB: '#b91c1c', text: 'BAR' },
+        gear: { 'Bar': 1 }
+      },
+      {
+        key: 'stage',
+        title: 'Stage',
+        note: '12×8 ft',
+        default: { wFt: 12, hFt: 8 },
+        style: { fillA: '#3b82f6', fillB: '#1d4ed8', text: 'STAGE' },
+        gear: { 'Stage': 1 }
+      },
+      {
+        key: 'custom_rect',
+        title: 'Custom Rect',
+        note: 'Resizable',
+        default: { wFt: 6, hFt: 4 },
+        style: { fillA: '#a855f7', fillB: '#6b21a8', text: 'CUSTOM' },
+        gear: { 'Custom Area': 1 }
+      },
+    ];
+
+    const DefByKey = Object.fromEntries(PaletteDefs.map(d => [d.key, d]));
+
+    /* =========================================================
+       CANVAS ENGINE
+       - Single canvas, draws background + grid + objects + handles
+       - World coordinate system in pixels
+       - Convert feet -> pixels via scale.pxPerFoot
+       ========================================================= */
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
+
+    const DPR = () => Math.max(1, Math.min(2.5, window.devicePixelRatio || 1));
+
+    function resizeCanvas(){
+      const rect = canvas.getBoundingClientRect();
+      const dpr = DPR();
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      scheduleRender();
+    }
+
+    const scheduleRender = rafThrottle(() => render());
+
+    function worldToScreen(x, y){
+      return {
+        x: (x + State.view.panX) * State.view.zoom,
+        y: (y + State.view.panY) * State.view.zoom,
+      };
+    }
+
+    function screenToWorld(x, y){
+      return {
+        x: x / State.view.zoom - State.view.panX,
+        y: y / State.view.zoom - State.view.panY,
+      };
+    }
+
+    function feetToPx(ft){
+      return ft * State.scale.pxPerFoot;
+    }
+
+    function pxToFeet(px){
+      return px / State.scale.pxPerFoot;
+    }
+
+    function getObjectById(id){
+      return State.objects.find(o => o.id === id) || null;
+    }
+
+    function isSelected(id){
+      return State.selection.ids.includes(id);
+    }
+
+    function setSelection(ids){
+      State.selection.ids = Array.from(new Set(ids));
+      updateSelectedPanel();
+      scheduleRender();
+    }
+
+    function addSelection(id){
+      if (!isSelected(id)) State.selection.ids.push(id);
+      updateSelectedPanel();
+      scheduleRender();
+    }
+
+    function toggleSelection(id){
+      if (isSelected(id)) State.selection.ids = State.selection.ids.filter(x => x !== id);
+      else State.selection.ids.push(id);
+      updateSelectedPanel();
+      scheduleRender();
+    }
+
+    function clearSelection(){
+      if (State.selection.ids.length === 0) return;
+      State.selection.ids = [];
+      updateSelectedPanel();
+      scheduleRender();
+    }
+
+    function setTheme(theme){
+      State.ui.theme = theme;
+      localStorage.setItem('se_theme', theme);
+      document.documentElement.setAttribute('data-theme', theme);
+      scheduleRender();
+    }
+
+    /* -------------------------
+       Object model
+       -------------------------
+       x,y: center position in world px
+       w,h: dimensions in world px
+       rot: radians
+    */
+    function createObject(typeKey, atWorld){
+      const def = DefByKey[typeKey];
+      const w = feetToPx(def.default.wFt);
+      const h = feetToPx(def.default.hFt);
+      const o = {
+        id: uid(),
+        type: typeKey,
+        label: def.title,
+        x: atWorld.x,
+        y: atWorld.y,
+        w,
+        h,
+        rot: 0,
+        round: !!def.default.round,
+        locked: false,
+      };
+      State.objects.push(o);
+      State.meta.updatedAt = new Date().toISOString();
+      computeGearSummary();
+      setSelection([o.id]);
+      scheduleRender();
+      return o;
+    }
+
+    function duplicateSelected(){
+      if (State.selection.ids.length === 0) return;
+      const ids = State.selection.ids.slice();
+      const created = [];
+      for (const id of ids){
+        const src = getObjectById(id);
+        if (!src) continue;
+        const o = { ...structuredClone(src), id: uid(), x: src.x + 20, y: src.y + 20, label: src.label };
+        State.objects.push(o);
+        created.push(o.id);
+      }
+      State.meta.updatedAt = new Date().toISOString();
+      computeGearSummary();
+      setSelection(created);
+    }
+
+    function deleteSelected(){
+      if (State.selection.ids.length === 0) return;
+      const kill = new Set(State.selection.ids);
+      State.objects = State.objects.filter(o => !kill.has(o.id));
+      State.selection.ids = [];
+      State.meta.updatedAt = new Date().toISOString();
+      computeGearSummary();
+      updateSelectedPanel();
+      scheduleRender();
+    }
+
+    /* =========================================================
+       HIT TESTING + HANDLES
+       ========================================================= */
+
+    function getObjectCorners(o){
+      const hw = o.w/2, hh = o.h/2;
+      const cx = o.x, cy = o.y;
+      const pts = [
+        {x: cx - hw, y: cy - hh},
+        {x: cx + hw, y: cy - hh},
+        {x: cx + hw, y: cy + hh},
+        {x: cx - hw, y: cy + hh},
+      ];
+      return pts.map(p => pointRotate(p.x, p.y, cx, cy, o.rot));
+    }
+
+    function pointInPoly(pt, poly){
+      // ray-casting
+      let inside = false;
+      for (let i=0, j=poly.length-1; i<poly.length; j=i++){
+        const xi = poly[i].x, yi = poly[i].y;
+        const xj = poly[j].x, yj = poly[j].y;
+        const intersect = ((yi > pt.y) !== (yj > pt.y)) && (pt.x < (xj - xi) * (pt.y - yi) / ((yj - yi) || 1e-9) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
+
+    function hitTestObject(worldPt){
+      // topmost first
+      for (let i=State.objects.length-1; i>=0; i--){
+        const o = State.objects[i];
+        const poly = getObjectCorners(o);
+        if (pointInPoly(worldPt, poly)) return o;
+      }
+      return null;
+    }
+
+    function getHandles(o){
+      // In world coords. 8 resize handles + rotate handle.
+      const hw = o.w/2, hh = o.h/2;
+      const cx = o.x, cy = o.y;
+      const base = {
+        nw: {x: cx-hw, y: cy-hh},
+        ne: {x: cx+hw, y: cy-hh},
+        se: {x: cx+hw, y: cy+hh},
+        sw: {x: cx-hw, y: cy+hh},
+        n:  {x: cx,    y: cy-hh},
+        e:  {x: cx+hw, y: cy},
+        s:  {x: cx,    y: cy+hh},
+        w:  {x: cx-hw, y: cy},
+      };
+      const rotHandle = { x: cx, y: cy - hh - Math.max(18, Math.min(40, hh*0.25)) };
+      const out = {};
+      for (const k of Object.keys(base)) out[k] = pointRotate(base[k].x, base[k].y, cx, cy, o.rot);
+      out.rot = pointRotate(rotHandle.x, rotHandle.y, cx, cy, o.rot);
+      return out;
+    }
+
+    function hitTestHandle(o, worldPt){
+      const h = getHandles(o);
+      const radius = 10 / State.view.zoom; // scale with zoom
+      const hit = (p) => (Math.hypot(p.x - worldPt.x, p.y - worldPt.y) <= radius);
+      for (const key of ['nw','n','ne','e','se','s','sw','w']){
+        if (hit(h[key])) return { type:'resize', key };
+      }
+      if (hit(h.rot)) return { type:'rotate', key:'rot' };
+      return null;
+    }
+
+    /* =========================================================
+       RENDERING
+       ========================================================= */
+
+    function render(){
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+
+      ctx.clearRect(0,0,w,h);
+
+      // background
+      drawBackground(w,h);
+
+      // room boundary
+      drawRoomBoundary(w,h);
+
+      // grid
+      if (State.ui.grid) drawGrid(w,h);
+
+      // objects
+      for (const o of State.objects) drawObject(o);
+
+      // selection + handles
+      drawSelection();
+
+      // scale tool overlay
+      drawScaleOverlay();
+
+      updateReadouts();
+    }
+
+    function drawBackground(w,h){
+      const img = State.background.image;
+      if (!img) return;
+
+      ctx.save();
+      // apply camera
+      ctx.translate(State.view.panX * State.view.zoom, State.view.panY * State.view.zoom);
+      ctx.scale(State.view.zoom, State.view.zoom);
+
+      // background transform in world
+      const bx = State.background.offsetX;
+      const by = State.background.offsetY;
+      const bs = State.background.scale;
+
+      // draw centered
+      const iw = img.naturalWidth || img.width;
+      const ih = img.naturalHeight || img.height;
+
+      ctx.globalAlpha = 1;
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+
+      ctx.translate(bx, by);
+      ctx.scale(bs, bs);
+
+      // Fit-to-canvas is handled on load; here we draw at 0,0
+      ctx.drawImage(img, 0, 0, iw, ih);
+      ctx.restore();
+    }
+
+    function drawRoomBoundary(w,h){
+      if (!State.room.enabled) return;
+      const rw = feetToPx(State.room.widthFt);
+      const rh = feetToPx(State.room.heightFt);
+
+      // room anchored at origin (0,0)
+      ctx.save();
+      ctx.translate(State.view.panX * State.view.zoom, State.view.panY * State.view.zoom);
+      ctx.scale(State.view.zoom, State.view.zoom);
+
+      ctx.lineWidth = 2 / State.view.zoom;
+      ctx.strokeStyle = (getComputedStyle(document.documentElement).getPropertyValue('--border') || '#22304a').trim();
+      ctx.setLineDash([10/State.view.zoom, 8/State.view.zoom]);
+      ctx.strokeRect(0,0,rw,rh);
+      ctx.setLineDash([]);
+
+      // label
+      ctx.font = `700 ${12/State.view.zoom}px ${State.ui.theme === 'light' ? 'var(--sans)' : 'var(--sans)'}`;
+      ctx.fillStyle = (getComputedStyle(document.documentElement).getPropertyValue('--muted') || '#a9b4cf').trim();
+      ctx.fillText(`${State.room.widthFt}×${State.room.heightFt} ft`, 10/State.view.zoom, -10/State.view.zoom);
+
+      ctx.restore();
+    }
+
+    function drawGrid(w,h){
+      // grid is in world units. Use 1ft as minor, 5ft major.
+      const pxPerFt = State.scale.pxPerFoot;
+      const minor = pxPerFt * (State.ui.snapStepFt || 1);
+      const major = pxPerFt * 5;
+
+      const minorCol = getComputedStyle(document.documentElement).getPropertyValue('--grid-minor').trim() || 'rgba(255,255,255,.05)';
+      const majorCol = getComputedStyle(document.documentElement).getPropertyValue('--grid-major').trim() || 'rgba(255,255,255,.09)';
+
+      // Visible world bounds
+      const topLeft = screenToWorld(0,0);
+      const botRight = screenToWorld(w,h);
+
+      const startX = Math.floor(topLeft.x / minor) * minor;
+      const endX = Math.ceil(botRight.x / minor) * minor;
+      const startY = Math.floor(topLeft.y / minor) * minor;
+      const endY = Math.ceil(botRight.y / minor) * minor;
+
+      ctx.save();
+      ctx.translate(State.view.panX * State.view.zoom, State.view.panY * State.view.zoom);
+      ctx.scale(State.view.zoom, State.view.zoom);
+
+      ctx.lineWidth = 1 / State.view.zoom;
+
+      for (let x = startX; x <= endX; x += minor){
+        ctx.strokeStyle = (Math.abs(x % major) < 0.001) ? majorCol : minorCol;
+        ctx.beginPath();
+        ctx.moveTo(x, startY);
+        ctx.lineTo(x, endY);
+        ctx.stroke();
+      }
+      for (let y = startY; y <= endY; y += minor){
+        ctx.strokeStyle = (Math.abs(y % major) < 0.001) ? majorCol : minorCol;
+        ctx.beginPath();
+        ctx.moveTo(startX, y);
+        ctx.lineTo(endX, y);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function drawObject(o){
+      const def = DefByKey[o.type];
+      const a = def.style.fillA, b = def.style.fillB;
+
+      ctx.save();
+      // camera
+      ctx.translate(State.view.panX * State.view.zoom, State.view.panY * State.view.zoom);
+      ctx.scale(State.view.zoom, State.view.zoom);
+
+      // object transform
+      ctx.translate(o.x, o.y);
+      ctx.rotate(o.rot);
+
+      // shadow
+      ctx.shadowColor = 'rgba(0,0,0,.25)';
+      ctx.shadowBlur = 18;
+      ctx.shadowOffsetY = 8;
+
+      // fill
+      const grad = ctx.createLinearGradient(-o.w/2, -o.h/2, o.w/2, o.h/2);
+      grad.addColorStop(0, a);
+      grad.addColorStop(1, b);
+      ctx.fillStyle = grad;
+      ctx.strokeStyle = 'rgba(15,23,42,.55)';
+      ctx.lineWidth = 1.5;
+
+      const r = 10;
+      if (o.round){
+        const rad = Math.min(o.w, o.h)/2;
+        ctx.beginPath();
+        ctx.arc(0,0, rad, 0, Math.PI*2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = 'rgba(255,255,255,.08)';
+        ctx.stroke();
+      } else {
+        roundRect(ctx, -o.w/2, -o.h/2, o.w, o.h, r);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = 'rgba(255,255,255,.10)';
+        ctx.stroke();
+      }
+
+      // text
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = 'rgba(255,255,255,.92)';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const fontSize = clamp(Math.min(o.w, o.h) * 0.16, 10, 16);
+      ctx.font = `800 ${fontSize}px ${State.ui.theme === 'light' ? State.ui.theme : State.ui.theme}`;
+      const label = (o.label || def.title).toUpperCase();
+
+      // label fit
+      const maxWidth = o.w * 0.82;
+      const lines = wrapText(ctx, label, maxWidth);
+      const lineH = fontSize * 1.15;
+      const totalH = lines.length * lineH;
+      const y0 = -totalH/2 + lineH/2;
+      for (let i=0; i<lines.length; i++){
+        ctx.fillText(lines[i], 0, y0 + i*lineH);
+      }
+
+      // dim label (if calibrated)
+      if (State.scale.calibrated){
+        const dim = `${formatFeetIn(pxToFeet(o.w))} × ${formatFeetIn(pxToFeet(o.h))}`;
+        ctx.font = `700 ${Math.max(10, fontSize-4)}px ${State.ui.theme === 'light' ? State.ui.theme : State.ui.theme}`;
+        ctx.fillStyle = 'rgba(255,255,255,.72)';
+        ctx.fillText(dim, 0, (o.round ? (o.h*0.18) : (o.h*0.30)));
+      }
+
+      ctx.restore();
+    }
+
+    function wrapText(ctx, text, maxWidth){
+      const words = String(text).split(/\s+/).filter(Boolean);
+      if (words.length <= 1) return [text];
+      const lines = [];
+      let line = words[0];
+      for (let i=1;i<words.length;i++){
+        const test = line + " " + words[i];
+        if (ctx.measureText(test).width <= maxWidth) line = test;
+        else { lines.push(line); line = words[i]; }
+      }
+      lines.push(line);
+      // keep it max 2 lines for cleanliness
+      if (lines.length > 2){
+        const joined = lines.join(' ');
+        return [joined];
+      }
+      return lines;
+    }
+
+    function roundRect(ctx, x, y, w, h, r){
+      const rr = Math.min(r, w/2, h/2);
+      ctx.beginPath();
+      ctx.moveTo(x+rr, y);
+      ctx.arcTo(x+w, y, x+w, y+h, rr);
+      ctx.arcTo(x+w, y+h, x, y+h, rr);
+      ctx.arcTo(x, y+h, x, y, rr);
+      ctx.arcTo(x, y, x+w, y, rr);
+      ctx.closePath();
+    }
+
+    function drawSelection(){
+      if (State.selection.ids.length === 0) return;
+      // Only draw handles for the active (first) selection
+      const id = State.selection.ids[State.selection.ids.length - 1];
+      const o = getObjectById(id);
+      if (!o) return;
+
+      const corners = getObjectCorners(o);
+
+      ctx.save();
+      ctx.translate(State.view.panX * State.view.zoom, State.view.panY * State.view.zoom);
+      ctx.scale(State.view.zoom, State.view.zoom);
+
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--selection').trim() || 'rgba(251,191,36,.9)';
+      ctx.lineWidth = 2 / State.view.zoom;
+      ctx.setLineDash([6/State.view.zoom, 5/State.view.zoom]);
+
+      ctx.beginPath();
+      ctx.moveTo(corners[0].x, corners[0].y);
+      for (let i=1;i<corners.length;i++) ctx.lineTo(corners[i].x, corners[i].y);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // handles
+      const handles = getHandles(o);
+      const r = 6 / State.view.zoom;
+      const fill = getComputedStyle(document.documentElement).getPropertyValue('--handle').trim() || 'rgba(251,191,36,.95)';
+
+      for (const key of ['nw','n','ne','e','se','s','sw','w']){
+        const p = handles[key];
+        ctx.fillStyle = fill;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r, 0, Math.PI*2);
+        ctx.fill();
+      }
+      // rotate handle
+      ctx.strokeStyle = fill;
+      ctx.lineWidth = 2 / State.view.zoom;
+      ctx.beginPath();
+      ctx.moveTo(handles.n.x, handles.n.y);
+      ctx.lineTo(handles.rot.x, handles.rot.y);
+      ctx.stroke();
+      ctx.fillStyle = fill;
+      ctx.beginPath();
+      ctx.arc(handles.rot.x, handles.rot.y, r, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function drawScaleOverlay(){
+      const I = State.interaction;
+      if (I.tool !== 'setScale') return;
+
+      const p1 = I.scaleP1;
+      const p2 = I.scaleP2 || I.last;
+      if (!p1 || !p2) return;
+
+      const s1 = worldToScreen(p1.x, p1.y);
+      const s2 = worldToScreen(p2.x, p2.y);
+
+      ctx.save();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#fbbf24';
+      ctx.fillStyle = '#fbbf24';
+
+      ctx.beginPath();
+      ctx.moveTo(s1.x, s1.y);
+      ctx.lineTo(s2.x, s2.y);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(s1.x, s1.y, 4, 0, Math.PI*2);
+      ctx.arc(s2.x, s2.y, 4, 0, Math.PI*2);
+      ctx.fill();
+
+      const dx = s2.x - s1.x;
+      const dy = s2.y - s1.y;
+      const distPx = Math.hypot(dx, dy) / State.view.zoom;
+      const distFt = pxToFeet(distPx);
+
+      const midX = (s1.x + s2.x)/2;
+      const midY = (s1.y + s2.y)/2;
+      ctx.font = `700 12px ${State.ui.theme === 'light' ? 'var(--sans)' : 'var(--sans)'}`;
+      ctx.fillStyle = '#111827';
+      const label = State.scale.calibrated ? `${formatFeetIn(distFt)} (current)` : `${Math.round(distPx)} px`;
+      const pad = 6;
+      const tw = ctx.measureText(label).width;
+      ctx.fillStyle = 'rgba(17,24,39,.85)';
+      ctx.beginPath();
+      roundRect(ctx, midX - tw/2 - pad, midY - 10 - pad, tw + pad*2, 20 + pad*2, 10);
+      ctx.fill();
+      ctx.fillStyle = '#fbbf24';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, midX, midY);
+
+      ctx.restore();
+    }
+
+    /* =========================================================
+       INPUT / INTERACTION
+       - Smooth move, resize, rotate
+       - Zoom + Pan
+       - Background pan/zoom (when unlocked)
+       ========================================================= */
+
+    function getCanvasXY(evt){
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top,
+      };
+    }
+
+    function beginPointer(evt){
+      State.interaction.pointerDown = true;
+      State.interaction.dragging = false;
+
+      const s = getCanvasXY(evt);
+      const w = screenToWorld(s.x, s.y);
+      State.interaction.start = {x: w.x, y: w.y};
+      State.interaction.last = {x: w.x, y: w.y};
+
+      const spaceDown = Keys.space;
+
+      // Scale tool
+      if (State.interaction.tool === 'setScale'){
+        if (!State.interaction.scaleP1){
+          State.interaction.scaleP1 = {x: w.x, y: w.y};
+          State.interaction.scaleP2 = null;
+          scheduleRender();
+          return;
+        }
+        if (!State.interaction.scaleP2){
+          State.interaction.scaleP2 = {x: w.x, y: w.y};
+          scheduleRender();
+          // Prompt user for real length
+          const pxDist = Math.hypot(State.interaction.scaleP2.x - State.interaction.scaleP1.x, State.interaction.scaleP2.y - State.interaction.scaleP1.y);
+          const val = prompt("Enter the real-world length between the two points (feet). Examples: 12, 12.5, 12'6\"", "12");
+          const feet = parseFeetInput(val);
+          if (isFinite(feet) && feet > 0.001){
+            State.scale.pxPerFoot = pxDist / feet;
+            State.scale.calibrated = true;
+            document.getElementById('scaleHint').innerHTML = `Scale set: <b>1 ft = ${Math.round(State.scale.pxPerFoot)} px</b> • Object dimensions now show feet/in.`;
+            State.meta.updatedAt = new Date().toISOString();
+            scheduleRender();
+          } else {
+            alert("Scale not set — invalid length.");
+          }
+          // Exit scale tool
+          State.interaction.tool = 'select';
+          document.getElementById('btnSetScale').classList.remove('on');
+          State.interaction.scaleP1 = null;
+          State.interaction.scaleP2 = null;
+          return;
+        }
+      }
+
+      // Pan if holding space
+      if (spaceDown){
+        State.interaction.dragMode = 'pan';
+        return;
+      }
+
+      // Hit object
+      const hit = hitTestObject(w);
+      if (!hit){
+        clearSelection();
+        // background move (if exists and unlocked)
+        if (State.background.image && !State.ui.backgroundLocked){
+          State.interaction.dragMode = 'bg';
+          State.interaction.objStart = { bx: State.background.offsetX, by: State.background.offsetY };
+        } else {
+          State.interaction.dragMode = 'pan';
+        }
+        return;
+      }
+
+      // Select logic
+      const shift = evt.shiftKey;
+      if (shift) toggleSelection(hit.id);
+      else if (!isSelected(hit.id)) setSelection([hit.id]);
+
+      State.interaction.activeId = hit.id;
+
+      // Handle test for active
+      const active = getObjectById(State.selection.ids[State.selection.ids.length-1]);
+      const handle = active ? hitTestHandle(active, w) : null;
+      if (active && handle){
+        if (handle.type === 'rotate'){
+          State.interaction.dragMode = 'rotate';
+          const ang = Math.atan2(w.y - active.y, w.x - active.x);
+          State.interaction.objStart = { rot: active.rot, startAng: ang };
+          return;
+        }
+        if (handle.type === 'resize'){
+          State.interaction.dragMode = 'resize';
+          State.interaction.objStart = { w: active.w, h: active.h, x: active.x, y: active.y, rot: active.rot, handle: handle.key };
+          return;
+        }
+      }
+
+      // Move
+      State.interaction.dragMode = 'move';
+      State.interaction.objStart = State.selection.ids.map(id => {
+        const o = getObjectById(id);
+        return o ? { id, x:o.x, y:o.y } : null;
+      }).filter(Boolean);
+    }
+
+    function movePointer(evt){
+      const s = getCanvasXY(evt);
+      const w = screenToWorld(s.x, s.y);
+      State.interaction.last = {x: w.x, y: w.y};
+
+      if (!State.interaction.pointerDown){
+        // hover handle
+        const active = State.selection.ids.length ? getObjectById(State.selection.ids[State.selection.ids.length-1]) : null;
+        State.interaction.hoverHandle = active ? hitTestHandle(active, w) : null;
+        canvas.style.cursor = State.interaction.hoverHandle ? (State.interaction.hoverHandle.type === 'rotate' ? 'grab' : 'nwse-resize') : 'default';
+        scheduleRender();
+        return;
+      }
+
+      const dx = w.x - State.interaction.start.x;
+      const dy = w.y - State.interaction.start.y;
+      if (Math.hypot(dx,dy) > (2 / State.view.zoom)) State.interaction.dragging = true;
+
+      const mode = State.interaction.dragMode;
+      if (mode === 'pan'){
+        State.view.panX += (w.x - State.interaction.last.x) ? 0 : 0;
+        // We implement pan in screen space for smoother feel
+        // Convert screen delta to world delta
+        const rect = canvas.getBoundingClientRect();
+        const sx = evt.movementX;
+        const sy = evt.movementY;
+        State.view.panX += sx / State.view.zoom;
+        State.view.panY += sy / State.view.zoom;
+        scheduleRender();
+        return;
+      }
+
+      if (mode === 'bg'){
+        const start = State.interaction.objStart;
+        State.background.offsetX = start.bx + dx;
+        State.background.offsetY = start.by + dy;
+        scheduleRender();
+        return;
+      }
+
+      const active = State.selection.ids.length ? getObjectById(State.selection.ids[State.selection.ids.length-1]) : null;
+      if (!active) return;
+
+      if (mode === 'move'){
+        const start = State.interaction.objStart;
+        const stepFt = State.ui.snap ? State.ui.snapStepFt : 0;
+        for (const item of start){
+          const o = getObjectById(item.id);
+          if (!o) continue;
+          let nx = item.x + dx;
+          let ny = item.y + dy;
+          if (State.ui.snap && stepFt > 0){
+            const stepPx = feetToPx(stepFt);
+            nx = Math.round(nx / stepPx) * stepPx;
+            ny = Math.round(ny / stepPx) * stepPx;
+          }
+          o.x = nx;
+          o.y = ny;
+        }
+        State.meta.updatedAt = new Date().toISOString();
+        scheduleRender();
+        updateSelectedPanelLive();
+        return;
+      }
+
+      if (mode === 'rotate'){
+        const start = State.interaction.objStart;
+        const ang = Math.atan2(w.y - active.y, w.x - active.x);
+        const delta = ang - start.startAng;
+        active.rot = start.rot + delta;
+        // snap rotation to 5° with shift
+        if (evt.shiftKey){
+          const step = toRadians(5);
+          active.rot = Math.round(active.rot / step) * step;
+        }
+        State.meta.updatedAt = new Date().toISOString();
+        scheduleRender();
+        updateSelectedPanelLive();
+        return;
+      }
+
+      if (mode === 'resize'){
+        // Resize in object-local space for predictable behavior
+        const s0 = State.interaction.objStart;
+        const local = worldToObjectLocal(active, w);
+        const handle = s0.handle;
+
+        let newW = s0.w;
+        let newH = s0.h;
+
+        // local coords: (-w/2..w/2, -h/2..h/2)
+        // handle defines which edges move
+        if (handle.includes('e')) newW = clamp((local.x + s0.w/2) * 2, feetToPx(1), feetToPx(200));
+        if (handle.includes('w')) newW = clamp((s0.w/2 - local.x) * 2, feetToPx(1), feetToPx(200));
+        if (handle.includes('s')) newH = clamp((local.y + s0.h/2) * 2, feetToPx(1), feetToPx(200));
+        if (handle.includes('n')) newH = clamp((s0.h/2 - local.y) * 2, feetToPx(1), feetToPx(200));
+
+        // Keep aspect ratio with shift
+        if (evt.shiftKey){
+          const ar = s0.w / s0.h;
+          if (Math.abs(newW - s0.w) > Math.abs(newH - s0.h)) newH = newW / ar;
+          else newW = newH * ar;
+        }
+
+        // Snap to feet step if calibrated + snap
+        if (State.scale.calibrated && State.ui.snap){
+          const stepFt = State.ui.snapStepFt || 1;
+          const wFt = roundToStep(pxToFeet(newW), stepFt);
+          const hFt = roundToStep(pxToFeet(newH), stepFt);
+          newW = feetToPx(wFt);
+          newH = feetToPx(hFt);
+        }
+
+        active.w = newW;
+        active.h = newH;
+        State.meta.updatedAt = new Date().toISOString();
+        scheduleRender();
+        updateSelectedPanelLive();
+        return;
+      }
+    }
+
+    function endPointer(){
+      State.interaction.pointerDown = false;
+      State.interaction.dragging = false;
+      State.interaction.dragMode = null;
+      State.interaction.activeId = null;
+      State.interaction.objStart = null;
+      scheduleRender();
+    }
+
+    function worldToObjectLocal(o, worldPt){
+      // translate into object space then rotate by -rot
+      const dx = worldPt.x - o.x;
+      const dy = worldPt.y - o.y;
+      const s = Math.sin(-o.rot), c = Math.cos(-o.rot);
+      return { x: dx*c - dy*s, y: dx*s + dy*c };
+    }
+
+    function onWheel(evt){
+      evt.preventDefault();
+      const s = getCanvasXY(evt);
+      const before = screenToWorld(s.x, s.y);
+
+      const delta = -evt.deltaY;
+      const zoomFactor = Math.pow(1.0015, delta);
+      const nextZoom = clamp(State.view.zoom * zoomFactor, State.view.minZoom, State.view.maxZoom);
+
+      // zoom to cursor
+      State.view.zoom = nextZoom;
+      const after = screenToWorld(s.x, s.y);
+      State.view.panX += (after.x - before.x);
+      State.view.panY += (after.y - before.y);
+
+      scheduleRender();
+    }
+
+    /* =========================================================
+       UI BINDINGS
+       ========================================================= */
+
+    const $ = (id) => document.getElementById(id);
+
+    function buildPalette(){
+      const el = $('palette');
+      el.innerHTML = '';
+      for (const def of PaletteDefs){
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.key = def.key;
+        card.innerHTML = `<div class="t">${escapeHtml(def.title)}</div><div class="m">${escapeHtml(def.note)}</div>`;
+        card.addEventListener('click', () => {
+          const center = screenToWorld(canvas.getBoundingClientRect().width/2, canvas.getBoundingClientRect().height/2);
+          createObject(def.key, center);
+        });
+        // drag to canvas
+        card.draggable = true;
+        card.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', def.key);
+          e.dataTransfer.effectAllowed = 'copy';
+        });
+        el.appendChild(card);
+      }
+    }
+
+    function escapeHtml(s){
+      return String(s).replace(/[&<>\"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function bindUI(){
+      // theme
+      $('btnTheme').addEventListener('click', () => {
+        setTheme(State.ui.theme === 'dark' ? 'light' : 'dark');
+      });
+
+      // grid
+      $('btnGrid').addEventListener('click', () => {
+        State.ui.grid = !State.ui.grid;
+        $('btnGrid').classList.toggle('on', State.ui.grid);
+        scheduleRender();
+      });
+
+      // snap
+      $('btnSnap').addEventListener('click', () => {
+        State.ui.snap = !State.ui.snap;
+        $('btnSnap').classList.toggle('on', State.ui.snap);
+        scheduleRender();
+      });
+
+      // snap step
+      $('snapStep').addEventListener('change', (e) => {
+        State.ui.snapStepFt = parseInt(e.target.value, 10) || 1;
+        scheduleRender();
+      });
+
+      // room preset
+      $('roomPreset').addEventListener('change', (e) => {
+        const v = e.target.value;
+        if (!v){
+          State.room.enabled = false;
+        } else {
+          const [w,h] = v.split('x').map(n => parseInt(n,10));
+          State.room.enabled = true;
+          State.room.widthFt = w;
+          State.room.heightFt = h;
+          // position camera so room is visible
+          fitRoomToView();
+        }
+        scheduleRender();
+      });
+
+      // set scale
+      $('btnSetScale').addEventListener('click', () => {
+        const on = State.interaction.tool === 'setScale';
+        State.interaction.tool = on ? 'select' : 'setScale';
+        $('btnSetScale').classList.toggle('on', !on);
+        State.interaction.scaleP1 = null;
+        State.interaction.scaleP2 = null;
+        scheduleRender();
+      });
+
+      // background upload
+      $('btnBg').addEventListener('click', () => $('fileBg').click());
+      $('fileBg').addEventListener('change', handleBgFile);
+
+      // lock bg
+      $('btnLockBg').addEventListener('click', () => {
+        State.ui.backgroundLocked = !State.ui.backgroundLocked;
+        $('btnLockBg').classList.toggle('on', State.ui.backgroundLocked);
+        scheduleRender();
+      });
+
+      // project meta
+      $('eventName').addEventListener('input', (e) => {
+        State.meta.eventName = e.target.value;
+        State.meta.updatedAt = new Date().toISOString();
+      });
+      $('eventNotes').addEventListener('input', (e) => {
+        State.meta.notes = e.target.value;
+        State.meta.updatedAt = new Date().toISOString();
+      });
+
+      // selection UI
+      $('selLabel').addEventListener('input', (e) => {
+        const id = State.selection.ids[State.selection.ids.length-1];
+        const o = getObjectById(id);
+        if (!o) return;
+        o.label = e.target.value;
+        State.meta.updatedAt = new Date().toISOString();
+        computeGearSummary();
+        scheduleRender();
+      });
+      $('btnDuplicate').addEventListener('click', duplicateSelected);
+      $('btnDelete').addEventListener('click', deleteSelected);
+
+      // Save/Load
+      $('btnDownload').addEventListener('click', downloadProject);
+      $('btnUpload').addEventListener('click', () => $('fileJson').click());
+      $('fileJson').addEventListener('change', handleJsonFile);
+
+      $('btnSaveLocal').addEventListener('click', saveLocal);
+      $('btnLoadLocal').addEventListener('click', loadLocal);
+
+      // Export
+      $('btnExportPng').addEventListener('click', () => exportPNG(3));
+      $('btnExportPdf').addEventListener('click', () => exportPDF());
+
+      // Canvas drag/drop
+      canvas.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
+      canvas.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const key = e.dataTransfer.getData('text/plain');
+        if (!key || !DefByKey[key]) return;
+        const rect = canvas.getBoundingClientRect();
+        const s = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        const w = screenToWorld(s.x, s.y);
+        createObject(key, w);
+      });
+
+      // Canvas pointer events
+      canvas.addEventListener('pointerdown', (e) => { canvas.setPointerCapture(e.pointerId); beginPointer(e); });
+      canvas.addEventListener('pointermove', movePointer);
+      canvas.addEventListener('pointerup', endPointer);
+      canvas.addEventListener('pointercancel', endPointer);
+
+      // Zoom
+      canvas.addEventListener('wheel', onWheel, { passive:false });
+
+      // Shortcuts
+      window.addEventListener('keydown', onKeyDown);
+      window.addEventListener('keyup', onKeyUp);
+
+      // Initialize button states
+      $('btnGrid').classList.toggle('on', State.ui.grid);
+      $('btnSnap').classList.toggle('on', State.ui.snap);
+      $('btnLockBg').classList.toggle('on', State.ui.backgroundLocked);
+    }
+
+    function fitRoomToView(){
+      if (!State.room.enabled) return;
+      const rect = canvas.getBoundingClientRect();
+      const rw = feetToPx(State.room.widthFt);
+      const rh = feetToPx(State.room.heightFt);
+      const pad = 60;
+      const scaleX = (rect.width - pad) / rw;
+      const scaleY = (rect.height - pad) / rh;
+      State.view.zoom = clamp(Math.min(scaleX, scaleY), State.view.minZoom, State.view.maxZoom);
+      // center room
+      const cx = rw/2;
+      const cy = rh/2;
+      const screenCx = rect.width/2;
+      const screenCy = rect.height/2;
+      State.view.panX = (screenCx / State.view.zoom) - cx;
+      State.view.panY = (screenCy / State.view.zoom) - cy;
+      scheduleRender();
+    }
+
+    function updateReadouts(){
+      $('zoomReadout').textContent = `${Math.round(State.view.zoom * 100)}%`;
+      $('scaleReadout').textContent = State.scale.calibrated ? `1 ft = ${Math.round(State.scale.pxPerFoot)} px` : 'Uncalibrated';
+    }
+
+    function updateSelectedPanel(){
+      const id = State.selection.ids[State.selection.ids.length-1];
+      const o = id ? getObjectById(id) : null;
+      const has = !!o;
+      $('selectedNone').style.display = has ? 'none' : 'block';
+      $('selectedUI').style.display = has ? 'block' : 'none';
+      if (!o) return;
+      $('selLabel').value = o.label || '';
+      updateSelectedPanelLive();
+    }
+
+    function updateSelectedPanelLive(){
+      const id = State.selection.ids[State.selection.ids.length-1];
+      const o = id ? getObjectById(id) : null;
+      if (!o) return;
+      $('selSize').textContent = State.scale.calibrated
+        ? `${formatFeetIn(pxToFeet(o.w))} × ${formatFeetIn(pxToFeet(o.h))}`
+        : `${Math.round(o.w)}×${Math.round(o.h)} px`;
+      $('selRot').textContent = `${Math.round(toDegrees(o.rot))}°`;
+      $('selPos').textContent = State.scale.calibrated
+        ? `${formatFeetIn(pxToFeet(o.x))}, ${formatFeetIn(pxToFeet(o.y))}`
+        : `${Math.round(o.x)}, ${Math.round(o.y)} px`;
+    }
+
+    /* =========================================================
+       BACKGROUND IMPORT (PNG/JPG)
+       - Fit-to-canvas in world space
+       - Zoom + pan via camera; background can be moved if unlocked
+       - Performance: keep Image element, avoid re-decoding
+       ========================================================= */
+
+    async function handleBgFile(e){
+      const file = e.target.files && e.target.files[0];
+      e.target.value = '';
+      if (!file) return;
+
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.decoding = 'async';
+      img.loading = 'eager';
+      img.src = url;
+      await img.decode().catch(() => new Promise((res) => { img.onload = res; img.onerror = res; }));
+
+      State.background.image = img;
+      State.background.src = await fileToDataUrl(file);
+
+      // Fit-to-view: background at (0,0) with scale so it fits initial view
+      State.background.offsetX = 0;
+      State.background.offsetY = 0;
+      State.background.scale = 1;
+
+      fitBackgroundToView();
+      State.meta.updatedAt = new Date().toISOString();
+      scheduleRender();
+      URL.revokeObjectURL(url);
+    }
+
+    function fitBackgroundToView(){
+      const img = State.background.image;
+      if (!img) return;
+      const rect = canvas.getBoundingClientRect();
+      const iw = img.naturalWidth || img.width;
+      const ih = img.naturalHeight || img.height;
+
+      // place background in world such that it visually fits the viewport initially
+      // We choose world background scale so that image fits a decent portion of view.
+      const targetW = rect.width / State.view.zoom;
+      const targetH = rect.height / State.view.zoom;
+
+      const scale = Math.min(targetW / iw, targetH / ih);
+      State.background.scale = scale;
+
+      // center it in world at current view
+      const centerWorld = screenToWorld(rect.width/2, rect.height/2);
+      const bw = iw * scale;
+      const bh = ih * scale;
+      State.background.offsetX = centerWorld.x - bw/2;
+      State.background.offsetY = centerWorld.y - bh/2;
+    }
+
+    function fileToDataUrl(file){
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    /* =========================================================
+       SAVE / LOAD
+       ========================================================= */
+
+    function serializeProject(){
+      return {
+        version: State.version,
+        meta: {
+          ...State.meta,
+          eventName: $('eventName').value,
+          notes: $('eventNotes').value,
+          updatedAt: new Date().toISOString(),
+        },
+        ui: { ...State.ui },
+        scale: { ...State.scale },
+        view: { ...State.view },
+        room: { ...State.room },
+        background: {
+          src: State.background.src,
+          offsetX: State.background.offsetX,
+          offsetY: State.background.offsetY,
+          scale: State.background.scale,
+        },
+        objects: State.objects.map(o => ({...o})),
+      };
+    }
+
+    async function hydrateProject(data){
+      if (!data || typeof data !== 'object') throw new Error('Invalid project');
+
+      State.version = data.version || 1;
+      State.meta = data.meta || State.meta;
+      State.ui = { ...State.ui, ...(data.ui || {}) };
+      State.scale = { ...State.scale, ...(data.scale || {}) };
+      State.view = { ...State.view, ...(data.view || {}) };
+      State.room = { ...State.room, ...(data.room || {}) };
+      State.objects = Array.isArray(data.objects) ? data.objects.map(o => ({...o})) : [];
+      State.selection.ids = [];
+
+      // background
+      State.background.src = data.background?.src || null;
+      State.background.offsetX = data.background?.offsetX || 0;
+      State.background.offsetY = data.background?.offsetY || 0;
+      State.background.scale = data.background?.scale || 1;
+      State.background.image = null;
+      if (State.background.src){
+        const img = new Image();
+        img.decoding = 'async';
+        img.src = State.background.src;
+        await img.decode().catch(() => new Promise((res) => { img.onload=res; img.onerror=res; }));
+        State.background.image = img;
+      }
+
+      // UI
+      setTheme(State.ui.theme || 'dark');
+      $('btnGrid').classList.toggle('on', !!State.ui.grid);
+      $('btnSnap').classList.toggle('on', !!State.ui.snap);
+      $('btnLockBg').classList.toggle('on', !!State.ui.backgroundLocked);
+      $('snapStep').value = String(State.ui.snapStepFt || 1);
+
+      // meta
+      $('eventName').value = State.meta.eventName || '';
+      $('eventNotes').value = State.meta.notes || '';
+
+      // room preset select
+      $('roomPreset').value = '';
+      if (State.room.enabled){
+        $('roomPreset').value = `${State.room.widthFt}x${State.room.heightFt}`;
+      }
+
+      computeGearSummary();
+      updateSelectedPanel();
+      scheduleRender();
+    }
+
+    function downloadProject(){
+      const data = serializeProject();
+      const name = (data.meta.eventName || 'SleeveEvents_Project').replace(/[^a-z0-9_-]+/gi,'_');
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      downloadBlob(`${name}.json`, blob);
+    }
+
+    async function handleJsonFile(e){
+      const file = e.target.files && e.target.files[0];
+      e.target.value = '';
+      if (!file) return;
+      const txt = await file.text();
+      let data;
+      try { data = JSON.parse(txt); }
+      catch { alert('Invalid JSON file'); return; }
+      try { await hydrateProject(data); }
+      catch (err){ console.error(err); alert('Could not load project'); }
+    }
+
+    function saveLocal(){
+      const data = serializeProject();
+      localStorage.setItem('se_room_planner_project', JSON.stringify(data));
+      toast('Saved to this browser.');
+    }
+
+    async function loadLocal(){
+      const txt = localStorage.getItem('se_room_planner_project');
+      if (!txt){ toast('No local save found.'); return; }
+      try {
+        const data = JSON.parse(txt);
+        await hydrateProject(data);
+        toast('Loaded local save.');
+      } catch {
+        toast('Local save is corrupted.');
+      }
+    }
+
+    /* =========================================================
+       GEAR SUMMARY
+       - Based on object types
+       ========================================================= */
+
+    function computeGearSummary(){
+      const counts = new Map();
+      for (const o of State.objects){
+        const def = DefByKey[o.type];
+        const gear = def.gear || {};
+        for (const [k,v] of Object.entries(gear)){
+          counts.set(k, (counts.get(k) || 0) + v);
+        }
+      }
+
+      const lines = [];
+      const sorted = Array.from(counts.entries()).sort((a,b) => a[0].localeCompare(b[0]));
+      for (const [k,v] of sorted){
+        lines.push(`• ${k}: ${v}`);
+      }
+
+      $('gearSummary').textContent = lines.length ? lines.join('\n') : 'Place objects to generate a summary.';
+    }
+
+    /* =========================================================
+       EXPORT
+       - PNG: render offscreen at higher scale
+       - PDF: embed exported JPEG into a minimal single-page PDF
+       ========================================================= */
+
+    async function exportPNG(mult = 3){
+      const rect = canvas.getBoundingClientRect();
+      const w = Math.floor(rect.width * mult);
+      const h = Math.floor(rect.height * mult);
+
+      const off = document.createElement('canvas');
+      off.width = w;
+      off.height = h;
+      const octx = off.getContext('2d');
+
+      await renderToContext(octx, rect.width, rect.height, mult);
+
+      off.toBlob((blob) => {
+        if (!blob) return;
+        const name = (State.meta.eventName || 'SleeveEvents_Plan').replace(/[^a-z0-9_-]+/gi,'_');
+        downloadBlob(`${name}.png`, blob);
+      }, 'image/png', 1.0);
+    }
+
+    async function exportPDF(){
+      // 1) Render high-res image
+      const rect = canvas.getBoundingClientRect();
+      const mult = 3;
+      const w = Math.floor(rect.width * mult);
+      const h = Math.floor(rect.height * mult);
+
+      const off = document.createElement('canvas');
+      off.width = w;
+      off.height = h;
+      const octx = off.getContext('2d');
+      await renderToContext(octx, rect.width, rect.height, mult);
+
+      // 2) JPEG for smaller PDF size
+      const jpgDataUrl = off.toDataURL('image/jpeg', 0.92);
+
+      // 3) Build minimal PDF with embedded JPEG
+      const pdfBytes = buildSingleImagePdfFromJpegDataUrl(jpgDataUrl, w, h, 150);
+
+      const blob = new Blob([pdfBytes], { type:'application/pdf' });
+      const name = (State.meta.eventName || 'SleeveEvents_Plan').replace(/[^a-z0-9_-]+/gi,'_');
+      downloadBlob(`${name}.pdf`, blob);
+    }
+
+    async function renderToContext(targetCtx, viewW, viewH, mult){
+      // Render same scene, but scaled.
+      targetCtx.save();
+      targetCtx.setTransform(mult,0,0,mult,0,0);
+      targetCtx.clearRect(0,0,viewW,viewH);
+
+      // background
+      if (State.background.image){
+        targetCtx.save();
+        targetCtx.translate(State.view.panX * State.view.zoom, State.view.panY * State.view.zoom);
+        targetCtx.scale(State.view.zoom, State.view.zoom);
+        const img = State.background.image;
+        const iw = img.naturalWidth || img.width;
+        const ih = img.naturalHeight || img.height;
+        targetCtx.translate(State.background.offsetX, State.background.offsetY);
+        targetCtx.scale(State.background.scale, State.background.scale);
+        targetCtx.drawImage(img, 0, 0, iw, ih);
+        targetCtx.restore();
+      }
+
+      // room boundary
+      if (State.room.enabled){
+        targetCtx.save();
+        targetCtx.translate(State.view.panX * State.view.zoom, State.view.panY * State.view.zoom);
+        targetCtx.scale(State.view.zoom, State.view.zoom);
+        targetCtx.lineWidth = 2 / State.view.zoom;
+        targetCtx.strokeStyle = 'rgba(0,0,0,.55)';
+        if (State.ui.theme === 'dark') targetCtx.strokeStyle = 'rgba(255,255,255,.25)';
+        targetCtx.setLineDash([10/State.view.zoom, 8/State.view.zoom]);
+        targetCtx.strokeRect(0,0, feetToPx(State.room.widthFt), feetToPx(State.room.heightFt));
+        targetCtx.setLineDash([]);
+        targetCtx.restore();
+      }
+
+      // grid
+      if (State.ui.grid){
+        // reuse grid logic but write directly here
+        const pxPerFt = State.scale.pxPerFoot;
+        const minor = pxPerFt * (State.ui.snapStepFt || 1);
+        const major = pxPerFt * 5;
+        const minorCol = State.ui.theme === 'dark' ? 'rgba(255,255,255,.05)' : 'rgba(16,24,40,.06)';
+        const majorCol = State.ui.theme === 'dark' ? 'rgba(255,255,255,.09)' : 'rgba(16,24,40,.10)';
+
+        const topLeft = screenToWorld(0,0);
+        const botRight = screenToWorld(viewW, viewH);
+
+        const startX = Math.floor(topLeft.x / minor) * minor;
+        const endX = Math.ceil(botRight.x / minor) * minor;
+        const startY = Math.floor(topLeft.y / minor) * minor;
+        const endY = Math.ceil(botRight.y / minor) * minor;
+
+        targetCtx.save();
+        targetCtx.translate(State.view.panX * State.view.zoom, State.view.panY * State.view.zoom);
+        targetCtx.scale(State.view.zoom, State.view.zoom);
+        targetCtx.lineWidth = 1 / State.view.zoom;
+
+        for (let x = startX; x <= endX; x += minor){
+          targetCtx.strokeStyle = (Math.abs(x % major) < 0.001) ? majorCol : minorCol;
+          targetCtx.beginPath();
+          targetCtx.moveTo(x, startY);
+          targetCtx.lineTo(x, endY);
+          targetCtx.stroke();
+        }
+        for (let y = startY; y <= endY; y += minor){
+          targetCtx.strokeStyle = (Math.abs(y % major) < 0.001) ? majorCol : minorCol;
+          targetCtx.beginPath();
+          targetCtx.moveTo(startX, y);
+          targetCtx.lineTo(endX, y);
+          targetCtx.stroke();
+        }
+
+        targetCtx.restore();
+      }
+
+      // objects
+      for (const o of State.objects){
+        drawObjectToContext(targetCtx, o);
+      }
+
+      // watermark / branding
+      targetCtx.save();
+      targetCtx.font = `700 12px ${State.ui.theme === 'dark' ? 'system-ui' : 'system-ui'}`;
+      targetCtx.fillStyle = State.ui.theme === 'dark' ? 'rgba(255,255,255,.55)' : 'rgba(16,24,40,.6)';
+      targetCtx.textAlign = 'right';
+      targetCtx.textBaseline = 'bottom';
+      targetCtx.fillText('SLEEVE EVENTS • ROOM PLANNER', viewW - 14, viewH - 12);
+      targetCtx.restore();
+
+      targetCtx.restore();
+    }
+
+    function drawObjectToContext(targetCtx, o){
+      const def = DefByKey[o.type];
+      const a = def.style.fillA, b = def.style.fillB;
+
+      targetCtx.save();
+      targetCtx.translate(State.view.panX * State.view.zoom, State.view.panY * State.view.zoom);
+      targetCtx.scale(State.view.zoom, State.view.zoom);
+
+      targetCtx.translate(o.x, o.y);
+      targetCtx.rotate(o.rot);
+
+      const grad = targetCtx.createLinearGradient(-o.w/2, -o.h/2, o.w/2, o.h/2);
+      grad.addColorStop(0, a);
+      grad.addColorStop(1, b);
+      targetCtx.fillStyle = grad;
+
+      if (o.round){
+        targetCtx.beginPath();
+        targetCtx.arc(0,0, Math.min(o.w,o.h)/2, 0, Math.PI*2);
+        targetCtx.fill();
+      } else {
+        roundRect(targetCtx, -o.w/2, -o.h/2, o.w, o.h, 10);
+        targetCtx.fill();
+      }
+
+      // text
+      targetCtx.fillStyle = 'rgba(255,255,255,.94)';
+      targetCtx.textAlign = 'center';
+      targetCtx.textBaseline = 'middle';
+      const fontSize = clamp(Math.min(o.w, o.h) * 0.16, 10, 16);
+      targetCtx.font = `800 ${fontSize}px system-ui`;
+      const label = (o.label || def.title).toUpperCase();
+      const maxWidth = o.w * 0.82;
+      const lines = wrapText(targetCtx, label, maxWidth);
+      const lineH = fontSize * 1.15;
+      const totalH = lines.length * lineH;
+      const y0 = -totalH/2 + lineH/2;
+      for (let i=0;i<lines.length;i++) targetCtx.fillText(lines[i], 0, y0 + i*lineH);
+
+      if (State.scale.calibrated){
+        const dim = `${formatFeetIn(pxToFeet(o.w))} × ${formatFeetIn(pxToFeet(o.h))}`;
+        targetCtx.font = `700 ${Math.max(10, fontSize-4)}px system-ui`;
+        targetCtx.fillStyle = 'rgba(255,255,255,.75)';
+        targetCtx.fillText(dim, 0, (o.round ? (o.h*0.18) : (o.h*0.30)));
+      }
+
+      targetCtx.restore();
+    }
+
+    function buildSingleImagePdfFromJpegDataUrl(jpegDataUrl, pxW, pxH, dpi){
+      // Minimal PDF generator embedding JPEG with /DCTDecode.
+      // Page size in points: points = inches * 72 = (px/dpi)*72
+      const ptsW = (pxW / dpi) * 72;
+      const ptsH = (pxH / dpi) * 72;
+
+      const base64 = jpegDataUrl.split(',')[1] || '';
+      const jpegBytes = base64ToBytes(base64);
+
+      const chunks = [];
+      const push = (s) => chunks.push(typeof s === 'string' ? strToBytes(s) : s);
+
+      // PDF header
+      push('%PDF-1.4\n');
+
+      const offsets = [];
+      const obj = (n, bodyBytes) => {
+        offsets[n] = byteLength(chunks);
+        push(`${n} 0 obj\n`);
+        push(bodyBytes);
+        push('\nendobj\n');
+      };
+
+      // 1: Catalog
+      obj(1, strToBytes('<< /Type /Catalog /Pages 2 0 R >>'));
+
+      // 2: Pages
+      obj(2, strToBytes('<< /Type /Pages /Kids [3 0 R] /Count 1 >>'));
+
+      // 3: Page
+      obj(3, strToBytes(`<< /Type /Page /Parent 2 0 R /Resources << /XObject << /Im0 4 0 R >> >> /MediaBox [0 0 ${ptsW.toFixed(2)} ${ptsH.toFixed(2)}] /Contents 5 0 R >>`));
+
+      // 4: Image XObject
+      const imgDict = `<< /Type /XObject /Subtype /Image /Name /Im0 /Width ${pxW} /Height ${pxH} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBytes.length} >>\nstream\n`;
+      const imgEnd = '\nendstream';
+      const imgBody = concatBytes([strToBytes(imgDict), jpegBytes, strToBytes(imgEnd)]);
+      obj(4, imgBody);
+
+      // 5: Content stream (draw image)
+      // q ... cm ... Do Q
+      const content = `q\n${ptsW.toFixed(2)} 0 0 ${ptsH.toFixed(2)} 0 0 cm\n/Im0 Do\nQ\n`;
+      const contentBytes = strToBytes(content);
+      const contentObj = concatBytes([strToBytes(`<< /Length ${contentBytes.length} >>\nstream\n`), contentBytes, strToBytes('\nendstream')]);
+      obj(5, contentObj);
+
+      // xref
+      const xrefOffset = byteLength(chunks);
+      push('xref\n');
+      push('0 6\n');
+      push('0000000000 65535 f \n');
+      for (let i=1;i<=5;i++){
+        const off = (offsets[i] || 0).toString().padStart(10,'0');
+        push(`${off} 00000 n \n`);
+      }
+
+      // trailer
+      push(`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`);
+
+      return concatBytes(chunks);
+    }
+
+    function strToBytes(str){
+      return new TextEncoder().encode(str);
+    }
+
+    function base64ToBytes(b64){
+      const bin = atob(b64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+      return bytes;
+    }
+
+    function concatBytes(arrays){
+      const total = arrays.reduce((sum,a)=>sum + a.length, 0);
+      const out = new Uint8Array(total);
+      let offset = 0;
+      for (const a of arrays){ out.set(a, offset); offset += a.length; }
+      return out;
+    }
+
+    function byteLength(chunks){
+      let sum = 0;
+      for (const c of chunks) sum += c.length;
+      return sum;
+    }
+
+    /* =========================================================
+       KEYBOARD SHORTCUTS
+       ========================================================= */
+
+    const Keys = { space:false };
+
+    function onKeyDown(e){
+      if (e.code === 'Space'){
+        Keys.space = true;
+        // prevent page scroll
+        e.preventDefault();
+      }
+      const cmd = e.metaKey || e.ctrlKey;
+
+      if (cmd && e.key.toLowerCase() === 'd'){
+        e.preventDefault();
+        duplicateSelected();
+      }
+
+      if (e.key === 'Delete' || e.key === 'Backspace'){
+        if (document.activeElement && ['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        deleteSelected();
+      }
+
+      if (e.key === 'Escape'){
+        State.interaction.tool = 'select';
+        $('btnSetScale').classList.remove('on');
+        State.interaction.scaleP1 = null;
+        State.interaction.scaleP2 = null;
+        clearSelection();
+        scheduleRender();
+      }
+    }
+
+    function onKeyUp(e){
+      if (e.code === 'Space') Keys.space = false;
+    }
+
+    /* =========================================================
+       TOAST
+       ========================================================= */
+
+    let toastTimer = null;
+    function toast(msg){
+      const hint = $('hint');
+      const prev = hint.innerHTML;
+      hint.innerHTML = `<div style="font-weight:750; letter-spacing:.02em">${escapeHtml(msg)}</div>` +
+        `<div class="small" style="margin-top:6px">(This will fade.)</div>`;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        hint.innerHTML = prev;
+      }, 1800);
+    }
+
+    /* =========================================================
+       INIT
+       ========================================================= */
+
+    function init(){
+      setTheme(State.ui.theme);
+      buildPalette();
+      bindUI();
+      resizeCanvas();
+
+      // default camera nice framing
+      const rect = canvas.getBoundingClientRect();
+      State.view.zoom = 1;
+      State.view.panX = rect.width * 0.15;
+      State.view.panY = rect.height * 0.15;
+
+      // hydrate from local save (non-destructive prompt)
+      const local = localStorage.getItem('se_room_planner_project');
+      if (local){
+        // Do not auto-load; but keep easy load via button.
+      }
+
+      computeGearSummary();
+      scheduleRender();
+    }
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      scheduleRender();
+    });
+
+    init();
+
+  })();
+  </script>
+</body>
+</html>
