@@ -29,6 +29,10 @@
       --gBold: 400px;
       --gOffX: 0px;
       --gOffY: 0px;
+
+      /* Room grid (inside room box) */
+      --roomStepPx: 80px;
+      --roomMajorPx: 400px;
     }
 
     /* Softer “eggshell paper” light mode */
@@ -91,7 +95,7 @@
     .brandTitle .t1{ font-weight:1000; letter-spacing:.08em; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .brandTitle .t2{ font-weight:800; color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-    .actions{ display:flex; align-items:center; gap:10px; flex-wrap:nowrap; min-width:0; }
+    .actions{ display:flex; align-items:center; gap:10px; flex-wrap:nowrap; min-width:0; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:thin; padding-bottom:2px; }
 
     .pill{
       display:flex;
@@ -325,7 +329,7 @@
         linear-gradient(to bottom, rgba(255,255,255,.07) 1px, transparent 1px),
         linear-gradient(to right, rgba(255,255,255,.12) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(255,255,255,.12) 1px, transparent 1px);
-      background-size: 80px 80px, 80px 80px, 400px 400px, 400px 400px;
+      background-size: var(--roomStepPx) var(--roomStepPx), var(--roomStepPx) var(--roomStepPx), var(--roomMajorPx) var(--roomMajorPx), var(--roomMajorPx) var(--roomMajorPx);
       opacity:.16;
     }
 
@@ -618,7 +622,7 @@
         <button class="btn" id="btnTools">Tools</button>
         <button class="btn" id="btnSaveLocal">Save Local</button>
         <button class="btn" id="btnLoadLocal">Load Local</button>
-        <button class="btn" id="btnDownload">Download</button>
+        <button class="btn" id="btnDownload">Download .sleeve</button>
         <button class="btn" id="btnUpload">Upload</button>
         <button class="btn" id="btnShare">Copy Link</button>
         <button class="btn" id="btnExportPNG">Export PNG</button>
@@ -765,6 +769,8 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
               <div class="chips">
                 <div class="chip" id="chipLock"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Lock Selected</div>
                 <div class="chip" id="chipDuplicate"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Duplicate</div>
+                <div class="chip" id="chipRotL"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>⟲ -45°</div>
+                <div class="chip" id="chipRotR"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>⟳ +45°</div>
                 <div class="chip" id="chipDelete" style="border-color:rgba(255,77,77,.35);"><span class="swatch" style="background:rgba(255,77,77,.65)"></span>Delete</div>
               </div>
 
@@ -835,7 +841,7 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
           <div style="height:8px"></div>
           <div class="row">
             <button class="btn" id="mShare" style="flex:1;">Copy Link</button>
-            <button class="btn" id="mDownload" style="flex:1;">Download</button>
+            <button class="btn" id="mDownload" style="flex:1;">Download .sleeve</button>
           </div>
           <div style="height:8px"></div>
           <div class="row">
@@ -854,7 +860,7 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
       <div class="footerNote">Exports include branding footer: SleeveEvents.com • stephen@sleeveevents.com</div>
     </div>
 
-    <input id="fileUpload" type="file" accept="application/json" class="hide" />
+    <input id="fileUpload" type="file" accept=".sleeve,application/json" class="hide" />
     <input id="bgUpload" type="file" accept="image/png,image/jpeg,application/pdf" class="hide" />
 
     <div class="toast" id="toast"></div>
@@ -1154,7 +1160,7 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
     const computeItemBg = (it)=>{
       const hex = colorHex(it.color || 'brand');
       // Slight translucency looks premium over backgrounds
-      const alpha = (State.theme === 'dark') ? 0.22 : 0.14;
+      const alpha = (State.theme === 'dark') ? 0.32 : 0.22;
       return hex + Math.round(alpha*255).toString(16).padStart(2,'0');
     };
 
@@ -1225,6 +1231,8 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
       selH: document.getElementById('selH'),
       chipLock: document.getElementById('chipLock'),
       chipDuplicate: document.getElementById('chipDuplicate'),
+      chipRotL: document.getElementById('chipRotL'),
+      chipRotR: document.getElementById('chipRotR'),
       chipDelete: document.getElementById('chipDelete'),
       colorChips: document.getElementById('colorChips'),
 
@@ -1378,6 +1386,12 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
       UI.swSnap.classList.toggle('on', State.snapOn);
       UI.chipShowGrid.classList.toggle('on', State.gridOn);
       UI.chipSnap.classList.toggle('on', State.snapOn);
+
+      // Room grid hash marks: minor = gridStepFt, major = 5ft
+      const stepPx = Math.max(2, State.gridStepFt * State.pxPerFt);
+      const majorPx = Math.max(stepPx, 5 * State.pxPerFt);
+      UI.room.style.setProperty('--roomStepPx', stepPx + 'px');
+      UI.room.style.setProperty('--roomMajorPx', majorPx + 'px');
 
       UI.room.classList.toggle('noGrid', !State.gridOn);
       updateInfiniteGrid();
@@ -1714,6 +1728,20 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
       toast(anyUnlocked ? 'Locked selected' : 'Unlocked selected');
     }
 
+    function rotateSelectedBy(deg){
+      const ids = [...State.selected];
+      if (!ids.length) return;
+      const items = ids.map(getItem).filter(Boolean).filter(it=>!it.locked);
+      if (!items.length) return;
+      History.push('rotate-step');
+      for (const it of items){
+        it.rot = normalizeAngle((it.rot || 0) + deg);
+        updateItemEl(it);
+      }
+      updateSelectedPanel();
+      toast(`Rotated ${items.length} by ${deg}°`);
+    }
+
     /* =========================================================
        ITEMS: CREATE
        ========================================================= */
@@ -1880,6 +1908,7 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
       State.scaleTool.hover = null;
       showScaleOverlay(false);
       setMode('idle');
+      UI.hudScale.classList.remove('on');
       toast('Scale cancelled');
     }
 
@@ -2229,6 +2258,23 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
     });
 
     UI.viewport.addEventListener('wheel', (e)=>{
+      // When BG is unlocked, wheel zooms the background (so uploaded PNGs are easy to fit)
+      if (State.bg.src && !State.bg.locked){
+        e.preventDefault();
+        const factor = (e.deltaY < 0) ? 1.06 : 0.94;
+        const p = screenToRoomPoint(e.clientX, e.clientY);
+        // zoom around cursor point
+        const old = State.bg.scale || 1;
+        const next = clamp(old * factor, 0.05, 10);
+        const sx = (p.x - State.bg.x) / old;
+        const sy = (p.y - State.bg.y) / old;
+        State.bg.scale = next;
+        State.bg.x = p.x - sx * next;
+        State.bg.y = p.y - sy * next;
+        renderBg();
+        return;
+      }
+
       e.preventDefault();
       const factor = (e.deltaY < 0) ? 1.08 : 0.92;
       zoomAt(e.clientX, e.clientY, State.view.zoom * factor);
@@ -2293,13 +2339,14 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
     function downloadProject(){
       const p = getProject();
       const name = safeFile(State.eventName || 'SleeveEvents_RoomPlan') || 'SleeveEvents_RoomPlan';
-      const blob = new Blob([JSON.stringify(p, null, 2)], { type:'application/json' });
+      // .sleeve is just JSON (so users can email it around), with a custom extension.
+      const blob = new Blob([JSON.stringify(p, null, 2)], { type:'application/octet-stream' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `${name}.json`;
+      a.download = `${name}.sleeve`;
       a.click();
       setTimeout(()=>URL.revokeObjectURL(a.href), 800);
-      toast('Downloaded project');
+      toast('Downloaded .sleeve');
     }
 
     function uploadProject(){ UI.fileUpload.click(); }
@@ -2307,10 +2354,14 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
     UI.fileUpload.addEventListener('change', async (e)=>{
       const f = e.target.files && e.target.files[0];
       if (!f) return;
-      const txt = await f.text();
-      try{ loadProject(JSON.parse(txt)); }
-      catch(_){ alert('Invalid JSON file'); }
-      UI.fileUpload.value = '';
+      try{
+        const txt = await f.text();
+        loadProject(JSON.parse(txt));
+      } catch(_){
+        alert('Invalid .sleeve / JSON file');
+      } finally {
+        UI.fileUpload.value = '';
+      }
     });
 
     function saveLocal(){
@@ -2658,11 +2709,19 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
     UI.btnFit.addEventListener('click', fitToView);
 
     UI.btnSetScale.addEventListener('click', ()=>{
+      // toggle behavior
+      if (State.mode === 'setScale'){
+        cancelScaleTool();
+        UI.hudScale.classList.remove('on');
+        return;
+      }
+
       State.scaleTool.step = 0;
       State.scaleTool.p1 = null;
       State.scaleTool.p2 = null;
       State.scaleTool.hover = null;
       setMode('setScale');
+      UI.hudScale.classList.add('on');
       showScaleOverlay(true);
       toast('Scale: click first point');
     });
@@ -2684,7 +2743,7 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
       History.push('bg-lock');
       State.bg.locked = !State.bg.locked;
       renderBg();
-      toast(State.bg.locked ? 'BG locked' : 'BG unlocked (drag to move)');
+      toast(State.bg.locked ? 'BG locked' : 'BG unlocked (drag to move + wheel/pinch to scale)');
     });
     UI.chipShowGrid.addEventListener('click', toggleGrid);
     UI.chipSnap.addEventListener('click', toggleSnap);
@@ -2708,6 +2767,8 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
 
     UI.chipLock.addEventListener('click', toggleLockSelected);
     UI.chipDuplicate.addEventListener('click', duplicateSelected);
+    UI.chipRotL.addEventListener('click', ()=>rotateSelectedBy(-45));
+    UI.chipRotR.addEventListener('click', ()=>rotateSelectedBy(45));
     UI.chipDelete.addEventListener('click', deleteSelected);
 
     UI.mUndo.addEventListener('click', ()=>History.undo());
