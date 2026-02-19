@@ -1179,13 +1179,24 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
       return c ? c.hex : '#8b5cf6';
     };
 
-    // Solid colors (no gradients) for v1
-    const computeItemBg = (it)=>{
-      const hex = colorHex(it.color || 'brand');
-      // Slight translucency looks premium over backgrounds
-      const alpha = (State.theme === 'dark') ? 0.32 : 0.22;
-      return hex + Math.round(alpha*255).toString(16).padStart(2,'0');
-    };
+    // Solid (high-opacity) colors for objects
+// Goal: readable, “real” blocks on top of background images + grid.
+const computeItemBg = (it)=>{
+  const hex = colorHex(it.color || 'brand');
+  // Much more solid than before (was ~0.32 / ~0.22)
+  const alpha = (State.theme === 'dark') ? 0.86 : 0.80;
+  return hex + Math.round(alpha*255).toString(16).padStart(2,'0');
+};
+
+// Canvas helper: convert #RRGGBB (+ optional alpha 0..1) to rgba()
+function hexToRgba(hex, a=1){
+  const h = String(hex || '').replace('#','').trim();
+  const r = parseInt(h.slice(0,2), 16) || 0;
+  const g = parseInt(h.slice(2,4), 16) || 0;
+  const b = parseInt(h.slice(4,6), 16) || 0;
+  const aa = clamp(a, 0, 1);
+  return `rgba(${r},${g},${b},${aa})`;
+}
 
     /* =========================================================
        UI REFERENCES
@@ -2567,44 +2578,48 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
     }
 
     function drawItem(ctx, it){
-      const d = defByType(it.type);
-      const hex = colorHex(it.color || 'brand');
-      ctx.save();
-      const cx = it.x + it.w/2;
-      const cy = it.y + it.h/2;
-      ctx.translate(cx, cy);
-      ctx.rotate((it.rot||0) * Math.PI/180);
-      ctx.translate(-cx, -cy);
+  const d = defByType(it.type);
+  const hex = colorHex(it.color || 'brand');
 
-      ctx.fillStyle = hex;
-      ctx.globalAlpha = State.theme==='dark' ? 0.22 : 0.14;
-      if (d?.shape === 'circle'){
-        ctx.beginPath();
-        ctx.ellipse(cx, cy, it.w/2, it.h/2, 0, 0, Math.PI*2);
-        ctx.fill();
-        ctx.globalAlpha = 0.9;
-        ctx.strokeStyle = State.theme==='dark' ? 'rgba(255,255,255,.16)' : 'rgba(17,24,39,.16)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      } else {
-        roundRect(ctx, it.x, it.y, it.w, it.h, 12);
-        ctx.fill();
-        ctx.globalAlpha = 0.9;
-        ctx.strokeStyle = State.theme==='dark' ? 'rgba(255,255,255,.16)' : 'rgba(17,24,39,.16)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
+  // Match on-canvas object solidity (high opacity)
+  const fillA = (State.theme==='dark') ? 0.86 : 0.80;
 
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = State.theme==='dark' ? 'rgba(255,255,255,.92)' : 'rgba(17,24,39,.92)';
-      ctx.font = `900 12px ${getComputedStyle(document.body).fontFamily}`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      const label = it.label || d?.name || '';
-      ctx.fillText(label, cx, cy);
+  ctx.save();
+  const cx = it.x + it.w/2;
+  const cy = it.y + it.h/2;
+  ctx.translate(cx, cy);
+  ctx.rotate((it.rot||0) * Math.PI/180);
+  ctx.translate(-cx, -cy);
 
-      ctx.restore();
-    }
+  // Fill (solid blocks)
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = hexToRgba(hex, fillA);
+
+  // Stroke (slightly darker in light mode, slightly lighter in dark mode)
+  ctx.strokeStyle = State.theme==='dark' ? 'rgba(255,255,255,.20)' : 'rgba(17,24,39,.22)';
+  ctx.lineWidth = 1;
+
+  if (d?.shape === 'circle'){
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, it.w/2, it.h/2, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+  } else {
+    roundRect(ctx, it.x, it.y, it.w, it.h, 12);
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  // Label
+  ctx.fillStyle = State.theme==='dark' ? 'rgba(255,255,255,.94)' : 'rgba(17,24,39,.94)';
+  ctx.font = `900 12px ${getComputedStyle(document.body).fontFamily}`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const label = it.label || d?.name || '';
+  ctx.fillText(label, cx, cy);
+
+  ctx.restore();
+}
 
     async function exportPNG(){
       const scale = 2;
