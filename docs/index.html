@@ -31,16 +31,17 @@
       --gOffY: 0px;
     }
 
+    /* Softer “eggshell paper” light mode */
     body[data-theme="light"]{
-      --bg:#f7f7fb;
-      --panel:#ffffff;
-      --panel2:#f3f4f6;
-      --stroke: rgba(17,24,39,.14);
-      --stroke2: rgba(17,24,39,.08);
+      --bg:#fbf4e6;
+      --panel:#fffaf0;
+      --panel2:#f5ecd9;
+      --stroke: rgba(17,24,39,.16);
+      --stroke2: rgba(17,24,39,.10);
       --text: rgba(17,24,39,.92);
-      --muted: rgba(17,24,39,.66);
-      --muted2: rgba(17,24,39,.50);
-      --shadow: 0 20px 60px rgba(17,24,39,.18);
+      --muted: rgba(17,24,39,.68);
+      --muted2: rgba(17,24,39,.52);
+      --shadow: 0 18px 56px rgba(17,24,39,.14);
     }
 
     *{ box-sizing:border-box; }
@@ -66,6 +67,10 @@
       flex:0 0 auto;
       gap:12px;
       min-width:0;
+    }
+
+    body[data-theme="light"] .topbar{
+      background: linear-gradient(90deg, rgba(139,92,246,.10), rgba(255,79,163,.06), rgba(255,255,255,0));
     }
 
     .brand{ display:flex; align-items:center; gap:10px; min-width:0; }
@@ -141,6 +146,7 @@
     .btn:hover{ background:rgba(255,255,255,.06); }
     .btn.primary{ background:rgba(139,92,246,.18); border-color:rgba(139,92,246,.35); }
     .btn.primary:hover{ background:rgba(139,92,246,.25); }
+    .btn.danger{ border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.10); }
 
     .chip{
       border:1px solid var(--stroke);
@@ -161,6 +167,7 @@
     .chip.on{ border-color:rgba(139,92,246,.55); background:rgba(139,92,246,.14); }
 
     .swatch{ width:14px; height:14px; border-radius:5px; border:1px solid rgba(255,255,255,.20); }
+    body[data-theme="light"] .swatch{ border-color: rgba(17,24,39,.16); }
 
     /* --- Main Layout --- */
     .main{ flex:1 1 auto; display:flex; min-height:0; }
@@ -176,6 +183,7 @@
       -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
       touch-action: pan-y;
+      background: color-mix(in srgb, var(--panel) 88%, transparent);
     }
 
     .panel{
@@ -185,6 +193,10 @@
       padding:12px;
       box-shadow: 0 1px 0 rgba(255,255,255,.03) inset;
       margin-bottom:12px;
+    }
+
+    body[data-theme="light"] .panel{
+      background: linear-gradient(180deg, rgba(17,24,39,.03), rgba(17,24,39,.01));
     }
 
     .panelHeader{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
@@ -231,7 +243,7 @@
     .tile .swatch{ width:18px; height:18px; border-radius:7px; }
 
     .chips{ display:flex; gap:8px; flex-wrap:wrap; }
-    .footerNote{ color:var(--muted2); font-size:12px; line-height:1.35; }
+    .footerNote{ color:var(--muted2); font-size:12px; line-height:1.35; white-space:pre-line; }
 
     .kbd{ font-weight:1000; background: rgba(255,255,255,.08); border:1px solid var(--stroke2); padding:2px 6px; border-radius:8px; }
 
@@ -247,6 +259,13 @@
         radial-gradient(1200px 800px at 20% 20%, rgba(139,92,246,.12), transparent 55%),
         radial-gradient(1000px 700px at 80% 30%, rgba(255,79,163,.10), transparent 55%),
         radial-gradient(1000px 700px at 50% 90%, rgba(64,162,255,.08), transparent 60%);
+    }
+
+    body[data-theme="light"] .viewport{
+      background:
+        radial-gradient(1200px 800px at 18% 22%, rgba(139,92,246,.08), transparent 55%),
+        radial-gradient(1000px 700px at 78% 30%, rgba(255,79,163,.06), transparent 55%),
+        radial-gradient(1000px 700px at 50% 90%, rgba(64,162,255,.06), transparent 60%);
     }
 
     .infiniteGrid{
@@ -277,7 +296,7 @@
         linear-gradient(to bottom, rgba(17,24,39,.08) 1px, transparent 1px),
         linear-gradient(to right, rgba(17,24,39,.16) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(17,24,39,.16) 1px, transparent 1px);
-      opacity:.35;
+      opacity:.28;
     }
 
     .stageLayer{ position:absolute; left:0; top:0; transform-origin: 0 0; }
@@ -286,10 +305,14 @@
       position:absolute;
       left:0; top:0;
       border-radius:22px;
-      border:1px solid var(--stroke);
+      border:2px solid color-mix(in srgb, var(--stroke) 80%, transparent);
       box-shadow: var(--shadow);
       overflow:hidden;
       background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.02));
+    }
+
+    body[data-theme="light"] .room{
+      background: linear-gradient(180deg, rgba(17,24,39,.02), rgba(17,24,39,.00));
     }
 
     .room::before{
@@ -303,7 +326,7 @@
         linear-gradient(to right, rgba(255,255,255,.12) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(255,255,255,.12) 1px, transparent 1px);
       background-size: 80px 80px, 80px 80px, 400px 400px, 400px 400px;
-      opacity:.22;
+      opacity:.16;
     }
 
     body[data-theme="light"] .room::before{
@@ -312,7 +335,7 @@
         linear-gradient(to bottom, rgba(17,24,39,.08) 1px, transparent 1px),
         linear-gradient(to right, rgba(17,24,39,.15) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(17,24,39,.15) 1px, transparent 1px);
-      opacity:.18;
+      opacity:.12;
     }
 
     .room.noGrid::before{ display:none; }
@@ -351,7 +374,7 @@
     .item.selected{ outline:2px solid rgba(255,79,163,.75); outline-offset:2px; }
 
     .itemLabel{ padding: 4px 6px; border-radius:10px; background: rgba(0,0,0,.12); pointer-events:none; }
-    body[data-theme="light"] .itemLabel{ background: rgba(255,255,255,.65); }
+    body[data-theme="light"] .itemLabel{ background: rgba(255,255,255,.70); }
 
     .handle{
       position:absolute;
@@ -397,7 +420,7 @@
     }
 
     body[data-theme="light"] .badgeDim{
-      background: rgba(255,255,255,.72);
+      background: rgba(255,255,255,.78);
       border:1px solid rgba(17,24,39,.12);
       color: rgba(17,24,39,.92);
     }
@@ -409,7 +432,7 @@
       position:absolute;
       left:16px;
       bottom:16px;
-      width:380px;
+      width:420px;
       max-width: calc(100% - 32px);
       background: rgba(15,23,51,.86);
       border:1px solid rgba(255,255,255,.12);
@@ -419,7 +442,7 @@
       backdrop-filter: blur(10px);
     }
 
-    body[data-theme="light"] .help{ background: rgba(255,255,255,.85); border-color: rgba(17,24,39,.12); }
+    body[data-theme="light"] .help{ background: rgba(255,250,240,.90); border-color: rgba(17,24,39,.12); }
     .helpHeader{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
     .helpHeader .h{ font-weight:1000; }
     .helpBody{ color:var(--muted); font-size:12px; line-height:1.45; }
@@ -443,6 +466,60 @@
 
     body[data-theme="light"] .toast{ background: rgba(17,24,39,.86); }
     .hide{ display:none !important; }
+
+    /* Mini HUD (prominent controls) */
+    .hud{
+      position:absolute;
+      top:14px;
+      left:14px;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      padding:10px;
+      border-radius: 18px;
+      background: rgba(15,23,51,.68);
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      z-index:50;
+      user-select:none;
+      -webkit-user-select:none;
+    }
+    body[data-theme="light"] .hud{ background: rgba(255,250,240,.80); border-color: rgba(17,24,39,.12); }
+    .hud .btnTiny{
+      height:34px;
+      padding: 0 10px;
+      border-radius: 14px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.02);
+      cursor:pointer;
+      font-weight:1000;
+      color: var(--text);
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      touch-action: manipulation;
+    }
+    .hud .btnTiny.on{ border-color: rgba(255,79,163,.55); background: rgba(255,79,163,.10); }
+    .hud .hint{ font-size:12px; color: var(--muted2); font-weight:900; padding-left:6px; }
+
+    /* Scale overlay */
+    .scaleOverlay{ position:absolute; inset:0; pointer-events:none; z-index:60; }
+    .scaleLine{ position:absolute; height:2px; background: rgba(255,79,163,.95); transform-origin: 0 50%; border-radius: 999px; box-shadow: 0 10px 20px rgba(255,79,163,.20); }
+    .scaleDot{ position:absolute; width:10px; height:10px; border-radius: 999px; background: rgba(255,79,163,.95); transform: translate(-50%,-50%); }
+    .scaleLabel{ position:absolute; transform: translate(-50%,-120%); padding:6px 10px; border-radius: 999px; font-size:12px; font-weight:1000; color:#fff; background: rgba(0,0,0,.65); border: 1px solid rgba(255,255,255,.12); }
+    body[data-theme="light"] .scaleLabel{ background: rgba(17,24,39,.86); }
+
+    /* Rulers */
+    .rulerTop{ position:absolute; left:0; top:-28px; height:24px; width:100%; pointer-events:none; z-index:40; }
+    .rulerLeft{ position:absolute; top:0; left:-34px; width:30px; height:100%; pointer-events:none; z-index:40; }
+    .rulerTick{ position:absolute; background: rgba(255,255,255,.62); opacity:.9; }
+    .rulerTick.minor{ background: rgba(255,255,255,.38); opacity:.75; }
+    body[data-theme="light"] .rulerTick{ background: rgba(17,24,39,.50); }
+    body[data-theme="light"] .rulerTick.minor{ background: rgba(17,24,39,.30); }
+    .rulerLbl{ position:absolute; font-size:11px; font-weight:1000; color: rgba(255,255,255,.80); transform: translateX(-50%); }
+    body[data-theme="light"] .rulerLbl{ color: rgba(17,24,39,.70); }
+    .rulerLblY{ transform: translateY(50%); left:2px; }
 
     /* Mobile sheet */
     .fab{
@@ -494,7 +571,8 @@
     body.exporting .help,
     body.exporting .fab,
     body.exporting .sheet,
-    body.exporting .sheetBackdrop{ display:none !important; }
+    body.exporting .sheetBackdrop,
+    body.exporting .hud{ display:none !important; }
 
     @media (max-width: 980px){ .sidebar{ width:340px; min-width:320px; } }
 
@@ -505,6 +583,8 @@
       .actions .btn{ display:none; }
       .actions .btn.primary{ display:inline-flex; }
       .actions .pill{ display:none; }
+      .hud{ top:auto; bottom: 88px; left: 12px; right: 12px; justify-content:space-between; }
+      .hud .hint{ display:none; }
     }
 
     body.sheetOpen{ overflow:hidden; }
@@ -522,17 +602,19 @@
         </div>
         <div class="brandTitle">
           <div class="t1">SLEEVE EVENTS</div>
-          <div class="t2">Official Room Planner • Single-file Edition</div>
+          <div class="t2">Official Event Planner • Room Layout Builder</div>
         </div>
       </div>
 
       <div class="actions">
         <div class="pill" id="toggles">
-          <div class="toggle" id="toggleTheme"><div class="switch on" id="swTheme"></div><span>Dark</span></div>
+          <div class="toggle" id="toggleTheme"><div class="switch on" id="swTheme"></div><span id="themeLabel">Dark</span></div>
           <div class="toggle" id="toggleGrid"><div class="switch on" id="swGrid"></div><span>Grid</span></div>
           <div class="toggle" id="toggleSnap"><div class="switch on" id="swSnap"></div><span>Snap</span></div>
         </div>
 
+        <button class="btn" id="btnUndo" title="Undo (Ctrl/⌘+Z)">Undo</button>
+        <button class="btn" id="btnRedo" title="Redo (Ctrl/⌘+Shift+Z)">Redo</button>
         <button class="btn" id="btnTools">Tools</button>
         <button class="btn" id="btnSaveLocal">Save Local</button>
         <button class="btn" id="btnLoadLocal">Load Local</button>
@@ -549,9 +631,29 @@
       <div class="canvasCard">
         <div class="viewport" id="viewport">
           <div class="infiniteGrid" id="infiniteGrid" aria-hidden="true"></div>
+
+          <!-- Mini HUD (prominent controls) -->
+          <div class="hud" id="hud">
+            <button class="btnTiny" id="hudPan" title="Pan tool">✋ Pan</button>
+            <button class="btnTiny" id="hudScale" title="Set scale">📏 Scale</button>
+            <button class="btnTiny" id="hudFit" title="Fit view">⤢ Fit</button>
+            <div class="hint" id="hudHint">Drag to select/move • Arrow keys nudge • Shift+Click multi-select</div>
+          </div>
+
+          <!-- Scale overlay -->
+          <div class="scaleOverlay" id="scaleOverlay" style="display:none;">
+            <div class="scaleLine" id="scaleLine"></div>
+            <div class="scaleDot" id="scaleDot1"></div>
+            <div class="scaleDot" id="scaleDot2"></div>
+            <div class="scaleLabel" id="scaleLabel"></div>
+          </div>
+
           <div class="stageLayer" id="stageLayer">
             <img class="bgImage" id="bgImage" alt="" />
-            <div class="room" id="room"></div>
+            <div class="room" id="room">
+              <div class="rulerTop" id="rulerTop"></div>
+              <div class="rulerLeft" id="rulerLeft"></div>
+            </div>
           </div>
         </div>
 
@@ -562,10 +664,10 @@
             <div class="h">Controls</div>
             <button class="btn" id="btnHelpHide" style="height:28px;padding:0 10px;font-size:12px;box-shadow:none;">Hide</button>
           </div>
-          <div class="helpBody">
-            Desktop: Pan <span class="kbd">Space</span> + drag • Zoom: wheel/trackpad (zooms to cursor) • Select: click • Multi-select: <span class="kbd">Shift</span>+click • Duplicate: <span class="kbd">⌘/Ctrl</span>+<span class="kbd">D</span> • Delete: <span class="kbd">Del</span>/<span class="kbd">Backspace</span> • Lock: <span class="kbd">L</span><br/>
+          <div class="helpBody" id="helpBody">
+            Desktop: Pan <span class="kbd">Space</span> + drag (or ✋ Pan) • Zoom: wheel/trackpad (zooms to cursor) • Select: click • Multi-select: <span class="kbd">Shift</span>+click • Nudge: <span class="kbd">Arrows</span> (Shift = bigger) • Duplicate: <span class="kbd">⌘/Ctrl</span>+<span class="kbd">D</span> • Delete: <span class="kbd">Del</span>/<span class="kbd">Backspace</span> • Lock: <span class="kbd">L</span> • Undo/Redo: <span class="kbd">⌘/Ctrl</span>+<span class="kbd">Z</span> / <span class="kbd">⌘/Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">Z</span><br/>
             Mobile: 1-finger drag = move object • 2-finger drag = pan • pinch = zoom
-            <div style="margin-top:8px;"><span id="scaleNote">Scale not set — use <b>Set Scale</b> to get accurate feet/in.</span></div>
+            <div style="margin-top:8px;"><span id="scaleNote">Scale not set — click <b>📏 Scale</b> and click two points.</span></div>
           </div>
         </div>
       </div>
@@ -614,7 +716,7 @@
 
             <div style="height:10px"></div>
             <label class="small">Background</label>
-            <div class="footerNote" style="margin:-2px 0 8px;">Upload PNG/JPG or PDF (imports page 1).</div>
+            <div class="footerNote" style="margin:-2px 0 8px;">Upload PNG/JPG or PDF (imports page 1). Toggle Lock BG to move it.</div>
             <div class="row">
               <button class="btn" id="btnBgUpload" style="flex:1;">Upload</button>
               <button class="btn" id="btnBgFit" style="flex:1;">Fit</button>
@@ -633,14 +735,16 @@
           <div class="panelBody">
             <div class="palette" id="palette"></div>
             <div style="height:12px"></div>
-            <div class="footerNote">Tip: place, then use <span class="kbd">⌘/Ctrl</span>+<span class="kbd">D</span> to duplicate fast. Lock with <span class="kbd">L</span>.</div>
+            <div class="footerNote">Tip: place, then <span class="kbd">⌘/Ctrl</span>+<span class="kbd">D</span> duplicates fast. Multi-select with <span class="kbd">Shift</span>+click. Lock with <span class="kbd">L</span>.</div>
           </div>
         </div>
 
         <div class="panel">
           <div class="panelHeader"><div class="h">Selected</div></div>
           <div class="panelBody">
-            <div id="selEmpty" class="footerNote">Select an object to edit label, lock, color, and size.</div>
+            <div id="selEmpty" class="footerNote">Select an object to edit label, lock, color, and size.
+
+Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock multiple items.</div>
             <div id="selPanel" class="hide">
               <label class="small">Label</label>
               <input id="selLabel" type="text" />
@@ -659,7 +763,7 @@
 
               <div style="height:10px"></div>
               <div class="chips">
-                <div class="chip" id="chipLock"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Lock</div>
+                <div class="chip" id="chipLock"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Lock Selected</div>
                 <div class="chip" id="chipDuplicate"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Duplicate</div>
                 <div class="chip" id="chipDelete" style="border-color:rgba(255,77,77,.35);"><span class="swatch" style="background:rgba(255,77,77,.65)"></span>Delete</div>
               </div>
@@ -692,6 +796,11 @@
       <div class="panel" style="box-shadow:none;">
         <div class="panelHeader"><div class="h">Quick Actions</div></div>
         <div class="panelBody">
+          <div class="row">
+            <button class="btn" id="mUndo" style="flex:1;">Undo</button>
+            <button class="btn" id="mRedo" style="flex:1;">Redo</button>
+          </div>
+          <div style="height:8px"></div>
           <div class="row">
             <button class="btn" id="mSetScale" style="flex:1;">Set Scale</button>
             <button class="btn" id="mFit" style="flex:1;">Fit</button>
@@ -773,7 +882,10 @@
       mode: 'idle',
       pointer: { id: null },
       drag: null,
-      scaleTool: { step: 0, p1: null, p2: null },
+      scaleTool: { step: 0, p1: null, p2: null, hover: null },
+      ui: {
+        panTool: false,
+      },
       gesture: {
         pointers: new Map(),
         active: false,
@@ -790,6 +902,104 @@
       email: 'stephen@sleeveevents.com',
       tagline: 'Every Moment, With Love & Precision'
     };
+
+    /* =========================================================
+       HISTORY (UNDO/REDO)
+       ========================================================= */
+    const History = {
+      past: [],
+      future: [],
+      max: 80,
+      _frozen: false,
+
+      snapshot(){
+        return {
+          eventName: State.eventName,
+          eventNotes: State.eventNotes,
+          theme: State.theme,
+          roomFt: { ...State.roomFt },
+          pxPerFt: State.pxPerFt,
+          gridOn: State.gridOn,
+          snapOn: State.snapOn,
+          gridStepFt: State.gridStepFt,
+          snapStepFt: State.snapStepFt,
+          bg: JSON.parse(JSON.stringify(State.bg)),
+          view: { ...State.view },
+          items: JSON.parse(JSON.stringify(State.items)),
+          selected: [...State.selected],
+        };
+      },
+
+      restore(snap){
+        if (!snap) return;
+        this._frozen = true;
+        State.eventName = snap.eventName || '';
+        State.eventNotes = snap.eventNotes || '';
+        State.theme = snap.theme || 'dark';
+        State.roomFt = snap.roomFt || { w:60, h:40 };
+        State.pxPerFt = snap.pxPerFt || 40;
+        State.gridOn = (snap.gridOn !== undefined) ? snap.gridOn : true;
+        State.snapOn = (snap.snapOn !== undefined) ? snap.snapOn : true;
+        State.gridStepFt = snap.gridStepFt || 2;
+        State.snapStepFt = snap.snapStepFt || State.gridStepFt;
+        State.bg = snap.bg || State.bg;
+        State.view = snap.view || State.view;
+        State.items = Array.isArray(snap.items) ? snap.items : [];
+        State.selected = new Set(Array.isArray(snap.selected) ? snap.selected : []);
+
+        UI.eventName.value = State.eventName;
+        UI.eventNotes.value = State.eventNotes;
+        UI.roomW.value = State.roomFt.w;
+        UI.roomH.value = State.roomFt.h;
+        UI.gridStep.value = String(State.gridStepFt);
+
+        applyTheme();
+        applyRoom();
+        applyView();
+        renderBg();
+        renderGrid();
+        renderItems();
+        updateScaleNote();
+        updateUndoRedoButtons();
+        this._frozen = false;
+      },
+
+      push(reason){
+        if (this._frozen) return;
+        const snap = this.snapshot();
+        const last = this.past[this.past.length - 1];
+        if (last && JSON.stringify(last) === JSON.stringify(snap)) return;
+        this.past.push(snap);
+        if (this.past.length > this.max) this.past.shift();
+        this.future.length = 0;
+        updateUndoRedoButtons();
+      },
+
+      undo(){
+        if (!this.past.length) return;
+        const cur = this.snapshot();
+        const prev = this.past.pop();
+        this.future.push(cur);
+        this.restore(prev);
+        toast('Undo');
+      },
+
+      redo(){
+        if (!this.future.length) return;
+        const cur = this.snapshot();
+        const next = this.future.pop();
+        this.past.push(cur);
+        this.restore(next);
+        toast('Redo');
+      }
+    };
+
+    function updateUndoRedoButtons(){
+      UI.btnUndo.disabled = History.past.length === 0;
+      UI.btnRedo.disabled = History.future.length === 0;
+      UI.mUndo.disabled = History.past.length === 0;
+      UI.mRedo.disabled = History.future.length === 0;
+    }
 
     /* =========================================================
        UTILITIES
@@ -851,28 +1061,22 @@
       }
     }
 
+    function isEditableTarget(el){
+      return !!(el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable));
+    }
+
     /* =========================================================
        POINTER CAPTURE (SAFE)
-       =========================================================
-       Fixes: "Failed to execute setPointerCapture" by capturing on the
-       element that received pointerdown (currentTarget), not always the
-       viewport.
-    */
+       ========================================================= */
     const PointerCapture = {
       el: null,
       pid: null,
-      /**
-       * Capture the pointer on the element that received pointerdown.
-       * IMPORTANT: setPointerCapture must be called on a target that is
-       * part of the pointerdown event dispatch for that pointer.
-       */
       safeCapture(pointerId, el){
         try{
           if (pointerId === undefined || pointerId === null) return false;
           if (!el || !el.isConnected) return false;
           if (typeof el.setPointerCapture !== 'function') return false;
 
-          // Only capture once per pointer.
           if (typeof el.hasPointerCapture === 'function'){
             if (!el.hasPointerCapture(pointerId)) el.setPointerCapture(pointerId);
           } else {
@@ -946,9 +1150,12 @@
       return c ? c.hex : '#8b5cf6';
     };
 
+    // Solid colors (no gradients) for v1
     const computeItemBg = (it)=>{
       const hex = colorHex(it.color || 'brand');
-      return `linear-gradient(135deg, ${hex}, rgba(255,255,255,.06))`;
+      // Slight translucency looks premium over backgrounds
+      const alpha = (State.theme === 'dark') ? 0.22 : 0.14;
+      return hex + Math.round(alpha*255).toString(16).padStart(2,'0');
     };
 
     /* =========================================================
@@ -991,6 +1198,9 @@
       btnExportPNG: document.getElementById('btnExportPNG'),
       btnExportPDF: document.getElementById('btnExportPDF'),
 
+      btnUndo: document.getElementById('btnUndo'),
+      btnRedo: document.getElementById('btnRedo'),
+
       btnTools: document.getElementById('btnTools'),
 
       toggleTheme: document.getElementById('toggleTheme'),
@@ -999,6 +1209,7 @@
       swTheme: document.getElementById('swTheme'),
       swGrid: document.getElementById('swGrid'),
       swSnap: document.getElementById('swSnap'),
+      themeLabel: document.getElementById('themeLabel'),
 
       help: document.getElementById('help'),
       btnHelpHide: document.getElementById('btnHelpHide'),
@@ -1021,6 +1232,8 @@
       sheetBackdrop: document.getElementById('sheetBackdrop'),
       sheet: document.getElementById('sheet'),
       btnSheetClose: document.getElementById('btnSheetClose'),
+      mUndo: document.getElementById('mUndo'),
+      mRedo: document.getElementById('mRedo'),
       mSetScale: document.getElementById('mSetScale'),
       mFit: document.getElementById('mFit'),
       mBgUpload: document.getElementById('mBgUpload'),
@@ -1035,12 +1248,25 @@
       mLoadLocal: document.getElementById('mLoadLocal'),
       mUpload: document.getElementById('mUpload'),
       mClear: document.getElementById('mClear'),
+
+      hudPan: document.getElementById('hudPan'),
+      hudScale: document.getElementById('hudScale'),
+      hudFit: document.getElementById('hudFit'),
+
+      scaleOverlay: document.getElementById('scaleOverlay'),
+      scaleLine: document.getElementById('scaleLine'),
+      scaleDot1: document.getElementById('scaleDot1'),
+      scaleDot2: document.getElementById('scaleDot2'),
+      scaleLabelEl: document.getElementById('scaleLabel'),
+
+      rulerTop: document.getElementById('rulerTop'),
+      rulerLeft: document.getElementById('rulerLeft'),
     };
 
     /* =========================================================
        RENDERING (STABLE DOM)
        ========================================================= */
-    const ItemEls = new Map(); // id -> {root, label, badge, handles}
+    const ItemEls = new Map(); // id -> {root, label, badge}
 
     function ensureItemEl(it){
       let rec = ItemEls.get(it.id);
@@ -1065,7 +1291,6 @@
       el.appendChild(rot);
       el.appendChild(badge);
 
-      // single set of listeners (no duplicates)
       el.addEventListener('pointerdown', (e)=>onItemPointerDown(e, it.id));
       br.addEventListener('pointerdown', (e)=>onHandleDown(e, it.id, 'br'));
       bl.addEventListener('pointerdown', (e)=>onHandleDown(e, it.id, 'bl'));
@@ -1145,6 +1370,7 @@
       document.body.setAttribute('data-theme', State.theme);
       const on = State.theme === 'dark';
       UI.swTheme.classList.toggle('on', on);
+      UI.themeLabel.textContent = on ? 'Dark' : 'Light';
     }
 
     function renderGrid(){
@@ -1155,6 +1381,64 @@
 
       UI.room.classList.toggle('noGrid', !State.gridOn);
       updateInfiniteGrid();
+    }
+
+    function buildRulers(){
+      UI.rulerTop.innerHTML = '';
+      UI.rulerLeft.innerHTML = '';
+
+      const roomWpx = State.roomFt.w * State.pxPerFt;
+      const roomHpx = State.roomFt.h * State.pxPerFt;
+
+      const tickFt = 5;
+      const minorFt = 1;
+
+      // Top ruler
+      for (let ft=0; ft<=State.roomFt.w; ft+=minorFt){
+        const x = ft * State.pxPerFt;
+        const isMajor = (ft % tickFt === 0);
+        const t = document.createElement('div');
+        t.className = 'rulerTick' + (isMajor ? '' : ' minor');
+        t.style.left = x + 'px';
+        t.style.bottom = '0px';
+        t.style.width = '1px';
+        t.style.height = isMajor ? '12px' : '8px';
+        UI.rulerTop.appendChild(t);
+
+        if (isMajor && ft % 10 === 0){
+          const lbl = document.createElement('div');
+          lbl.className = 'rulerLbl';
+          lbl.style.left = x + 'px';
+          lbl.style.top = '0px';
+          lbl.textContent = `${ft}ft`;
+          UI.rulerTop.appendChild(lbl);
+        }
+      }
+
+      // Left ruler
+      for (let ft=0; ft<=State.roomFt.h; ft+=minorFt){
+        const y = ft * State.pxPerFt;
+        const isMajor = (ft % tickFt === 0);
+        const t = document.createElement('div');
+        t.className = 'rulerTick' + (isMajor ? '' : ' minor');
+        t.style.top = y + 'px';
+        t.style.right = '0px';
+        t.style.height = '1px';
+        t.style.width = isMajor ? '12px' : '8px';
+        UI.rulerLeft.appendChild(t);
+
+        if (isMajor && ft % 10 === 0){
+          const lbl = document.createElement('div');
+          lbl.className = 'rulerLbl rulerLblY';
+          lbl.style.top = y + 'px';
+          lbl.textContent = `${ft}`;
+          UI.rulerLeft.appendChild(lbl);
+        }
+      }
+
+      // Keep rulers visible even if small
+      UI.rulerTop.style.width = roomWpx + 'px';
+      UI.rulerLeft.style.height = roomHpx + 'px';
     }
 
     function applyRoom(){
@@ -1170,6 +1454,7 @@
       UI.stageLayer.style.width = pxW + 'px';
       UI.stageLayer.style.height = pxH + 'px';
 
+      buildRulers();
       renderBg();
       renderGrid();
       renderItems();
@@ -1200,18 +1485,15 @@
       return { x: clientX - rect.left, y: clientY - rect.top, rect };
     }
 
-    /* Zoom towards cursor (this restores the "infinite" smooth feel) */
     function zoomAt(clientX, clientY, newZoom){
-      const { x: sx, y: sy, rect } = screenPointFromClient(clientX, clientY);
+      const { x: sx, y: sy } = screenPointFromClient(clientX, clientY);
       const oldZoom = State.view.zoom;
       const z = clamp(newZoom, 0.25, 4);
       if (z === oldZoom) return;
 
-      // world point under cursor before zoom
       const wx = (sx - State.view.panX) / oldZoom;
       const wy = (sy - State.view.panY) / oldZoom;
 
-      // keep it under cursor after zoom
       State.view.zoom = z;
       State.view.panX = sx - wx * z;
       State.view.panY = sy - wy * z;
@@ -1239,7 +1521,6 @@
       });
     }
 
-    // --- PDF import (page 1) via PDF.js (loaded on-demand) ---
     const PdfImport = {
       loaded:false,
       loading:false,
@@ -1249,7 +1530,6 @@
         if (this.loading) return this.loadPromise;
         this.loading = true;
         this.loadPromise = (async ()=>{
-          // Prefer a stable CDN. pdf.js is not a "framework"; it's a renderer.
           const scriptUrl = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.js';
           const workerUrl = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.js';
 
@@ -1263,9 +1543,7 @@
           });
 
           if (!window.pdfjsLib) throw new Error('PDF.js failed to load');
-          // Configure worker
           window.pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
-
           this.loaded = true;
           return true;
         })().finally(()=>{ this.loading = false; });
@@ -1274,8 +1552,8 @@
       },
 
       async pdfFileToPngDataURL(file, opts={}){
-        const maxSide = opts.maxSide || 2600; // limits giant PDFs for stability
-        const qualityScale = opts.qualityScale || 2; // initial render scale
+        const maxSide = opts.maxSide || 2600;
+        const qualityScale = opts.qualityScale || 2;
 
         await this.ensureLoaded();
 
@@ -1283,7 +1561,6 @@
         const doc = await window.pdfjsLib.getDocument({ data: buf }).promise;
         const page = await doc.getPage(1);
 
-        // Start with a scale; then clamp to maxSide.
         let viewport = page.getViewport({ scale: qualityScale });
         const maxDim = Math.max(viewport.width, viewport.height);
         if (maxDim > maxSide){
@@ -1296,7 +1573,6 @@
         canvas.width = Math.max(1, Math.floor(viewport.width));
         canvas.height = Math.max(1, Math.floor(viewport.height));
 
-        // White background for transparent PDFs
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0,0,canvas.width,canvas.height);
 
@@ -1317,6 +1593,7 @@
       State.bg.x = (rw - iw*s)/2;
       State.bg.y = (rh - ih*s)/2;
       renderBg();
+      History.push('bg-fit');
       toast('Background fit');
     }
 
@@ -1326,6 +1603,8 @@
 
       try{
         const isPdf = (f.type === 'application/pdf') || /\.pdf$/i.test(f.name);
+
+        History.push('before-bg-upload');
 
         if (isPdf){
           toast('Importing PDF (page 1)…');
@@ -1353,6 +1632,7 @@
        SELECTION + EDIT
        ========================================================= */
     const getItem = (id)=>State.items.find(i=>i.id===id) || null;
+
     const clearSelection = ()=>State.selected.clear();
     const selectOnly = (id)=>{ State.selected.clear(); if (id) State.selected.add(id); };
 
@@ -1365,7 +1645,8 @@
         UI.selLabel.value = it.label || '';
         UI.selW.textContent = fmtFtIn(it.w);
         UI.selH.textContent = fmtFtIn(it.h);
-        UI.chipLock.classList.toggle('on', !!it.locked);
+        const allLocked = it.locked;
+        UI.chipLock.classList.toggle('on', !!allLocked);
         buildColorChips(it.color || 'brand');
       } else {
         UI.selEmpty.classList.remove('hide');
@@ -1383,6 +1664,7 @@
         chip.addEventListener('click', ()=>{
           const ids = [...State.selected];
           if (ids.length !== 1) return;
+          History.push('color');
           const it = getItem(ids[0]);
           it.color = c.key;
           updateItemEl(it);
@@ -1394,6 +1676,8 @@
 
     function deleteSelected(){
       const ids = new Set(State.selected);
+      if (!ids.size) return;
+      History.push('delete');
       State.items = State.items.filter(i=>!ids.has(i.id));
       clearSelection();
       renderItems();
@@ -1403,6 +1687,7 @@
     function duplicateSelected(){
       const ids = [...State.selected];
       if (!ids.length) return;
+      History.push('duplicate');
       const newIds = [];
       for (const id of ids){
         const src = getItem(id);
@@ -1417,14 +1702,16 @@
       toast('Duplicated');
     }
 
+    // Multi-lock: toggles all selected (if any unlocked -> lock all; else unlock all)
     function toggleLockSelected(){
       const ids = [...State.selected];
-      if (ids.length !== 1) return;
-      const it = getItem(ids[0]);
-      it.locked = !it.locked;
-      updateItemEl(it);
+      if (!ids.length) return;
+      History.push('lock');
+      const items = ids.map(getItem).filter(Boolean);
+      const anyUnlocked = items.some(it=>!it.locked);
+      for (const it of items){ it.locked = anyUnlocked; updateItemEl(it); }
       updateSelectedPanel();
-      toast(it.locked ? 'Locked' : 'Unlocked');
+      toast(anyUnlocked ? 'Locked selected' : 'Unlocked selected');
     }
 
     /* =========================================================
@@ -1433,6 +1720,7 @@
     function addItem(type, at){
       const d = defByType(type);
       if (!d) return;
+      History.push('add');
       const id = uid();
       const w = d.wFt * State.pxPerFt;
       const h = d.hFt * State.pxPerFt;
@@ -1481,7 +1769,8 @@
       for (const [k,v] of [...counts.entries()].sort((a,b)=>a[0].localeCompare(b[0]))){
         lines.push(`• ${k}: ${v}`);
       }
-      UI.gear.textContent = lines.join('\n');
+      UI.gear.textContent = lines.join('
+');
     }
 
     /* =========================================================
@@ -1490,22 +1779,83 @@
     function setMode(m){ State.mode = m; }
 
     const Key = { space:false, shift:false };
+
+    function isPanKey(){ return Key.space; }
+
+    function nudgeSelected(dx, dy, big=false){
+      const ids = [...State.selected];
+      if (!ids.length) return;
+      const step = (State.pxPerFt && State.pxPerFt > 0) ? (State.pxPerFt * (big ? 5 : 1)) : (big ? 20 : 5);
+      const mx = dx * step;
+      const my = dy * step;
+
+      // Only nudge unlocked
+      const items = ids.map(getItem).filter(Boolean).filter(it=>!it.locked);
+      if (!items.length) return;
+
+      History.push('nudge');
+
+      for (const it of items){
+        const maxX = State.roomFt.w*State.pxPerFt - it.w;
+        const maxY = State.roomFt.h*State.pxPerFt - it.h;
+        let nx = clamp(it.x + mx, 0, maxX);
+        let ny = clamp(it.y + my, 0, maxY);
+        it.x = State.snapOn ? snapPx(nx) : nx;
+        it.y = State.snapOn ? snapPx(ny) : ny;
+        updateItemEl(it);
+      }
+      updateSelectedPanel();
+    }
+
     window.addEventListener('keydown', (e)=>{
       if (e.code === 'Space') Key.space = true;
       if (e.key === 'Shift') Key.shift = true;
 
+      // Keyboard shortcuts should not fire while typing
+      if (isEditableTarget(document.activeElement)) return;
+
       const isCmd = e.metaKey || e.ctrlKey;
+
+      // Undo/redo
+      if (isCmd && e.key.toLowerCase() === 'z'){
+        e.preventDefault();
+        if (e.shiftKey) History.redo();
+        else History.undo();
+        return;
+      }
+
+      // Duplicate
       if (isCmd && e.key.toLowerCase() === 'd'){
         e.preventDefault();
         duplicateSelected();
+        return;
       }
+
+      // Nudge
+      if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){
+        e.preventDefault();
+        const big = e.shiftKey;
+        if (e.key === 'ArrowUp') nudgeSelected(0,-1,big);
+        if (e.key === 'ArrowDown') nudgeSelected(0, 1,big);
+        if (e.key === 'ArrowLeft') nudgeSelected(-1,0,big);
+        if (e.key === 'ArrowRight') nudgeSelected(1,0,big);
+        return;
+      }
+
       if (e.key === 'Backspace' || e.key === 'Delete'){
-        if (document.activeElement && ['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
         deleteSelected();
+        return;
       }
+
       if (e.key.toLowerCase() === 'l'){
-        if (document.activeElement && ['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
         toggleLockSelected();
+        return;
+      }
+
+      if (e.key === 'Escape'){
+        if (State.mode === 'setScale') cancelScaleTool();
+        else if (State.ui.panTool){ togglePanTool(false); }
+        else { clearSelection(); renderItems(); }
       }
     });
 
@@ -1514,33 +1864,97 @@
       if (e.key === 'Shift') Key.shift = false;
     });
 
-    function isPanKey(){ return Key.space; }
+    function togglePanTool(force){
+      State.ui.panTool = (force !== undefined) ? force : !State.ui.panTool;
+      UI.hudPan.classList.toggle('on', State.ui.panTool);
+      toast(State.ui.panTool ? 'Pan tool on' : 'Pan tool off');
+    }
+
+    function showScaleOverlay(show){
+      UI.scaleOverlay.style.display = show ? 'block' : 'none';
+    }
+
+    function cancelScaleTool(){
+      State.scaleTool.step = 0;
+      State.scaleTool.p1 = null;
+      State.scaleTool.p2 = null;
+      State.scaleTool.hover = null;
+      showScaleOverlay(false);
+      setMode('idle');
+      toast('Scale cancelled');
+    }
+
+    function updateScaleOverlay(){
+      if (State.mode !== 'setScale') return;
+      const p1 = State.scaleTool.p1;
+      const p2 = (State.scaleTool.step === 1) ? State.scaleTool.hover : State.scaleTool.p2;
+      if (!p1 || !p2) return;
+
+      showScaleOverlay(true);
+
+      const len = dist(p1,p2);
+      const ang = Math.atan2(p2.y-p1.y, p2.x-p1.x) * 180/Math.PI;
+
+      UI.scaleLine.style.left = p1.x + 'px';
+      UI.scaleLine.style.top  = p1.y + 'px';
+      UI.scaleLine.style.width = len + 'px';
+      UI.scaleLine.style.transform = `rotate(${ang}deg)`;
+
+      UI.scaleDot1.style.left = p1.x + 'px';
+      UI.scaleDot1.style.top  = p1.y + 'px';
+      UI.scaleDot2.style.left = p2.x + 'px';
+      UI.scaleDot2.style.top  = p2.y + 'px';
+
+      const mid = { x:(p1.x+p2.x)/2, y:(p1.y+p2.y)/2 };
+      UI.scaleLabelEl.style.left = mid.x + 'px';
+      UI.scaleLabelEl.style.top  = mid.y + 'px';
+      UI.scaleLabelEl.textContent = `Line: ${fmtFtIn(len)} (enter real ft)`;
+    }
 
     function onItemPointerDown(e, id){
       e.preventDefault();
       const it = getItem(id);
       if (!it) return;
 
+      const alreadySelected = State.selected.has(id);
       if (Key.shift){
-        if (State.selected.has(id)) State.selected.delete(id);
+        if (alreadySelected) State.selected.delete(id);
         else State.selected.add(id);
       } else {
-        selectOnly(id);
+        if (!alreadySelected || State.selected.size <= 1) selectOnly(id);
+        // else keep multi-selection and drag the group
       }
 
-      if (it.locked){ renderItems(); return; }
+      // If clicked item is locked, do not drag
+      const clicked = getItem(id);
+      if (clicked?.locked){ renderItems(); return; }
 
       setMode('dragging');
       State.pointer.id = e.pointerId;
       PointerCapture.safeCapture(e.pointerId, e.currentTarget);
 
       const p = screenToRoomPoint(e.clientX, e.clientY);
-      State.drag = { kind:'move', id, start: { x: p.x, y: p.y }, orig: { x: it.x, y: it.y } };
 
-      const rec = ItemEls.get(id);
-      if (rec) rec.root.classList.add('dragging');
-      updateItemEl(it);
-      updateSelectedPanel();
+      // Drag group if multiple selected and this item is part of it
+      const groupIds = (State.selected.size > 1 && State.selected.has(id)) ? [...State.selected] : [id];
+      const group = groupIds.map(getItem).filter(Boolean).filter(x=>!x.locked);
+
+      // If everything in group is locked, nothing to do
+      if (!group.length){ renderItems(); return; }
+
+      History.push('move');
+
+      const orig = new Map();
+      for (const g of group) orig.set(g.id, { x:g.x, y:g.y });
+
+      State.drag = { kind:'move', ids: group.map(g=>g.id), start: { x: p.x, y: p.y }, orig };
+
+      for (const gid of group.map(g=>g.id)){
+        const rec = ItemEls.get(gid);
+        if (rec) rec.root.classList.add('dragging');
+      }
+
+      renderItems();
     }
 
     function onHandleDown(e, id, corner){
@@ -1553,6 +1967,7 @@
       State.pointer.id = e.pointerId;
       PointerCapture.safeCapture(e.pointerId, e.currentTarget);
       const p = screenToRoomPoint(e.clientX, e.clientY);
+      History.push('resize');
       State.drag = { kind:'resize', id, corner, start: { x:p.x, y:p.y }, orig: { x: it.x, y: it.y, w: it.w, h: it.h } };
       updateSelectedPanel();
     }
@@ -1570,11 +1985,11 @@
       const cx = it.x + it.w/2;
       const cy = it.y + it.h/2;
       const ang0 = Math.atan2(p.y - cy, p.x - cx) * 180/Math.PI;
+      History.push('rotate');
       State.drag = { kind:'rotate', id, center:{x:cx,y:cy}, ang0, origRot: it.rot };
       updateSelectedPanel();
     }
 
-    // Multi-touch pan/zoom for mobile (2 fingers)
     function updateGestureFromPointers(){
       const pts = [...State.gesture.pointers.values()];
       if (pts.length < 2) return;
@@ -1593,15 +2008,12 @@
         return;
       }
 
-      // zoom factor
       const factor = d / (State.gesture.startDist || d);
       const targetZoom = clamp(State.gesture.startZoom * factor, 0.25, 4);
 
-      // pan by midpoint movement
       const dx = mid.x - State.gesture.startMid.x;
       const dy = mid.y - State.gesture.startMid.y;
 
-      // apply zoom around midpoint
       State.view.panX = State.gesture.startPanX + dx;
       State.view.panY = State.gesture.startPanY + dy;
       State.view.zoom = targetZoom;
@@ -1610,18 +2022,20 @@
     }
 
     UI.viewport.addEventListener('pointerdown', (e)=>{
-      // track pointers for mobile gestures
       State.gesture.pointers.set(e.pointerId, { clientX:e.clientX, clientY:e.clientY });
 
       const isItem = e.target.closest && e.target.closest('.item');
 
-      // scale tool
+      // Scale tool
       if (State.mode === 'setScale'){
         e.preventDefault();
         const p = screenToRoomPoint(e.clientX, e.clientY);
         if (State.scaleTool.step === 0){
           State.scaleTool.p1 = p;
           State.scaleTool.step = 1;
+          State.scaleTool.hover = p;
+          showScaleOverlay(true);
+          updateScaleOverlay();
           toast('Scale: click second point');
         } else {
           State.scaleTool.p2 = p;
@@ -1629,8 +2043,10 @@
           const ft = prompt('Enter real-world length in feet (e.g., 20):', '20');
           const ftNum = parseFloat(ft||'');
           if (ftNum && ftNum > 0){
+            History.push('scale');
             State.pxPerFt = px / ftNum;
             toast(`Scale set: 1ft = ${Math.round(State.pxPerFt)}px`);
+            buildRulers();
             applyRoom();
           } else {
             toast('Scale cancelled');
@@ -1638,18 +2054,21 @@
           State.scaleTool.step = 0;
           State.scaleTool.p1 = null;
           State.scaleTool.p2 = null;
+          State.scaleTool.hover = null;
+          showScaleOverlay(false);
           setMode('idle');
         }
         return;
       }
 
       // background move when unlocked
-      if (State.bg.src && !State.bg.locked && !isItem && !isPanKey() && State.mode==='idle'){
+      if (State.bg.src && !State.bg.locked && !isItem && !isPanKey() && !State.ui.panTool && State.mode==='idle'){
         e.preventDefault();
         setMode('draggingBG');
         State.pointer.id = e.pointerId;
         PointerCapture.safeCapture(e.pointerId, e.currentTarget);
         const p = screenToRoomPoint(e.clientX, e.clientY);
+        History.push('bg-move');
         State.drag = { kind:'bg', start:{x:p.x,y:p.y}, orig:{x:State.bg.x, y:State.bg.y} };
         return;
       }
@@ -1660,8 +2079,8 @@
         renderItems();
       }
 
-      // Pan with Space (desktop)
-      if (isPanKey()){
+      // Pan with Space OR Pan tool
+      if ((isPanKey() || State.ui.panTool) && !isItem){
         e.preventDefault();
         setMode('panning');
         State.pointer.id = e.pointerId;
@@ -1669,7 +2088,7 @@
         State.drag = { kind:'pan', lastX: e.clientX, lastY: e.clientY };
       }
 
-      // If 2 fingers are down, treat as gesture
+      // 2 finger gesture
       if (State.gesture.pointers.size >= 2 && !isItem){
         e.preventDefault();
         setMode('gesturing');
@@ -1677,10 +2096,17 @@
     });
 
     UI.viewport.addEventListener('pointermove', (e)=>{
-      // update pointer tracking for gestures
       if (State.gesture.pointers.has(e.pointerId)){
         State.gesture.pointers.set(e.pointerId, { clientX:e.clientX, clientY:e.clientY });
       }
+
+      // Scale hover line
+      if (State.mode === 'setScale' && State.scaleTool.step === 1){
+        const p = screenToRoomPoint(e.clientX, e.clientY);
+        State.scaleTool.hover = p;
+        updateScaleOverlay();
+      }
+
       if (State.mode === 'gesturing'){
         updateGestureFromPointers();
         return;
@@ -1711,23 +2137,38 @@
         return;
       }
 
+      if (State.drag.kind === 'move'){
+        const p = screenToRoomPoint(e.clientX, e.clientY);
+        const dx = p.x - State.drag.start.x;
+        const dy = p.y - State.drag.start.y;
+
+        for (const id of State.drag.ids){
+          const it = getItem(id);
+          if (!it) continue;
+          const o = State.drag.orig.get(id);
+          if (!o) continue;
+          let nx = o.x + dx;
+          let ny = o.y + dy;
+          nx = clamp(nx, 0, State.roomFt.w*State.pxPerFt - it.w);
+          ny = clamp(ny, 0, State.roomFt.h*State.pxPerFt - it.h);
+          it.x = snapPx(nx);
+          it.y = snapPx(ny);
+          updateItemEl(it);
+        }
+
+        if (State.selected.size === 1){
+          const only = getItem([...State.selected][0]);
+          if (only){
+            UI.selW.textContent = fmtFtIn(only.w);
+            UI.selH.textContent = fmtFtIn(only.h);
+          }
+        }
+        return;
+      }
+
       const it = getItem(State.drag.id);
       if (!it) return;
       const p = screenToRoomPoint(e.clientX, e.clientY);
-
-      if (State.drag.kind === 'move'){
-        const dx = p.x - State.drag.start.x;
-        const dy = p.y - State.drag.start.y;
-        let nx = State.drag.orig.x + dx;
-        let ny = State.drag.orig.y + dy;
-        nx = clamp(nx, 0, State.roomFt.w*State.pxPerFt - it.w);
-        ny = clamp(ny, 0, State.roomFt.h*State.pxPerFt - it.h);
-        it.x = snapPx(nx);
-        it.y = snapPx(ny);
-        updateItemEl(it);
-        UI.selW.textContent = fmtFtIn(it.w);
-        UI.selH.textContent = fmtFtIn(it.h);
-      }
 
       if (State.drag.kind === 'resize'){
         const o = State.drag.orig;
@@ -1788,7 +2229,6 @@
       endInteraction(e.pointerId);
     });
 
-    // Wheel zoom (zoom-to-cursor)
     UI.viewport.addEventListener('wheel', (e)=>{
       e.preventDefault();
       const factor = (e.deltaY < 0) ? 1.08 : 0.92;
@@ -1818,6 +2258,8 @@
 
     function loadProject(p){
       if (!p || typeof p !== 'object') return;
+      History.push('before-load');
+
       State.version = p.version || 1;
       State.eventName = p.eventName || '';
       State.eventNotes = p.eventNotes || '';
@@ -1872,7 +2314,11 @@
       UI.fileUpload.value = '';
     });
 
-    function saveLocal(){ localStorage.setItem('sleeve_room_planner_v1', JSON.stringify(getProject())); toast('Saved locally'); }
+    function saveLocal(){
+      History.push('save-local');
+      localStorage.setItem('sleeve_room_planner_v1', JSON.stringify(getProject()));
+      toast('Saved locally');
+    }
 
     function loadLocal(){
       const txt = localStorage.getItem('sleeve_room_planner_v1');
@@ -1945,8 +2391,6 @@
 
     /* =========================================================
        EXPORT
-       NOTE: unchanged from your version, kept minimal here.
-       (PNG/PDF are still wired and will work with the room border.)
        ========================================================= */
 
     function roundRect(ctx, x,y,w,h,r){
@@ -1965,7 +2409,7 @@
       const fontSize = 16 * scale;
       ctx.save();
       ctx.globalAlpha = 0.88;
-      ctx.fillStyle = State.theme === 'dark' ? 'rgba(0,0,0,.55)' : 'rgba(255,255,255,.75)';
+      ctx.fillStyle = State.theme === 'dark' ? 'rgba(0,0,0,.55)' : 'rgba(255,250,240,.92)';
       const boxH = 54 * scale;
       ctx.fillRect(0, h - boxH, w, boxH);
       ctx.globalAlpha = 1;
@@ -1998,19 +2442,19 @@
       ctx.translate(-cx, -cy);
 
       ctx.fillStyle = hex;
-      ctx.globalAlpha = State.theme==='dark' ? 0.28 : 0.16;
+      ctx.globalAlpha = State.theme==='dark' ? 0.22 : 0.14;
       if (d?.shape === 'circle'){
         ctx.beginPath();
         ctx.ellipse(cx, cy, it.w/2, it.h/2, 0, 0, Math.PI*2);
         ctx.fill();
-        ctx.globalAlpha = 0.85;
+        ctx.globalAlpha = 0.9;
         ctx.strokeStyle = State.theme==='dark' ? 'rgba(255,255,255,.16)' : 'rgba(17,24,39,.16)';
         ctx.lineWidth = 1;
         ctx.stroke();
       } else {
         roundRect(ctx, it.x, it.y, it.w, it.h, 12);
         ctx.fill();
-        ctx.globalAlpha = 0.85;
+        ctx.globalAlpha = 0.9;
         ctx.strokeStyle = State.theme==='dark' ? 'rgba(255,255,255,.16)' : 'rgba(17,24,39,.16)';
         ctx.lineWidth = 1;
         ctx.stroke();
@@ -2037,7 +2481,7 @@
       const ctx = c.getContext('2d');
       ctx.scale(scale, scale);
 
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = State.theme === 'dark' ? '#ffffff' : '#fffaf0';
       ctx.fillRect(0,0,roomW,roomH);
 
       if (State.bg.src){
@@ -2084,7 +2528,6 @@
     function escapeHtml(str){ return String(str).replace(/[&<>\"']/g, s=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[s])); }
 
     async function exportPDF(){
-      // Print-to-PDF flow: open a print window with a rendered PNG
       const scale = 2;
       const roomW = State.roomFt.w * State.pxPerFt;
       const roomH = State.roomFt.h * State.pxPerFt;
@@ -2094,7 +2537,7 @@
       const ctx = c.getContext('2d');
       ctx.scale(scale, scale);
 
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = State.theme === 'dark' ? '#ffffff' : '#fffaf0';
       ctx.fillRect(0,0,roomW,roomH);
 
       if (State.bg.src){
@@ -2154,9 +2597,16 @@
     /* =========================================================
        UI WIRING
        ========================================================= */
-    function toggleTheme(){ State.theme = (State.theme === 'dark') ? 'light' : 'dark'; applyTheme(); renderItems(); renderGrid(); toast(State.theme === 'dark' ? 'Dark mode' : 'Light mode'); }
-    function toggleGrid(){ State.gridOn = !State.gridOn; renderGrid(); toast(State.gridOn ? 'Grid on' : 'Grid off'); }
-    function toggleSnap(){ State.snapOn = !State.snapOn; renderGrid(); toast(State.snapOn ? 'Snap on' : 'Snap off'); }
+    function toggleTheme(){
+      History.push('theme');
+      State.theme = (State.theme === 'dark') ? 'light' : 'dark';
+      applyTheme();
+      renderItems();
+      renderGrid();
+      toast(State.theme === 'dark' ? 'Dark mode' : 'Light mode');
+    }
+    function toggleGrid(){ History.push('grid'); State.gridOn = !State.gridOn; renderGrid(); toast(State.gridOn ? 'Grid on' : 'Grid off'); }
+    function toggleSnap(){ History.push('snap'); State.snapOn = !State.snapOn; renderGrid(); toast(State.snapOn ? 'Snap on' : 'Snap off'); }
 
     function openSheet(){ UI.sheetBackdrop.style.display = 'block'; UI.sheet.style.display = 'block'; document.body.classList.add('sheetOpen'); }
     function closeSheet(){ UI.sheetBackdrop.style.display = 'none'; UI.sheet.style.display = 'none'; document.body.classList.remove('sheetOpen'); }
@@ -2170,19 +2620,27 @@
     UI.toggleGrid.addEventListener('click', toggleGrid);
     UI.toggleSnap.addEventListener('click', toggleSnap);
 
+    UI.btnUndo.addEventListener('click', ()=>History.undo());
+    UI.btnRedo.addEventListener('click', ()=>History.redo());
+
+    UI.hudPan.addEventListener('click', ()=>togglePanTool());
+    UI.hudScale.addEventListener('click', ()=>UI.btnSetScale.click());
+    UI.hudFit.addEventListener('click', ()=>fitToView());
+
     UI.btnHelpHide.addEventListener('click', ()=>{ UI.help.style.display='none'; toast('Help hidden'); });
 
     UI.eventName.addEventListener('input', ()=>{ State.eventName = UI.eventName.value; });
     UI.eventNotes.addEventListener('input', ()=>{ State.eventNotes = UI.eventNotes.value; });
 
     UI.gridStep.addEventListener('change', ()=>{
+      History.push('grid-step');
       State.gridStepFt = parseFloat(UI.gridStep.value)||2;
       State.snapStepFt = State.gridStepFt;
       renderGrid();
       toast(`Grid ${State.gridStepFt}ft`);
     });
 
-    UI.btnApplyRoom.addEventListener('click', ()=>{ applyRoom(); toast('Room updated'); });
+    UI.btnApplyRoom.addEventListener('click', ()=>{ History.push('room'); applyRoom(); toast('Room updated'); });
 
     function fitToView(){
       const roomW = State.roomFt.w * State.pxPerFt;
@@ -2204,12 +2662,15 @@
       State.scaleTool.step = 0;
       State.scaleTool.p1 = null;
       State.scaleTool.p2 = null;
+      State.scaleTool.hover = null;
       setMode('setScale');
+      showScaleOverlay(true);
       toast('Scale: click first point');
     });
 
     UI.btnClear.addEventListener('click', ()=>{
       if (!confirm('Clear all items?')) return;
+      History.push('clear');
       State.items = [];
       clearSelection();
       renderItems();
@@ -2220,7 +2681,12 @@
     UI.btnBgUpload.addEventListener('click', ()=>UI.bgUpload.click());
     UI.btnBgFit.addEventListener('click', ()=>bgFit());
 
-    UI.chipBgLock.addEventListener('click', ()=>{ State.bg.locked = !State.bg.locked; renderBg(); toast(State.bg.locked ? 'BG locked' : 'BG unlocked'); });
+    UI.chipBgLock.addEventListener('click', ()=>{
+      History.push('bg-lock');
+      State.bg.locked = !State.bg.locked;
+      renderBg();
+      toast(State.bg.locked ? 'BG locked' : 'BG unlocked (drag to move)');
+    });
     UI.chipShowGrid.addEventListener('click', toggleGrid);
     UI.chipSnap.addEventListener('click', toggleSnap);
 
@@ -2235,6 +2701,7 @@
     UI.selLabel.addEventListener('input', ()=>{
       const ids = [...State.selected];
       if (ids.length !== 1) return;
+      History.push('label');
       const it = getItem(ids[0]);
       it.label = UI.selLabel.value;
       updateItemEl(it);
@@ -2243,6 +2710,9 @@
     UI.chipLock.addEventListener('click', toggleLockSelected);
     UI.chipDuplicate.addEventListener('click', duplicateSelected);
     UI.chipDelete.addEventListener('click', deleteSelected);
+
+    UI.mUndo.addEventListener('click', ()=>History.undo());
+    UI.mRedo.addEventListener('click', ()=>History.redo());
 
     UI.mSetScale.addEventListener('click', ()=>{ closeSheet(); UI.btnSetScale.click(); });
     UI.mFit.addEventListener('click', ()=>{ closeSheet(); fitToView(); });
@@ -2276,7 +2746,6 @@
     document.addEventListener('touchmove', (e)=>{
       if (!touchStartInViewport) return;
       if (!e.cancelable) return;
-      // never block sheet/sidebar scroll
       const t = e.target;
       if (isIn(t, '#sheet') || isIn(t, '#sidebar')) return;
       e.preventDefault();
@@ -2304,6 +2773,15 @@
       State.snapOn = prevSnap; State.pxPerFt = prevScale;
       assert(PointerCapture.safeCapture(null, document.body) === false, 'PointerCapture null pointerId');
       assert(PointerCapture.safeCapture(1, null) === false, 'PointerCapture null element');
+      // Undo/redo basic
+      const before = History.snapshot();
+      History.push('test');
+      State.eventName = 'X';
+      History.push('test2');
+      History.undo();
+      assert(State.eventName === before.eventName, 'undo restores state');
+      History.redo();
+      assert(State.eventName === 'X', 'redo restores state');
       console.log('[Sleeve Planner] Tests OK');
     }
 
@@ -2333,6 +2811,10 @@
         updateGear();
         updateScaleNote();
       }
+
+      // Seed history with initial state
+      History.push('init');
+      updateUndoRedoButtons();
 
       if (window.innerWidth <= 560){ UI.help.style.display = 'none'; }
       if (location.search.includes('test=1')){
