@@ -190,6 +190,14 @@
       background: color-mix(in srgb, var(--panel) 88%, transparent);
     }
 
+    /* Keep the Selected panel always visible near the top of the sidebar */
+    .sidebar .selectedPanel{
+      position: sticky;
+      top: 12px;
+      z-index: 12;
+      backdrop-filter: blur(10px);
+    }
+
     .panel{
       background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
       border:1px solid var(--stroke2);
@@ -669,14 +677,67 @@
             <button class="btn" id="btnHelpHide" style="height:28px;padding:0 10px;font-size:12px;box-shadow:none;">Hide</button>
           </div>
           <div class="helpBody" id="helpBody">
-            Desktop: Pan <span class="kbd">Space</span> + drag (or ✋ Pan) • Zoom: wheel/trackpad (zooms to cursor) • Select: click • Multi-select: <span class="kbd">Shift</span>+click • Nudge: <span class="kbd">Arrows</span> (Shift = bigger) • Duplicate: <span class="kbd">⌘/Ctrl</span>+<span class="kbd">D</span> • Delete: <span class="kbd">Del</span>/<span class="kbd">Backspace</span> • Lock: <span class="kbd">L</span> • Undo/Redo: <span class="kbd">⌘/Ctrl</span>+<span class="kbd">Z</span> / <span class="kbd">⌘/Ctrl</span>+<span class="kbd">Shift</span>+<span class="kbd">Z</span><br/>
-            Mobile: 1-finger drag = move object • 2-finger drag = pan • pinch = zoom
-            <div style="margin-top:8px;"><span id="scaleNote">Scale not set — click <b>📏 Scale</b> and click two points.</span></div>
+            <div style="display:grid;gap:10px;">
+              <div>
+                <div style="font-weight:1000;color:var(--text);margin-bottom:4px;">Tools</div>
+                <div>✋ <b>Pan</b>: click the Pan button (or hold <span class="kbd">Space</span>) and drag.</div>
+                <div>📏 <b>Scale</b>: click Scale, then click two points, enter the real feet.</div>
+              </div>
+              <div>
+                <div style="font-weight:1000;color:var(--text);margin-bottom:4px;">Edit</div>
+                <div>Select: click • Multi-select: <span class="kbd">Shift</span>+click</div>
+                <div>Nudge: <span class="kbd">Arrows</span> (Shift = bigger)</div>
+                <div>Duplicate: <span class="kbd">⌘/Ctrl</span>+<span class="kbd">D</span> • Lock: <span class="kbd">L</span> • Delete: <span class="kbd">Del</span>/<span class="kbd">Backspace</span></div>
+              </div>
+              <div>
+                <div style="font-weight:1000;color:var(--text);margin-bottom:4px;">Mobile</div>
+                <div>1-finger drag = move object • 2-finger drag = pan • pinch = zoom</div>
+              </div>
+              <div><span id="scaleNote">Scale: 1 ft = 40 px • Grid 2ft • Snap 2ft</span></div>
+            </div>
           </div>
         </div>
       </div>
 
       <div class="sidebar" id="sidebar">
+
+        <div class="panel selectedPanel">
+          <div class="panelHeader"><div class="h">Selected</div></div>
+          <div class="panelBody">
+            <div id="selEmpty" class="footerNote">Select an object to edit label, lock, color, and size.
+
+Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock multiple items.</div>
+            <div id="selPanel" class="hide">
+              <label class="small">Label</label>
+              <input id="selLabel" type="text" />
+
+              <div style="height:10px"></div>
+              <div class="row">
+                <div class="col">
+                  <label class="small">Width</label>
+                  <div id="selW" class="footerNote"></div>
+                </div>
+                <div class="col">
+                  <label class="small">Height</label>
+                  <div id="selH" class="footerNote"></div>
+                </div>
+              </div>
+
+              <div style="height:10px"></div>
+              <div class="chips">
+                <div class="chip" id="chipLock"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Lock Selected</div>
+                <div class="chip" id="chipDuplicate"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Duplicate</div>
+                <div class="chip" id="chipRotL"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>⟲ -45°</div>
+                <div class="chip" id="chipRotR"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>⟳ +45°</div>
+                <div class="chip" id="chipDelete" style="border-color:rgba(255,77,77,.35);"><span class="swatch" style="background:rgba(255,77,77,.65)"></span>Delete</div>
+              </div>
+
+              <div style="height:10px"></div>
+              <label class="small">Color</label>
+              <div class="chips" id="colorChips"></div>
+            </div>
+          </div>
+        </div>
 
         <div class="panel">
           <div class="panelHeader"><div class="h">Project</div></div>
@@ -740,44 +801,6 @@
             <div class="palette" id="palette"></div>
             <div style="height:12px"></div>
             <div class="footerNote">Tip: place, then <span class="kbd">⌘/Ctrl</span>+<span class="kbd">D</span> duplicates fast. Multi-select with <span class="kbd">Shift</span>+click. Lock with <span class="kbd">L</span>.</div>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="panelHeader"><div class="h">Selected</div></div>
-          <div class="panelBody">
-            <div id="selEmpty" class="footerNote">Select an object to edit label, lock, color, and size.
-
-Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock multiple items.</div>
-            <div id="selPanel" class="hide">
-              <label class="small">Label</label>
-              <input id="selLabel" type="text" />
-
-              <div style="height:10px"></div>
-              <div class="row">
-                <div class="col">
-                  <label class="small">Width</label>
-                  <div id="selW" class="footerNote"></div>
-                </div>
-                <div class="col">
-                  <label class="small">Height</label>
-                  <div id="selH" class="footerNote"></div>
-                </div>
-              </div>
-
-              <div style="height:10px"></div>
-              <div class="chips">
-                <div class="chip" id="chipLock"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Lock Selected</div>
-                <div class="chip" id="chipDuplicate"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Duplicate</div>
-                <div class="chip" id="chipRotL"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>⟲ -45°</div>
-                <div class="chip" id="chipRotR"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>⟳ +45°</div>
-                <div class="chip" id="chipDelete" style="border-color:rgba(255,77,77,.35);"><span class="swatch" style="background:rgba(255,77,77,.65)"></span>Delete</div>
-              </div>
-
-              <div style="height:10px"></div>
-              <label class="small">Color</label>
-              <div class="chips" id="colorChips"></div>
-            </div>
           </div>
         </div>
 
@@ -1167,96 +1190,9 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
     /* =========================================================
        UI REFERENCES
        ========================================================= */
-    const UI = {
-      viewport: document.getElementById('viewport'),
-      infiniteGrid: document.getElementById('infiniteGrid'),
-      stageLayer: document.getElementById('stageLayer'),
-      room: document.getElementById('room'),
-      bgImage: document.getElementById('bgImage'),
-      palette: document.getElementById('palette'),
-      paletteMobile: document.getElementById('paletteMobile'),
-      sidebar: document.getElementById('sidebar'),
-      toast: document.getElementById('toast'),
+    const UI = {$1
 
-      eventName: document.getElementById('eventName'),
-      eventNotes: document.getElementById('eventNotes'),
-      roomW: document.getElementById('roomW'),
-      roomH: document.getElementById('roomH'),
-      gridStep: document.getElementById('gridStep'),
-      gear: document.getElementById('gear'),
-
-      btnApplyRoom: document.getElementById('btnApplyRoom'),
-      btnFit: document.getElementById('btnFit'),
-      btnSetScale: document.getElementById('btnSetScale'),
-      btnClear: document.getElementById('btnClear'),
-
-      btnBgUpload: document.getElementById('btnBgUpload'),
-      btnBgFit: document.getElementById('btnBgFit'),
-      chipBgLock: document.getElementById('chipBgLock'),
-      chipShowGrid: document.getElementById('chipShowGrid'),
-      chipSnap: document.getElementById('chipSnap'),
-
-      btnSaveLocal: document.getElementById('btnSaveLocal'),
-      btnLoadLocal: document.getElementById('btnLoadLocal'),
-      btnDownload: document.getElementById('btnDownload'),
-      btnUpload: document.getElementById('btnUpload'),
-      btnShare: document.getElementById('btnShare'),
-      btnExportPNG: document.getElementById('btnExportPNG'),
-      btnExportPDF: document.getElementById('btnExportPDF'),
-
-      btnUndo: document.getElementById('btnUndo'),
-      btnRedo: document.getElementById('btnRedo'),
-
-      btnTools: document.getElementById('btnTools'),
-
-      toggleTheme: document.getElementById('toggleTheme'),
-      toggleGrid: document.getElementById('toggleGrid'),
-      toggleSnap: document.getElementById('toggleSnap'),
-      swTheme: document.getElementById('swTheme'),
-      swGrid: document.getElementById('swGrid'),
-      swSnap: document.getElementById('swSnap'),
-      themeLabel: document.getElementById('themeLabel'),
-
-      help: document.getElementById('help'),
-      btnHelpHide: document.getElementById('btnHelpHide'),
-      scaleNote: document.getElementById('scaleNote'),
-
-      fileUpload: document.getElementById('fileUpload'),
-      bgUpload: document.getElementById('bgUpload'),
-
-      selEmpty: document.getElementById('selEmpty'),
-      selPanel: document.getElementById('selPanel'),
-      selLabel: document.getElementById('selLabel'),
-      selW: document.getElementById('selW'),
-      selH: document.getElementById('selH'),
-      chipLock: document.getElementById('chipLock'),
-      chipDuplicate: document.getElementById('chipDuplicate'),
-      chipRotL: document.getElementById('chipRotL'),
-      chipRotR: document.getElementById('chipRotR'),
-      chipDelete: document.getElementById('chipDelete'),
-      colorChips: document.getElementById('colorChips'),
-
-      fab: document.getElementById('fab'),
-      sheetBackdrop: document.getElementById('sheetBackdrop'),
-      sheet: document.getElementById('sheet'),
-      btnSheetClose: document.getElementById('btnSheetClose'),
-      mUndo: document.getElementById('mUndo'),
-      mRedo: document.getElementById('mRedo'),
-      mSetScale: document.getElementById('mSetScale'),
-      mFit: document.getElementById('mFit'),
-      mBgUpload: document.getElementById('mBgUpload'),
-      mBgFit: document.getElementById('mBgFit'),
-      mDemoWedding: document.getElementById('mDemoWedding'),
-      mDemoMitzvah: document.getElementById('mDemoMitzvah'),
-      mExportPNG: document.getElementById('mExportPNG'),
-      mExportPDF: document.getElementById('mExportPDF'),
-      mShare: document.getElementById('mShare'),
-      mDownload: document.getElementById('mDownload'),
-      mSaveLocal: document.getElementById('mSaveLocal'),
-      mLoadLocal: document.getElementById('mLoadLocal'),
-      mUpload: document.getElementById('mUpload'),
-      mClear: document.getElementById('mClear'),
-
+      hud: document.getElementById('hud'),
       hudPan: document.getElementById('hudPan'),
       hudScale: document.getElementById('hudScale'),
       hudFit: document.getElementById('hudFit'),
@@ -1882,7 +1818,7 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
 
       if (e.key === 'Escape'){
         if (State.mode === 'setScale') cancelScaleTool();
-        else if (State.ui.panTool){ togglePanTool(false); }
+        else if (State.ui.panTool) setActiveTool('none');
         else { clearSelection(); renderItems(); }
       }
     });
@@ -1892,10 +1828,52 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
       if (e.key === 'Shift') Key.shift = false;
     });
 
+    function setActiveTool(tool){
+      // tool: 'none' | 'pan' | 'scale'
+      if (tool === 'scale'){
+        // scale wins, pan off
+        State.ui.panTool = false;
+        UI.hudPan.classList.remove('on');
+        if (State.mode !== 'setScale'){
+          State.scaleTool.step = 0;
+          State.scaleTool.p1 = null;
+          State.scaleTool.p2 = null;
+          State.scaleTool.hover = null;
+          setMode('setScale');
+          UI.hudScale.classList.add('on');
+          showScaleOverlay(true);
+          toast('Scale: click first point');
+        } else {
+          cancelScaleTool();
+        }
+        return;
+      }
+
+      if (tool === 'pan'){
+        // pan wins, scale off
+        if (State.mode === 'setScale') cancelScaleTool();
+        State.ui.panTool = !State.ui.panTool;
+        UI.hudPan.classList.toggle('on', State.ui.panTool);
+        toast(State.ui.panTool ? 'Pan tool on' : 'Pan tool off');
+        return;
+      }
+
+      // none
+      if (State.mode === 'setScale') cancelScaleTool();
+      if (State.ui.panTool){
+        State.ui.panTool = false;
+        UI.hudPan.classList.remove('on');
+      }
+    }
+
+    function showScaleOverlay(show){
+      UI.scaleOverlay.style.display = show ? 'block' : 'none';
+    }
+
     function togglePanTool(force){
-      State.ui.panTool = (force !== undefined) ? force : !State.ui.panTool;
-      UI.hudPan.classList.toggle('on', State.ui.panTool);
-      toast(State.ui.panTool ? 'Pan tool on' : 'Pan tool off');
+      // Back-compat (still used by Escape path)
+      if (force === false) return setActiveTool('none');
+      return setActiveTool('pan');
     }
 
     function showScaleOverlay(show){
@@ -1910,7 +1888,7 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
       showScaleOverlay(false);
       setMode('idle');
       UI.hudScale.classList.remove('on');
-      toast('Scale cancelled');
+      toast('Scale off');
     }
 
     // Finish scale tool without extra toast (used after setting scale)
@@ -2693,11 +2671,15 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
     UI.btnUndo.addEventListener('click', ()=>History.undo());
     UI.btnRedo.addEventListener('click', ()=>History.redo());
 
-    UI.hudPan.addEventListener('click', ()=>togglePanTool());
-    UI.hudScale.addEventListener('click', ()=>UI.btnSetScale.click());
+    UI.hudPan.addEventListener('click', ()=>setActiveTool('pan'));
+    UI.hudScale.addEventListener('click', ()=>setActiveTool('scale'));
     UI.hudFit.addEventListener('click', ()=>fitToView());
 
     UI.btnHelpHide.addEventListener('click', ()=>{ UI.help.style.display='none'; toast('Help hidden'); });
+
+    // Prevent HUD/help clicks from triggering viewport tools
+    UI.hud.addEventListener('pointerdown', (e)=>{ e.stopPropagation(); }, { capture:true });
+    UI.help.addEventListener('pointerdown', (e)=>{ e.stopPropagation(); }, { capture:true }); });
 
     UI.eventName.addEventListener('input', ()=>{ State.eventName = UI.eventName.value; });
     UI.eventNotes.addEventListener('input', ()=>{ State.eventNotes = UI.eventNotes.value; });
@@ -2728,23 +2710,7 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
 
     UI.btnFit.addEventListener('click', fitToView);
 
-    UI.btnSetScale.addEventListener('click', ()=>{
-      // toggle behavior
-      if (State.mode === 'setScale'){
-        cancelScaleTool();
-        UI.hudScale.classList.remove('on');
-        return;
-      }
-
-      State.scaleTool.step = 0;
-      State.scaleTool.p1 = null;
-      State.scaleTool.p2 = null;
-      State.scaleTool.hover = null;
-      setMode('setScale');
-      UI.hudScale.classList.add('on');
-      showScaleOverlay(true);
-      toast('Scale: click first point');
-    });
+    UI.btnSetScale.addEventListener('click', ()=>setActiveTool('scale'));
 
     UI.btnClear.addEventListener('click', ()=>{
       if (!confirm('Clear all items?')) return;
