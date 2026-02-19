@@ -95,7 +95,7 @@
     .brandTitle .t1{ font-weight:1000; letter-spacing:.08em; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .brandTitle .t2{ font-weight:800; color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-    .actions{ display:flex; align-items:center; gap:10px; flex-wrap:nowrap; min-width:0; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:thin; padding-bottom:2px; }
+    .actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; min-width:0; overflow-x:visible; scrollbar-width:thin; padding-bottom:2px; }
 
     .pill{
       display:flex;
@@ -134,7 +134,7 @@
       border:1px solid var(--stroke);
       background:rgba(255,255,255,.03);
       color:var(--text);
-      padding:10px 12px;
+      padding:9px 11px;
       border-radius:14px;
       cursor:pointer;
       font-weight:900;
@@ -1485,13 +1485,14 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
     }
 
     function screenToRoomPoint(clientX, clientY){
+      // Use State.view directly (more reliable than computedStyle matrix across browsers)
       const rect = UI.viewport.getBoundingClientRect();
       const sx = clientX - rect.left;
       const sy = clientY - rect.top;
-      const m = new DOMMatrix(getComputedStyle(UI.stageLayer).transform);
-      const inv = m.inverse();
-      const p = new DOMPoint(sx, sy).matrixTransform(inv);
-      return { x: p.x, y: p.y };
+      return {
+        x: (sx - State.view.panX) / State.view.zoom,
+        y: (sy - State.view.panY) / State.view.zoom,
+      };
     }
 
     function screenPointFromClient(clientX, clientY){
@@ -1912,31 +1913,55 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
       toast('Scale cancelled');
     }
 
+    // Finish scale tool without extra toast (used after setting scale)
+    function finishScaleTool(){
+      State.scaleTool.step = 0;
+      State.scaleTool.p1 = null;
+      State.scaleTool.p2 = null;
+      State.scaleTool.hover = null;
+      showScaleOverlay(false);
+      setMode('idle');
+      UI.hudScale.classList.remove('on');
+    }
+
     function updateScaleOverlay(){
       if (State.mode !== 'setScale') return;
       const p1 = State.scaleTool.p1;
-      const p2 = (State.scaleTool.step === 1) ? State.scaleTool.hover : State.scaleTool.p2;
-      if (!p1 || !p2) return;
+      const p2Room = (State.scaleTool.step === 1) ? State.scaleTool.hover : State.scaleTool.p2;
+      if (!p1 || !p2Room) return;
+
+      // IMPORTANT: scale overlay is drawn in *screen* coordinates (viewport space),
+      // but p1/p2 are in *room/world* coordinates. Convert using the current view.
+      const toScreen = (p)=>({
+        x: (p.x * State.view.zoom) + State.view.panX,
+        y: (p.y * State.view.zoom) + State.view.panY,
+      });
+
+      const s1 = toScreen(p1);
+      const s2 = toScreen(p2Room);
 
       showScaleOverlay(true);
 
-      const len = dist(p1,p2);
-      const ang = Math.atan2(p2.y-p1.y, p2.x-p1.x) * 180/Math.PI;
+      const len = Math.hypot(s2.x - s1.x, s2.y - s1.y);
+      const ang = Math.atan2(s2.y - s1.y, s2.x - s1.x) * 180/Math.PI;
 
-      UI.scaleLine.style.left = p1.x + 'px';
-      UI.scaleLine.style.top  = p1.y + 'px';
+      UI.scaleLine.style.left = s1.x + 'px';
+      UI.scaleLine.style.top  = s1.y + 'px';
       UI.scaleLine.style.width = len + 'px';
       UI.scaleLine.style.transform = `rotate(${ang}deg)`;
 
-      UI.scaleDot1.style.left = p1.x + 'px';
-      UI.scaleDot1.style.top  = p1.y + 'px';
-      UI.scaleDot2.style.left = p2.x + 'px';
-      UI.scaleDot2.style.top  = p2.y + 'px';
+      UI.scaleDot1.style.left = s1.x + 'px';
+      UI.scaleDot1.style.top  = s1.y + 'px';
+      UI.scaleDot2.style.left = s2.x + 'px';
+      UI.scaleDot2.style.top  = s2.y + 'px';
 
-      const mid = { x:(p1.x+p2.x)/2, y:(p1.y+p2.y)/2 };
+      const mid = { x:(s1.x+s2.x)/2, y:(s1.y+s2.y)/2 };
       UI.scaleLabelEl.style.left = mid.x + 'px';
       UI.scaleLabelEl.style.top  = mid.y + 'px';
-      UI.scaleLabelEl.textContent = `Line: ${fmtFtIn(len)} (enter real ft)`;
+
+      // Still display the *world* length using current pxPerFt (until user enters real ft)
+      const worldLenPx = Math.hypot(p2Room.x - p1.x, p2Room.y - p1.y);
+      UI.scaleLabelEl.textContent = `Line: ${fmtFtIn(worldLenPx)} (enter real ft)`;
     }
 
     function onItemPointerDown(e, id){
@@ -2079,12 +2104,7 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
           } else {
             toast('Scale cancelled');
           }
-          State.scaleTool.step = 0;
-          State.scaleTool.p1 = null;
-          State.scaleTool.p2 = null;
-          State.scaleTool.hover = null;
-          showScaleOverlay(false);
-          setMode('idle');
+          finishScaleTool();
         }
         return;
       }
