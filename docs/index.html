@@ -1190,21 +1190,118 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
     /* =========================================================
        UI REFERENCES
        ========================================================= */
-    const UI = {$1
+    const UI = {
+      // Topbar + toggles
+      toggleTheme: document.getElementById('toggleTheme'),
+      toggleGrid: document.getElementById('toggleGrid'),
+      toggleSnap: document.getElementById('toggleSnap'),
+      swTheme: document.getElementById('swTheme'),
+      swGrid: document.getElementById('swGrid'),
+      swSnap: document.getElementById('swSnap'),
+      themeLabel: document.getElementById('themeLabel'),
 
+      btnUndo: document.getElementById('btnUndo'),
+      btnRedo: document.getElementById('btnRedo'),
+      btnTools: document.getElementById('btnTools'),
+      btnSaveLocal: document.getElementById('btnSaveLocal'),
+      btnLoadLocal: document.getElementById('btnLoadLocal'),
+      btnDownload: document.getElementById('btnDownload'),
+      btnUpload: document.getElementById('btnUpload'),
+      btnShare: document.getElementById('btnShare'),
+      btnExportPNG: document.getElementById('btnExportPNG'),
+      btnExportPDF: document.getElementById('btnExportPDF'),
+
+      // Viewport + stage
+      viewport: document.getElementById('viewport'),
+      infiniteGrid: document.getElementById('infiniteGrid'),
+      stageLayer: document.getElementById('stageLayer'),
+      room: document.getElementById('room'),
+      bgImage: document.getElementById('bgImage'),
+
+      // HUD
       hud: document.getElementById('hud'),
       hudPan: document.getElementById('hudPan'),
       hudScale: document.getElementById('hudScale'),
       hudFit: document.getElementById('hudFit'),
 
+      // Scale overlay
       scaleOverlay: document.getElementById('scaleOverlay'),
       scaleLine: document.getElementById('scaleLine'),
       scaleDot1: document.getElementById('scaleDot1'),
       scaleDot2: document.getElementById('scaleDot2'),
       scaleLabelEl: document.getElementById('scaleLabel'),
 
+      // Rulers
       rulerTop: document.getElementById('rulerTop'),
       rulerLeft: document.getElementById('rulerLeft'),
+
+      // Help
+      help: document.getElementById('help'),
+      btnHelpHide: document.getElementById('btnHelpHide'),
+      helpBody: document.getElementById('helpBody'),
+      scaleNote: document.getElementById('scaleNote'),
+
+      // Sidebar fields
+      sidebar: document.getElementById('sidebar'),
+      eventName: document.getElementById('eventName'),
+      eventNotes: document.getElementById('eventNotes'),
+      roomW: document.getElementById('roomW'),
+      roomH: document.getElementById('roomH'),
+      gridStep: document.getElementById('gridStep'),
+      btnApplyRoom: document.getElementById('btnApplyRoom'),
+      btnFit: document.getElementById('btnFit'),
+      btnSetScale: document.getElementById('btnSetScale'),
+      btnClear: document.getElementById('btnClear'),
+      btnBgUpload: document.getElementById('btnBgUpload'),
+      btnBgFit: document.getElementById('btnBgFit'),
+      chipBgLock: document.getElementById('chipBgLock'),
+      chipShowGrid: document.getElementById('chipShowGrid'),
+      chipSnap: document.getElementById('chipSnap'),
+      palette: document.getElementById('palette'),
+      gear: document.getElementById('gear'),
+
+      // Selected panel
+      selEmpty: document.getElementById('selEmpty'),
+      selPanel: document.getElementById('selPanel'),
+      selLabel: document.getElementById('selLabel'),
+      selW: document.getElementById('selW'),
+      selH: document.getElementById('selH'),
+      chipLock: document.getElementById('chipLock'),
+      chipDuplicate: document.getElementById('chipDuplicate'),
+      chipRotL: document.getElementById('chipRotL'),
+      chipRotR: document.getElementById('chipRotR'),
+      chipDelete: document.getElementById('chipDelete'),
+      colorChips: document.getElementById('colorChips'),
+
+      // Mobile sheet
+      fab: document.getElementById('fab'),
+      sheetBackdrop: document.getElementById('sheetBackdrop'),
+      sheet: document.getElementById('sheet'),
+      btnSheetClose: document.getElementById('btnSheetClose'),
+      paletteMobile: document.getElementById('paletteMobile'),
+      mUndo: document.getElementById('mUndo'),
+      mRedo: document.getElementById('mRedo'),
+      mSetScale: document.getElementById('mSetScale'),
+      mFit: document.getElementById('mFit'),
+      mBgUpload: document.getElementById('mBgUpload'),
+      mBgFit: document.getElementById('mBgFit'),
+      mDemoWedding: document.getElementById('mDemoWedding'),
+      mDemoMitzvah: document.getElementById('mDemoMitzvah'),
+      mExportPNG: document.getElementById('mExportPNG'),
+      mExportPDF: document.getElementById('mExportPDF'),
+      mShare: document.getElementById('mShare'),
+      mDownload: document.getElementById('mDownload'),
+      mSaveLocal: document.getElementById('mSaveLocal'),
+      mLoadLocal: document.getElementById('mLoadLocal'),
+      mUpload: document.getElementById('mUpload'),
+      mClear: document.getElementById('mClear'),
+
+      // File inputs
+      fileUpload: document.getElementById('fileUpload'),
+      bgUpload: document.getElementById('bgUpload'),
+
+      // Toast
+      toast: document.getElementById('toast'),
     };
 
     /* =========================================================
@@ -1864,16 +1961,6 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
         State.ui.panTool = false;
         UI.hudPan.classList.remove('on');
       }
-    }
-
-    function showScaleOverlay(show){
-      UI.scaleOverlay.style.display = show ? 'block' : 'none';
-    }
-
-    function togglePanTool(force){
-      // Back-compat (still used by Escape path)
-      if (force === false) return setActiveTool('none');
-      return setActiveTool('pan');
     }
 
     function showScaleOverlay(show){
@@ -2679,7 +2766,7 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
 
     // Prevent HUD/help clicks from triggering viewport tools
     UI.hud.addEventListener('pointerdown', (e)=>{ e.stopPropagation(); }, { capture:true });
-    UI.help.addEventListener('pointerdown', (e)=>{ e.stopPropagation(); }, { capture:true }); });
+    UI.help.addEventListener('pointerdown', (e)=>{ e.stopPropagation(); }, { capture:true });
 
     UI.eventName.addEventListener('input', ()=>{ State.eventName = UI.eventName.value; });
     UI.eventNotes.addEventListener('input', ()=>{ State.eventNotes = UI.eventNotes.value; });
