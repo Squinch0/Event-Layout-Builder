@@ -2,1133 +2,2158 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sleeve Events – Room Planner</title>
-
-  <!-- =========================
-       STYLE / THEME
-       - Premium minimal aesthetic
-       - Dark + Light modes via CSS variables
-       ========================= -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Sleeve Events • Official Room Planner</title>
   <style>
+    /* =========================================================
+       THEME
+       ========================================================= */
     :root{
-      --bg:#0b1020;
-      --surface:#0f172a;
-      --surface-2:#0b1229;
-      --panel:#0b1229;
-      --border:#22304a;
-      --text:#e9eefb;
-      --muted:#a9b4cf;
-      --accent:#a855f7;
-      --accent-2:#7c3aed;
-      --warn:#fbbf24;
-      --good:#34d399;
-      --shadow:0 10px 30px rgba(0,0,0,.35);
-      --radius:16px;
-      --radius-2:12px;
+      --bg: #0b1020;
+      --bg2:#050816;
+      --panel:#0b1224;
+      --panel2:#070d1b;
+      --text:#e8edf7;
+      --muted:#aab3c4;
+      --border:rgba(255,255,255,.08);
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --radius: 16px;
+      --accent:#8b5cf6; /* purple */
+      --accent2:#a855f7;
+      --gold:#f5c86b;
+      --pink:#ff4fa3;
+      --blue:#40a2ff;
+      --green:#22c55e;
+      --ink:#0b1020;
+      --grid: rgba(255,255,255,.07);
+      --gridBold: rgba(255,255,255,.12);
+      --btn:#0b1327;
+      --btnHover:#101c39;
+      --danger:#ff4d4d;
+      --ok:#23c55e;
+
+      --canvasBg:#050816;
+      --roomStroke: rgba(255,255,255,.22);
+      --select:#f5c86b;
+
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
 
-      --grid-major: rgba(255,255,255,.09);
-      --grid-minor: rgba(255,255,255,.045);
-
-      --handle: rgba(251,191,36,.95);
-      --selection: rgba(251,191,36,.9);
-      --shadow-soft: 0 8px 20px rgba(0,0,0,.25);
+      --tap: 44px;
     }
 
     [data-theme="light"]{
-      --bg:#f6f7fb;
-      --surface:#ffffff;
-      --surface-2:#f4f6fb;
+      --bg:#f5f7fb;
+      --bg2:#ffffff;
       --panel:#ffffff;
-      --border:#d7deee;
-      --text:#101828;
-      --muted:#52607a;
-      --shadow:0 12px 24px rgba(16,24,40,.08);
-
-      --grid-major: rgba(16,24,40,.10);
-      --grid-minor: rgba(16,24,40,.05);
+      --panel2:#ffffff;
+      --text:#111827;
+      --muted:#4b5563;
+      --border:rgba(17,24,39,.12);
+      --shadow: 0 16px 40px rgba(17,24,39,.12);
+      --btn:#f2f4f8;
+      --btnHover:#e9edf6;
+      --canvasBg:#ffffff;
+      --grid: rgba(17,24,39,.06);
+      --gridBold: rgba(17,24,39,.10);
+      --roomStroke: rgba(17,24,39,.25);
+      --ink:#111827;
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
     body{
       margin:0;
-      font-family:var(--sans);
-      background: radial-gradient(1200px 600px at 30% -10%, rgba(168,85,247,.25), transparent 60%),
-                  radial-gradient(900px 600px at 110% 20%, rgba(59,130,246,.18), transparent 60%),
-                  var(--bg);
+      font-family:var(--font);
       color:var(--text);
+      background: radial-gradient(1200px 700px at 20% -10%, rgba(139,92,246,.35), transparent 50%),
+                  radial-gradient(900px 600px at 90% 0%, rgba(255,79,163,.18), transparent 55%),
+                  linear-gradient(180deg, var(--bg), var(--bg2));
       overflow:hidden;
     }
 
-    /* =========================
+    /* =========================================================
        LAYOUT
-       ========================= */
+       ========================================================= */
     .app{
-      height:100%;
-      display:grid;
-      grid-template-rows: 62px 1fr;
-      grid-template-columns: 1fr 360px;
-      gap:12px;
-      padding:12px;
+      position:fixed;
+      inset:0;
+      display:flex;
+      flex-direction:column;
     }
 
     .topbar{
-      grid-column:1 / span 2;
+      padding: 12px 12px 10px;
       display:flex;
+      gap:10px;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
-      background: linear-gradient(180deg, rgba(255,255,255,.06), transparent), var(--surface);
-      border:1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(0,0,0,.18), transparent);
       backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
 
     .brand{
       display:flex;
       align-items:center;
       gap:10px;
-      min-width: 220px;
+      min-width: 240px;
     }
 
-    .logo{
-      width:36px;height:36px;
-      border-radius:12px;
-      background: radial-gradient(circle at 30% 30%, rgba(168,85,247,.95), rgba(124,58,237,.7));
-      box-shadow: 0 10px 18px rgba(168,85,247,.22);
-      border:1px solid rgba(255,255,255,.12);
+    .brandBadge{
+      width:38px;height:38px;
+      border-radius:14px;
+      display:grid;place-items:center;
+      background: radial-gradient(90% 90% at 30% 10%, rgba(255,255,255,.18), transparent 50%),
+                  linear-gradient(135deg, rgba(139,92,246,1), rgba(168,85,247,1));
+      box-shadow: 0 10px 30px rgba(139,92,246,.25);
+      flex:0 0 auto;
     }
 
-    .brand h1{
-      font-size:14px;
-      margin:0;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      line-height:1.1;
-    }
-    .brand .sub{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:2px;
-    }
+    .brandBadge svg{ filter: drop-shadow(0 8px 10px rgba(0,0,0,.25)); }
 
-    .toolbar{
+    .brandTitle{ line-height:1.1; }
+    .brandTitle .t1{ font-weight:900; letter-spacing:.08em; font-size:14px; }
+    .brandTitle .t2{ font-size:12px; color:var(--muted); margin-top:3px; }
+
+    .actions{
       display:flex;
-      align-items:center;
-      gap:8px;
       flex-wrap:wrap;
+      gap:8px;
       justify-content:flex-end;
+      align-items:center;
     }
 
     .btn{
-      appearance:none;
+      height:36px;
+      border-radius:999px;
       border:1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0)), var(--surface-2);
-      color:var(--text);
-      padding:8px 10px;
-      border-radius: 999px;
-      font-weight:650;
+      background: var(--btn);
+      color: var(--text);
+      padding: 0 12px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow: 0 10px 28px rgba(0,0,0,.15);
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:hover{ background:var(--btnHover); }
+    .btn.primary{
+      border-color: rgba(139,92,246,.55);
+      background: linear-gradient(135deg, rgba(76,29,149,1), rgba(139,92,246,1));
+    }
+    [data-theme="light"] .btn.primary{ color:#fff; }
+
+    .btn.danger{ border-color: rgba(255,77,77,.35); color: #ffd5d5; }
+
+    .pill{
+      height:36px;
+      padding:0 10px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      border:1px solid var(--border);
+      border-radius:999px;
+      background: rgba(0,0,0,.10);
+      box-shadow: 0 10px 26px rgba(0,0,0,.10);
+    }
+
+    .toggle{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      cursor:pointer;
+      user-select:none;
       font-size:12px;
-      letter-spacing:.02em;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .switch{
+      width:44px;height:24px;
+      border-radius:999px;
+      background: rgba(255,255,255,.10);
+      border:1px solid var(--border);
+      position:relative;
+      flex:0 0 auto;
+    }
+    .switch::after{
+      content:"";
+      position:absolute;
+      top:3px;left:3px;
+      width:18px;height:18px;
+      border-radius:50%;
+      background: linear-gradient(135deg, rgba(255,255,255,.35), rgba(255,255,255,.05));
+      box-shadow: 0 10px 20px rgba(0,0,0,.25);
+      transition: transform .18s ease;
+    }
+    .switch.on{ background: rgba(139,92,246,.25); border-color: rgba(139,92,246,.55); }
+    .switch.on::after{ transform: translateX(20px); background: linear-gradient(135deg, rgba(255,255,255,.95), rgba(255,255,255,.45)); }
+
+    .main{
+      flex:1;
+      display:flex;
+      gap:12px;
+      padding:12px;
+      overflow:hidden;
+    }
+
+    .canvasCard{
+      flex:1;
+      min-width:0;
+      border-radius:var(--radius);
+      background: radial-gradient(1200px 700px at 20% 0%, rgba(139,92,246,.14), transparent 55%),
+                  radial-gradient(900px 600px at 90% 10%, rgba(255,79,163,.10), transparent 55%),
+                  linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.06));
+      border:1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+
+    .viewport{
+      position:absolute;
+      inset:0;
+      overflow:hidden;
+      touch-action: none; /* we manage gestures */
+      background: var(--canvasBg);
+    }
+
+    .sidebar{
+      width: 340px;
+      flex:0 0 auto;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      overflow:hidden;
+    }
+
+    .panel{
+      background: linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.05));
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .panelHeader{
+      padding: 12px 12px 10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      border-bottom:1px solid var(--border);
+    }
+    .panelHeader .h{
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-size:12px;
+      color: var(--muted);
+    }
+
+    .panelBody{ padding:12px; }
+
+    .row{ display:flex; gap:10px; }
+    .col{ flex:1; }
+
+    label.small{ display:block; font-size:12px; color:var(--muted); font-weight:800; margin:0 0 6px; }
+    input[type="text"], textarea, select{
+      width:100%;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.10);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 10px;
+      font-size: 13px;
+      outline:none;
+    }
+    textarea{ min-height: 78px; resize: vertical; }
+
+    .muted{ color:var(--muted); }
+
+    .palette{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:8px;
+    }
+
+    .tile{
+      border:1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(0,0,0,.10);
+      padding: 10px;
+      cursor:pointer;
+      user-select:none;
+      box-shadow: 0 10px 20px rgba(0,0,0,.10);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+      min-height: 46px;
+    }
+    .tile:hover{ background: rgba(139,92,246,.12); border-color: rgba(139,92,246,.35); }
+    .tile .name{ font-weight:900; font-size:12px; }
+    .tile .note{ font-size:11px; color:var(--muted); font-weight:700; }
+
+    .kbd{ font-family:var(--mono); font-size:11px; padding:2px 6px; border-radius:8px; border:1px solid var(--border); background: rgba(0,0,0,.12); color:var(--muted); }
+
+    .chips{ display:flex; flex-wrap:wrap; gap:8px; }
+    .chip{
+      height:34px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.10);
       display:inline-flex;
       align-items:center;
       gap:8px;
       cursor:pointer;
-      box-shadow: var(--shadow-soft);
       user-select:none;
-    }
-    .btn:hover{filter:brightness(1.03)}
-    .btn:active{transform: translateY(1px)}
-    .btn.primary{
-      border-color: rgba(168,85,247,.45);
-      background: linear-gradient(135deg, rgba(76,29,149,.95), rgba(124,58,237,.95));
-      color:#fff;
-      box-shadow: 0 18px 26px rgba(124,58,237,.22);
-    }
-    .btn.ghost{background: transparent; box-shadow:none}
-    .btn.on{
-      border-color: rgba(168,85,247,.9);
-      box-shadow: 0 0 0 3px rgba(168,85,247,.18);
-    }
-    .btn.warn{
-      border-color: rgba(251,191,36,.55);
-      box-shadow: 0 0 0 3px rgba(251,191,36,.16);
-    }
-
-    .pill{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 10px;
-      border-radius: 999px;
-      border:1px solid var(--border);
-      background: var(--surface-2);
-      color: var(--muted);
+      font-weight:900;
       font-size:12px;
-      box-shadow: var(--shadow-soft);
-      user-select:none;
-      max-width: 520px;
-    }
-    .pill strong{color:var(--text)}
-    .pill code{font-family:var(--mono); font-size:11px; color:var(--text)}
-
-    .stage{
-      grid-row:2;
-      grid-column:1;
-      border-radius: var(--radius);
-      border:1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,.04), transparent), var(--surface);
-      box-shadow: var(--shadow);
-      position:relative;
-      overflow:hidden;
-      min-width:0;
-    }
-
-    .sidebar{
-      grid-row:2;
-      grid-column:2;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      border-radius: var(--radius);
-      border:1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,.04), transparent), var(--surface);
-      box-shadow: var(--shadow);
-      overflow:auto;
-      padding:12px;
-    }
-
-    .panel{
-      border-radius: var(--radius-2);
-      border:1px solid var(--border);
-      background: var(--panel);
-      padding:12px;
-    }
-
-    .panel h2{
-      margin:0 0 10px;
-      font-size:12px;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      color:var(--muted);
-    }
-
-    .field{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      margin-bottom:10px;
-    }
-    .field label{font-size:12px; color:var(--muted)}
-    .field input,.field textarea, .field select{
-      width:100%;
-      border-radius: 12px;
-      border:1px solid var(--border);
-      background: var(--surface-2);
       color:var(--text);
-      padding:10px 10px;
-      font-size:13px;
-      outline:none;
     }
-    .field textarea{min-height:84px; resize:vertical}
+    .chip:hover{ background: rgba(255,255,255,.06); }
+    .chip.on{ border-color: rgba(139,92,246,.55); box-shadow: 0 12px 22px rgba(139,92,246,.12); }
 
-    .grid2{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
+    .swatch{ width:14px;height:14px; border-radius:5px; border:1px solid rgba(255,255,255,.25); }
+    [data-theme="light"] .swatch{ border-color: rgba(17,24,39,.18); }
 
-    .palette{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
+    .footerNote{
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--muted);
     }
 
-    .card{
-      border-radius: 14px;
-      border:1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,.05), transparent), var(--surface-2);
-      padding:10px;
-      cursor:pointer;
-      user-select:none;
-      box-shadow: var(--shadow-soft);
-    }
-    .card:hover{filter:brightness(1.03)}
-    .card .t{font-weight:750; font-size:13px}
-    .card .m{font-size:12px; color:var(--muted); margin-top:4px}
-
-    .kv{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      font-size:12px;
-      margin:6px 0;
-      color:var(--muted);
-    }
-    .kv strong{color:var(--text); font-family:var(--mono); font-weight:700; font-size:11px}
-
-    .small{font-size:12px; color:var(--muted); line-height:1.35}
-
-    .divider{
-      height:1px;
-      background: var(--border);
-      margin:10px 0;
-      opacity:.8;
-    }
-
-    /* =========================
-       CANVAS
-       ========================= */
-    #canvas{
-      width:100%;
-      height:100%;
-      display:block;
-    }
-
-    .hint{
-      position:absolute;
-      left:12px;
-      bottom:12px;
-      padding:10px 12px;
-      border-radius: 14px;
-      border:1px solid var(--border);
-      background: rgba(0,0,0,.18);
-      backdrop-filter: blur(10px);
-      color: var(--text);
-      box-shadow: var(--shadow);
-      max-width: 560px;
-      pointer-events:none;
-    }
-    [data-theme="light"] .hint{background: rgba(255,255,255,.72)}
-    .hint .k{font-family:var(--mono); font-size:11px; color:var(--muted)}
-
-    /* =========================
-       PRINT / EXPORT MODE
-       - Hide UI when printing
-       ========================= */
-    body.exporting .topbar,
-    body.exporting .sidebar{display:none !important}
-    body.exporting .app{grid-template-rows: 1fr; grid-template-columns: 1fr; padding:0; gap:0}
-    body.exporting .stage{border-radius:0; border:none; box-shadow:none}
-
-    @media (max-width: 1100px){
-      .app{grid-template-columns: 1fr}
-      .topbar{grid-column:1}
-      .sidebar{grid-column:1; grid-row:3}
-      .app{grid-template-rows: 62px 60vh 1fr}
-    }
-  </style>
-</head>
-
-<body>
-  <div class="app" id="app">
-    <div class="topbar">
-      <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
-        <div>
-          <h1>SLEEVE EVENTS</h1>
-          <div class="sub">Official Room Planner • Single‑file Edition</div>
-        </div>
-      </div>
-
-      <div class="toolbar">
-        <button class="btn" id="btnTheme" title="Toggle dark/light">Theme</button>
-        <button class="btn" id="btnGrid" title="Toggle grid">Grid</button>
-        <button class="btn" id="btnSnap" title="Toggle snap">Snap</button>
-        <button class="btn" id="btnSetScale" title="Set scale by clicking two points">Set Scale</button>
-        <button class="btn" id="btnBg" title="Upload background image">Background</button>
-        <button class="btn" id="btnLockBg" title="Lock background pan/zoom">Lock BG</button>
-        <button class="btn" id="btnSaveLocal" title="Save to this browser">Save Local</button>
-        <button class="btn" id="btnLoadLocal" title="Load from this browser">Load Local</button>
-        <button class="btn" id="btnDownload" title="Download project JSON">Download</button>
-        <button class="btn" id="btnUpload" title="Upload project JSON">Upload</button>
-        <button class="btn" id="btnExportPng" title="Export a high‑res PNG">Export PNG</button>
-        <button class="btn primary" id="btnExportPdf" title="Export a clean PDF">Export PDF</button>
-      </div>
-    </div>
-
-    <div class="stage">
-      <canvas id="canvas"></canvas>
-      <div class="hint" id="hint">
-        <div style="font-weight:750; letter-spacing:.02em">Controls</div>
-        <div class="small" style="margin-top:6px">
-          <span class="k">Pan</span>: Space + drag • <span class="k">Zoom</span>: Trackpad/Mousewheel • <span class="k">Select</span>: click • <span class="k">Multi-select</span>: Shift+click • <span class="k">Duplicate</span>: ⌘/Ctrl+D • <span class="k">Delete</span>: Del/Backspace
-        </div>
-        <div class="small" style="margin-top:6px" id="scaleHint">Scale not set yet — use <b>Set Scale</b> to get accurate feet/in dimensions.</div>
-      </div>
-    </div>
-
-    <aside class="sidebar">
-      <div class="panel">
-        <h2>Project</h2>
-        <div class="field">
-          <label>Event Name</label>
-          <input id="eventName" placeholder="e.g., Ava's Bat Mitzvah" />
-        </div>
-        <div class="field">
-          <label>Notes</label>
-          <textarea id="eventNotes" placeholder="Add notes, power needs, timeline, special instructions…"></textarea>
-        </div>
-
-        <div class="divider"></div>
-        <div class="grid2">
-          <div class="field">
-            <label>Snap Step</label>
-            <select id="snapStep">
-              <option value="1">1 ft</option>
-              <option value="2">2 ft</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Room Size (optional)</label>
-            <select id="roomPreset">
-              <option value="">Freeform</option>
-              <option value="40x30">40×30 ft</option>
-              <option value="60x40">60×40 ft</option>
-              <option value="80x60">80×60 ft</option>
-              <option value="100x80">100×80 ft</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="kv"><span>Scale</span><strong id="scaleReadout">Uncalibrated</strong></div>
-        <div class="kv"><span>Zoom</span><strong id="zoomReadout">100%</strong></div>
-      </div>
-
-      <div class="panel">
-        <h2>Object Palette</h2>
-        <div class="palette" id="palette"></div>
-        <div class="small" style="margin-top:10px">Tip: drag from palette into the canvas, or click a palette item to drop at center.</div>
-      </div>
-
-      <div class="panel">
-        <h2>Selected</h2>
-        <div class="small" id="selectedNone">No selection.</div>
-        <div id="selectedUI" style="display:none">
-          <div class="field">
-            <label>Label</label>
-            <input id="selLabel" placeholder="Object label" />
-          </div>
-          <div class="grid2">
-            <button class="btn" id="btnDuplicate">Duplicate</button>
-            <button class="btn warn" id="btnDelete">Delete</button>
-          </div>
-          <div class="divider"></div>
-          <div class="kv"><span>Size</span><strong id="selSize">—</strong></div>
-          <div class="kv"><span>Rotation</span><strong id="selRot">—</strong></div>
-          <div class="kv"><span>Position</span><strong id="selPos">—</strong></div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h2>Gear Summary</h2>
-        <div class="small" id="gearSummary">Place objects to generate a summary.</div>
-      </div>
-
-      <div class="panel">
-        <h2>Export Notes</h2>
-        <div class="small">
-          PNG/PDF export hides UI automatically. PDF export embeds a high‑resolution image of the plan (background + objects + labels + grid if enabled).
-        </div>
-      </div>
-
-      <div class="panel">
-        <h2>Squarespace Embed Tip</h2>
-        <div class="small">
-          If Squarespace's code editor gets glitchy with large HTML, host this <b>planner.html</b> on GitHub Pages (or any static host) and embed via an <b>iframe</b>.
-        </div>
-      </div>
-    </aside>
-  </div>
-
-  <!-- Hidden file inputs -->
-  <input id="fileBg" type="file" accept="image/png,image/jpeg" style="display:none" />
-  <input id="fileJson" type="file" accept="application/json" style="display:none" />
-
-  <!-- =========================
-       APP SCRIPT
-       - Vanilla JS only
-       - Modular structure inside file
-       ========================= -->
-  <script>
-  ;(() => {
-    "use strict";
+    .hide{ display:none !important; }
 
     /* =========================================================
-       UTILITIES
+       MOBILE
        ========================================================= */
-    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-    const lerp = (a, b, t) => a + (b - a) * t;
-    const rafThrottle = (fn) => {
-      let queued = false;
-      return (...args) => {
-        if (queued) return;
-        queued = true;
-        requestAnimationFrame(() => {
-          queued = false;
-          fn(...args);
-        });
-      };
-    };
-
-    const uid = () => (Math.random().toString(16).slice(2) + Date.now().toString(16)).slice(0, 16);
-
-    function downloadBlob(filename, blob){
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 250);
+    .fab{
+      position:absolute;
+      right:14px;
+      bottom:14px;
+      z-index:50;
+      display:none;
+      height:52px;
+      padding:0 16px;
+      border-radius: 999px;
+      border:1px solid rgba(139,92,246,.55);
+      background: linear-gradient(135deg, rgba(76,29,149,1), rgba(139,92,246,1));
+      color:#fff;
+      font-weight:900;
+      letter-spacing:.02em;
+      box-shadow: 0 18px 55px rgba(0,0,0,.35);
+      cursor:pointer;
+      align-items:center;
+      gap:10px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    function formatFeetIn(feetFloat){
-      if (!isFinite(feetFloat)) return "—";
-      const sign = feetFloat < 0 ? "-" : "";
-      const abs = Math.abs(feetFloat);
-      const ft = Math.floor(abs + 1e-9);
-      const inches = Math.round((abs - ft) * 12);
-      if (inches === 12) return `${sign}${ft+1}′ 0″`;
-      return `${sign}${ft}′ ${inches}″`;
+    .sheetBackdrop{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.45);
+      z-index:70;
+      display:none;
     }
 
-    function parseFeetInput(str){
-      // Accept: "12", "12ft", "12'", "12'6", "12' 6\"", "12.5"
-      const s = String(str || "").trim();
-      if (!s) return NaN;
-      // 12.5
-      if (/^\d+(\.\d+)?$/.test(s)) return parseFloat(s);
-      // 12'6" / 12' 6
-      const m = s.match(/^(\d+(?:\.\d+)?)\s*(?:ft|\')\s*(\d+(?:\.\d+)?)?\s*(?:in|\")?$/i);
-      if (m){
-        const ft = parseFloat(m[1]);
-        const inch = m[2] ? parseFloat(m[2]) : 0;
-        return ft + (inch/12);
-      }
-      // 6" only
-      const mi = s.match(/^(\d+(?:\.\d+)?)\s*(?:in|\")$/i);
-      if (mi) return parseFloat(mi[1]) / 12;
-      return NaN;
+    .sheet{
+      position:fixed;
+      left:0; right:0; bottom:0;
+      z-index:80;
+      background: linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.08));
+      border-top:1px solid var(--border);
+      border-radius: 18px 18px 0 0;
+      box-shadow: 0 -24px 60px rgba(0,0,0,.35);
+      max-height: 75vh;
+      overflow:auto;
+      display:none;
+      padding: 12px;
+    }
+    .sheetHandle{ width:48px;height:4px; border-radius:99px; background: rgba(255,255,255,.20); margin: 6px auto 12px; }
+    [data-theme="light"] .sheetHandle{ background: rgba(17,24,39,.18); }
+
+    @media (max-width: 980px){
+      .sidebar{ width: 300px; }
     }
 
-    function roundToStep(valueFeet, stepFeet){
-      if (!isFinite(valueFeet) || !isFinite(stepFeet) || stepFeet <= 0) return valueFeet;
-      return Math.round(valueFeet / stepFeet) * stepFeet;
+    @media (max-width: 860px){
+      body{ overflow:auto; }
+      .app{ position:relative; height:auto; min-height:100vh; }
+      .main{ flex-direction:column; overflow:visible; }
+      .sidebar{ width:100%; }
+      .canvasCard{ height: 64vh; }
     }
 
-    function pointRotate(px, py, cx, cy, ang){
-      const s = Math.sin(ang), c = Math.cos(ang);
-      const x = px - cx, y = py - cy;
-      return { x: x*c - y*s + cx, y: x*s + y*c + cy };
+    @media (max-width: 560px){
+      .brand{ min-width: 0; }
+      .brandTitle .t2{ display:none; }
+      .actions{ gap:6px; }
+      .btn{ height: 34px; padding: 0 10px; font-size:12px; }
+      .pill{ display:none; }
+      .sidebar{ display:none; }
+      .fab{ display:inline-flex; }
     }
 
-    function toRadians(deg){ return deg * Math.PI / 180; }
-    function toDegrees(rad){ return rad * 180 / Math.PI; }
+    /* =========================================================
+       EXPORT (print mode)
+       ========================================================= */
+    body.exporting .topbar,
+    body.exporting .sidebar,
+    body.exporting .fab,
+    body.exporting .sheet,
+    body.exporting .sheetBackdrop{
+      display:none !important;
+    }
 
+    body.exporting .main{ padding:0; }
+    body.exporting .canvasCard{ border-radius:0; border:none; box-shadow:none; }
+
+    /* =========================================================
+       CANVAS OBJECTS
+       ========================================================= */
+    .scene{
+      position:absolute;
+      left:0; top:0;
+      width:100%; height:100%;
+      overflow:hidden;
+    }
+
+    .stageLayer{
+      position:absolute;
+      left:50%; top:50%;
+      transform: translate(-50%,-50%);
+      transform-origin: 0 0;
+    }
+
+    .room{
+      position:absolute;
+      left:0; top:0;
+      background:
+        linear-gradient(to right, var(--grid) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+      background-size: 40px 40px;
+      border: 2px solid var(--roomStroke);
+      border-radius: 14px;
+      overflow:hidden;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.18);
+    }
+
+    .room.gridBold{
+      background:
+        linear-gradient(to right, var(--grid) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
+        linear-gradient(to right, var(--gridBold) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--gridBold) 1px, transparent 1px);
+      background-size: 40px 40px, 40px 40px, 200px 200px, 200px 200px;
+    }
+
+    .bgImage{
+      position:absolute;
+      left:0; top:0;
+      transform-origin: 0 0;
+      will-change: transform;
+      pointer-events:none;
+      opacity: .9;
+      filter: saturate(1.02) contrast(1.02);
+    }
+
+    .item{
+      position:absolute;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 6px 8px;
+      text-align:center;
+      font-weight:900;
+      font-size: 12px;
+      letter-spacing:.02em;
+      user-select:none;
+      cursor: grab;
+      box-shadow: 0 18px 40px rgba(0,0,0,.25);
+      transform-origin:center center;
+      touch-action:none;
+    }
+
+    [data-theme="light"] .item{
+      border-color: rgba(17,24,39,.14);
+      background: rgba(17,24,39,.04);
+      box-shadow: 0 14px 32px rgba(17,24,39,.10);
+    }
+
+    .item.dragging{ cursor:grabbing; opacity:.95; }
+    .item.selected{ outline: 2px solid var(--select); outline-offset: 2px; }
+    .item.locked{ opacity: .60; cursor:default; border-style:dashed; }
+
+    .handle{
+      position:absolute;
+      width: 12px; height: 12px;
+      border-radius: 6px;
+      background: rgba(245,200,107,1);
+      border:1px solid rgba(0,0,0,.22);
+      box-shadow: 0 12px 22px rgba(0,0,0,.25);
+      z-index: 20;
+      display:none;
+      touch-action:none;
+    }
+    .item.selected .handle{ display:block; }
+
+    .handle.br{ right:-6px; bottom:-6px; cursor:nwse-resize; }
+    .handle.bl{ left:-6px; bottom:-6px; cursor:nesw-resize; }
+    .handle.tr{ right:-6px; top:-6px; cursor:nesw-resize; }
+    .handle.tl{ left:-6px; top:-6px; cursor:nwse-resize; }
+
+    .rotHandle{
+      position:absolute;
+      left:50%;
+      top:-26px;
+      width: 14px; height: 14px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: rgba(245,200,107,1);
+      border:1px solid rgba(0,0,0,.22);
+      box-shadow: 0 12px 22px rgba(0,0,0,.25);
+      z-index: 21;
+      display:none;
+      cursor:grab;
+      touch-action:none;
+    }
+    .item.selected .rotHandle{ display:block; }
+
+    .badgeDim{
+      position:absolute;
+      left:8px; bottom:6px;
+      font-size:11px;
+      font-family:var(--mono);
+      color: rgba(255,255,255,.75);
+      background: rgba(0,0,0,.26);
+      border:1px solid rgba(255,255,255,.10);
+      padding: 2px 6px;
+      border-radius: 10px;
+      pointer-events:none;
+      display:none;
+    }
+    [data-theme="light"] .badgeDim{ color: rgba(17,24,39,.72); background: rgba(255,255,255,.72); border-color: rgba(17,24,39,.10); }
+
+    .item.selected .badgeDim{ display:block; }
+
+    .toast{
+      position:fixed;
+      left:50%; bottom:16px;
+      transform: translateX(-50%);
+      z-index: 999;
+      background: rgba(0,0,0,.75);
+      border:1px solid rgba(255,255,255,.12);
+      color:#fff;
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-weight:900;
+      font-size: 13px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.45);
+      max-width: min(560px, calc(100vw - 20px));
+      display:none;
+    }
+
+    /* =========================================================
+       HELP OVERLAY
+       ========================================================= */
+    .help{
+      position:absolute;
+      left:12px; bottom:12px;
+      z-index:60;
+      max-width: 520px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.22);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .helpHeader{
+      padding: 10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .helpHeader .h{ font-weight:900; letter-spacing:.02em; }
+    .helpBody{ padding: 10px 12px; color:var(--muted); font-weight:800; font-size:12px; line-height:1.55; }
+
+    @media (max-width: 560px){
+      .help{ display:none; } /* default closed on mobile */
+    }
+
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="app" id="app">
+
+    <!-- =====================================================
+         TOP BAR
+         ===================================================== -->
+    <div class="topbar">
+      <div class="brand">
+        <div class="brandBadge" aria-label="Sleeve heart">
+          <!-- heart icon -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 21s-7.2-4.4-9.8-9.2C-.3 7.2 2.4 3.5 6.2 3.5c2 0 3.7 1 4.8 2.4 1.1-1.4 2.9-2.4 4.8-2.4 3.8 0 6.5 3.7 4 8.3C19.2 16.6 12 21 12 21z" fill="rgba(255,255,255,.92)"/>
+          </svg>
+        </div>
+        <div class="brandTitle">
+          <div class="t1">SLEEVE EVENTS</div>
+          <div class="t2">Official Room Planner • Single-file Edition</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <div class="pill" id="toggles">
+          <div class="toggle" id="toggleTheme"><div class="switch on" id="swTheme"></div><span>Dark</span></div>
+          <div class="toggle" id="toggleGrid"><div class="switch on" id="swGrid"></div><span>Grid</span></div>
+          <div class="toggle" id="toggleSnap"><div class="switch on" id="swSnap"></div><span>Snap</span></div>
+        </div>
+
+        <button class="btn" id="btnTools">Tools</button>
+        <button class="btn" id="btnSaveLocal">Save Local</button>
+        <button class="btn" id="btnLoadLocal">Load Local</button>
+        <button class="btn" id="btnDownload">Download</button>
+        <button class="btn" id="btnUpload">Upload</button>
+        <button class="btn" id="btnShare">Copy Link</button>
+        <button class="btn" id="btnExportPNG">Export PNG</button>
+        <button class="btn primary" id="btnExportPDF">Export PDF</button>
+      </div>
+    </div>
+
+    <!-- =====================================================
+         MAIN
+         ===================================================== -->
+    <div class="main">
+
+      <!-- CANVAS -->
+      <div class="canvasCard">
+        <div class="viewport" id="viewport">
+          <div class="scene" id="scene">
+            <div class="stageLayer" id="stageLayer">
+              <img class="bgImage" id="bgImage" alt="" />
+              <div class="room gridBold" id="room"></div>
+            </div>
+          </div>
+        </div>
+
+        <button class="fab" id="fab">+ Add Object</button>
+
+        <div class="help" id="help">
+          <div class="helpHeader">
+            <div class="h">Controls</div>
+            <button class="btn" id="btnHelpHide" style="height:28px;padding:0 10px;font-size:12px;box-shadow:none;">Hide</button>
+          </div>
+          <div class="helpBody">
+            Pan: <span class="kbd">Space</span> + drag • Zoom: mousewheel/trackpad • Select: click • Multi-select: <span class="kbd">Shift</span>+click • Duplicate: <span class="kbd">⌘/Ctrl</span>+<span class="kbd">D</span> • Delete: <span class="kbd">Del</span>/<span class="kbd">Backspace</span> • Lock: <span class="kbd">L</span>
+            <div style="margin-top:8px;">
+              <span id="scaleNote">Scale not set — use <b>Set Scale</b> to get accurate feet/in.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SIDEBAR -->
+      <div class="sidebar" id="sidebar">
+
+        <div class="panel">
+          <div class="panelHeader"><div class="h">Project</div></div>
+          <div class="panelBody">
+            <div class="row">
+              <div class="col">
+                <label class="small">Event Name</label>
+                <input id="eventName" type="text" placeholder="e.g., Karla & Andrew Wedding" />
+              </div>
+            </div>
+            <div style="height:10px"></div>
+            <label class="small">Notes</label>
+            <textarea id="eventNotes" placeholder="Load-in notes, vendor cues, timeline, etc."></textarea>
+            <div style="height:10px"></div>
+
+            <div class="row">
+              <div class="col">
+                <label class="small">Room Size (ft)</label>
+                <div class="row">
+                  <input id="roomW" type="text" value="60" />
+                  <input id="roomH" type="text" value="40" />
+                </div>
+              </div>
+              <div class="col">
+                <label class="small">Grid (ft)</label>
+                <select id="gridStep">
+                  <option value="1">1 ft</option>
+                  <option value="2" selected>2 ft</option>
+                  <option value="5">5 ft</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="height:10px"></div>
+            <div class="row">
+              <button class="btn" id="btnApplyRoom" style="flex:1;">Apply Room</button>
+              <button class="btn" id="btnFit" style="flex:1;">Fit</button>
+            </div>
+
+            <div style="height:10px"></div>
+            <div class="row">
+              <button class="btn" id="btnSetScale" style="flex:1;">Set Scale</button>
+              <button class="btn" id="btnClear" style="flex:1;">Clear</button>
+            </div>
+
+            <div style="height:10px"></div>
+            <label class="small">Background</label>
+            <div class="row">
+              <button class="btn" id="btnBgUpload" style="flex:1;">Upload</button>
+              <button class="btn" id="btnBgFit" style="flex:1;">Fit</button>
+            </div>
+            <div style="height:8px"></div>
+            <div class="chips">
+              <div class="chip on" id="chipBgLock"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Lock BG</div>
+              <div class="chip on" id="chipShowGrid"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Show Grid</div>
+              <div class="chip on" id="chipSnap"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Snap</div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panelHeader"><div class="h">Objects</div></div>
+          <div class="panelBody">
+            <div class="palette" id="palette"></div>
+            <div style="height:12px"></div>
+            <div class="footerNote">Tip: place, then use <span class="kbd">⌘/Ctrl</span>+<span class="kbd">D</span> to duplicate fast. Lock with <span class="kbd">L</span>.</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panelHeader"><div class="h">Selected</div></div>
+          <div class="panelBody">
+            <div id="selEmpty" class="footerNote">Select an object to edit label, lock, color, and size.</div>
+            <div id="selPanel" class="hide">
+              <label class="small">Label</label>
+              <input id="selLabel" type="text" />
+
+              <div style="height:10px"></div>
+              <div class="row">
+                <div class="col">
+                  <label class="small">Width</label>
+                  <div id="selW" class="footerNote"></div>
+                </div>
+                <div class="col">
+                  <label class="small">Height</label>
+                  <div id="selH" class="footerNote"></div>
+                </div>
+              </div>
+
+              <div style="height:10px"></div>
+              <div class="chips">
+                <div class="chip" id="chipLock"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Lock</div>
+                <div class="chip" id="chipDuplicate"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Duplicate</div>
+                <div class="chip" id="chipDelete" style="border-color:rgba(255,77,77,.35);"><span class="swatch" style="background:rgba(255,77,77,.65)"></span>Delete</div>
+              </div>
+
+              <div style="height:10px"></div>
+              <label class="small">Color</label>
+              <div class="chips" id="colorChips"></div>
+
+              <div style="height:10px"></div>
+              <label class="small">Arrange</label>
+              <div class="chips">
+                <div class="chip" id="chipAlignL">Align L</div>
+                <div class="chip" id="chipAlignC">Align C</div>
+                <div class="chip" id="chipAlignR">Align R</div>
+                <div class="chip" id="chipDistH">Distribute</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panelHeader"><div class="h">Gear Summary</div></div>
+          <div class="panelBody">
+            <div id="gear" class="footerNote"></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Mobile Sheet -->
+    <div class="sheetBackdrop" id="sheetBackdrop"></div>
+    <div class="sheet" id="sheet">
+      <div class="sheetHandle"></div>
+      <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-weight:900;letter-spacing:.02em;">Tools</div>
+        <button class="btn" id="btnSheetClose" style="height:30px;padding:0 12px;font-size:12px;box-shadow:none;">Close</button>
+      </div>
+
+      <div class="panel" style="box-shadow:none;">
+        <div class="panelHeader"><div class="h">Quick Actions</div></div>
+        <div class="panelBody">
+          <div class="row">
+            <button class="btn" id="mSetScale" style="flex:1;">Set Scale</button>
+            <button class="btn" id="mFit" style="flex:1;">Fit</button>
+          </div>
+          <div style="height:8px"></div>
+          <div class="row">
+            <button class="btn" id="mBgUpload" style="flex:1;">BG Upload</button>
+            <button class="btn" id="mBgFit" style="flex:1;">BG Fit</button>
+          </div>
+          <div style="height:8px"></div>
+          <div class="row">
+            <button class="btn" id="mDemoWedding" style="flex:1;">Demo Wedding</button>
+            <button class="btn" id="mDemoMitzvah" style="flex:1;">Demo Mitzvah</button>
+          </div>
+          <div style="height:8px"></div>
+          <div class="chips">
+            <div class="chip on" id="mToggleTheme"><span class="swatch" style="background:var(--accent)"></span>Theme</div>
+            <div class="chip on" id="mToggleGrid"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Grid</div>
+            <div class="chip on" id="mToggleSnap"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Snap</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:10px"></div>
+      <div class="panel" style="box-shadow:none;">
+        <div class="panelHeader"><div class="h">Add Objects</div></div>
+        <div class="panelBody">
+          <div class="palette" id="paletteMobile"></div>
+        </div>
+      </div>
+
+      <div style="height:10px"></div>
+      <div class="panel" style="box-shadow:none;">
+        <div class="panelHeader"><div class="h">Exports</div></div>
+        <div class="panelBody">
+          <div class="row">
+            <button class="btn" id="mExportPNG" style="flex:1;">Export PNG</button>
+            <button class="btn primary" id="mExportPDF" style="flex:1;">Export PDF</button>
+          </div>
+          <div style="height:8px"></div>
+          <div class="row">
+            <button class="btn" id="mShare" style="flex:1;">Copy Link</button>
+            <button class="btn" id="mDownload" style="flex:1;">Download</button>
+          </div>
+          <div style="height:8px"></div>
+          <div class="row">
+            <button class="btn" id="mSaveLocal" style="flex:1;">Save Local</button>
+            <button class="btn" id="mLoadLocal" style="flex:1;">Load Local</button>
+          </div>
+          <div style="height:8px"></div>
+          <div class="row">
+            <button class="btn" id="mUpload" style="flex:1;">Upload</button>
+            <button class="btn" id="mClear" style="flex:1;">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:12px"></div>
+      <div class="footerNote">Exports include branding footer: SleeveEvents.com • stephen@sleeveevents.com</div>
+    </div>
+
+    <input id="fileUpload" type="file" accept="application/json" class="hide" />
+    <input id="bgUpload" type="file" accept="image/png,image/jpeg" class="hide" />
+
+    <div class="toast" id="toast"></div>
+
+  </div>
+
+  <script>
     /* =========================================================
        STATE
        ========================================================= */
     const State = {
       version: 1,
-      meta: {
-        eventName: "",
-        notes: "",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      ui: {
-        theme: (localStorage.getItem('se_theme') || 'dark'),
-        grid: true,
-        snap: true,
-        snapStepFt: 1,
-        backgroundLocked: false,
-      },
-      scale: {
-        // pixels per foot. Default is arbitrary until set.
-        pxPerFoot: 20,
-        calibrated: false,
+      eventName: '',
+      eventNotes: '',
+      theme: 'dark',
+      roomFt: { w: 60, h: 40 },
+      pxPerFt: 40,              // default 40px = 1ft until user sets scale
+      gridOn: true,
+      snapOn: true,
+      gridStepFt: 2,
+      snapStepFt: 2,
+      bg: {
+        src: '',
+        locked: true,
+        fitMode: 'contain',
+        // transform is in ROOM local coords
+        x: 0, y: 0,
+        scale: 1,
       },
       view: {
-        // world -> screen transform, maintained as camera
+        // view transform for zoom/pan (screen -> stageLayer)
         zoom: 1,
-        minZoom: 0.2,
-        maxZoom: 6,
         panX: 0,
         panY: 0,
       },
-      room: {
-        // optional logical room size in feet; if set, we draw a boundary
-        enabled: false,
-        widthFt: 60,
-        heightFt: 40,
-      },
-      background: {
-        image: null,
-        src: null,
-        // background transform in world space
-        offsetX: 0,
-        offsetY: 0,
-        scale: 1,
-      },
-      objects: [],
-      selection: {
-        ids: [],
-      },
-      interaction: {
-        tool: 'select', // 'select' | 'setScale'
-        pointerDown: false,
-        dragging: false,
-        dragMode: null, // 'move' | 'resize' | 'rotate' | 'pan' | 'bg'
-        activeId: null,
-        start: {x:0,y:0},
-        last: {x:0,y:0},
-        // for object manipulation
-        objStart: null,
-        // for scale tool
-        scaleP1: null,
-        scaleP2: null,
-        hoverHandle: null,
-      }
+      items: [],
+      selected: new Set(),
+      // interaction
+      mode: 'idle', // idle | panning | dragging | resizing | rotating | setScale
+      pointer: { id: null, startX:0, startY:0, lastX:0, lastY:0 },
+      drag: null,
+      scaleTool: { step: 0, p1: null, p2: null },
+    };
+
+    const ExportBrand = {
+      site: 'SleeveEvents.com',
+      email: 'stephen@sleeveevents.com',
+      tagline: 'Every Moment, With Love & Precision'
     };
 
     /* =========================================================
-       OBJECT DEFINITIONS / PALETTE
-       - Sizes are in feet (real world)
-       - Convert to pixels via scale.pxPerFoot
+       CONSTANTS + UTILITIES
        ========================================================= */
-    const PaletteDefs = [
-      {
-        key: 'dj_booth',
-        title: 'DJ Booth',
-        note: '6 ft default',
-        default: { wFt: 6, hFt: 2.5 },
-        style: { fillA: '#4c1d95', fillB: '#8b5cf6', text: 'DJ' },
-        gear: { 'DJ Booth': 1 }
+
+    // Pointer capture can throw on some browsers (notably Safari/iOS) when state is not valid.
+    // We always guard and we also release safely on pointerup/cancel.
+    const PointerCapture = {
+      el: null,
+      pid: null,
+      safeCapture(el, pointerId){
+        try{
+          if (!el || !el.isConnected) return false;
+          if (pointerId === undefined || pointerId === null) return false;
+          if (typeof el.setPointerCapture !== 'function') return false;
+
+          if (this.el && this.el !== el && this.pid === pointerId){
+            this.safeRelease(this.el, pointerId);
+          }
+
+          if (typeof el.hasPointerCapture === 'function'){
+            if (!el.hasPointerCapture(pointerId)) el.setPointerCapture(pointerId);
+          } else {
+            el.setPointerCapture(pointerId);
+          }
+
+          this.el = el;
+          this.pid = pointerId;
+          return true;
+        } catch(_){
+          return false;
+        }
       },
-      {
-        key: 'speaker_pair',
-        title: 'Speaker Pair',
-        note: '2 speakers',
-        default: { wFt: 2.2, hFt: 2.2 },
-        style: { fillA: '#0ea5e9', fillB: '#0369a1', text: 'SPK×2' },
-        gear: { 'Speaker (pair)': 1 }
+      safeRelease(el, pointerId){
+        try{
+          if (!el) return;
+          if (typeof el.releasePointerCapture !== 'function') return;
+          if (typeof el.hasPointerCapture === 'function'){
+            if (el.hasPointerCapture(pointerId)) el.releasePointerCapture(pointerId);
+          } else {
+            el.releasePointerCapture(pointerId);
+          }
+        } catch(_){
+          // ignore
+        } finally {
+          if (this.el === el && this.pid === pointerId){
+            this.el = null;
+            this.pid = null;
+          }
+        }
       },
-      {
-        key: 'dance_floor',
-        title: 'Dance Floor',
-        note: '12×12 ft',
-        default: { wFt: 12, hFt: 12 },
-        style: { fillA: '#f97316', fillB: '#ea580c', text: 'DANCE' },
-        gear: { 'Dance Floor': 1 }
-      },
-      {
-        key: 'photobooth',
-        title: 'Photobooth',
-        note: '8×8 ft',
-        default: { wFt: 8, hFt: 8 },
-        style: { fillA: '#22c55e', fillB: '#16a34a', text: 'PHOTO' },
-        gear: { 'Photobooth': 1 }
-      },
-      {
-        key: 'round_table_48',
-        title: 'Round Table',
-        note: '48"',
-        default: { wFt: 4, hFt: 4, round: true },
-        style: { fillA: '#10b981', fillB: '#0f766e', text: '48"' },
-        gear: { 'Round Table (48")': 1 }
-      },
-      {
-        key: 'round_table_60',
-        title: 'Round Table',
-        note: '60"',
-        default: { wFt: 5, hFt: 5, round: true },
-        style: { fillA: '#10b981', fillB: '#0f766e', text: '60"' },
-        gear: { 'Round Table (60")': 1 }
-      },
-      {
-        key: 'round_table_72',
-        title: 'Round Table',
-        note: '72"',
-        default: { wFt: 6, hFt: 6, round: true },
-        style: { fillA: '#10b981', fillB: '#0f766e', text: '72"' },
-        gear: { 'Round Table (72")': 1 }
-      },
-      {
-        key: 'rect_table_6',
-        title: 'Rect Table',
-        note: '6 ft',
-        default: { wFt: 6, hFt: 2.5 },
-        style: { fillA: '#059669', fillB: '#0f766e', text: 'TABLE' },
-        gear: { 'Rect Table (6ft)': 1 }
-      },
-      {
-        key: 'bar',
-        title: 'Bar',
-        note: '8×3 ft',
-        default: { wFt: 8, hFt: 3 },
-        style: { fillA: '#ef4444', fillB: '#b91c1c', text: 'BAR' },
-        gear: { 'Bar': 1 }
-      },
-      {
-        key: 'stage',
-        title: 'Stage',
-        note: '12×8 ft',
-        default: { wFt: 12, hFt: 8 },
-        style: { fillA: '#3b82f6', fillB: '#1d4ed8', text: 'STAGE' },
-        gear: { 'Stage': 1 }
-      },
-      {
-        key: 'custom_rect',
-        title: 'Custom Rect',
-        note: 'Resizable',
-        default: { wFt: 6, hFt: 4 },
-        style: { fillA: '#a855f7', fillB: '#6b21a8', text: 'CUSTOM' },
-        gear: { 'Custom Area': 1 }
-      },
+      reset(pointerId){
+        if (this.el && this.pid === pointerId){
+          this.safeRelease(this.el, pointerId);
+        }
+      }
+    };
+
+    const uid = () => Math.random().toString(36).slice(2, 10);
+
+    function clamp(v,min,max){ return Math.max(min, Math.min(max,v)); }
+    function roundTo(v, step){ return Math.round(v/step)*step; }
+    function dist(a,b){ const dx=a.x-b.x, dy=a.y-b.y; return Math.hypot(dx,dy); }
+    function safeFile(name){ return (name||'').replace(/[^a-z0-9\-\_]+/gi,'_').slice(0,80); }
+
+    function normalizeAngle(deg){
+      let a = deg % 360;
+      if (a < 0) a += 360;
+      // avoid -0
+      return Math.round(a * 1000) / 1000;
+    }
+
+    function ftInFromPx(px){
+      const ft = px / State.pxPerFt;
+      const totalIn = ft * 12;
+      const rIn = Math.round(totalIn);
+      const oFt = Math.floor(rIn / 12);
+      const oIn = rIn % 12;
+      return { ft: oFt, inch: oIn, rawFt: ft };
+    }
+
+    function fmtFtIn(px){
+      if (!State.pxPerFt || State.pxPerFt <= 0) return '—';
+      const d = ftInFromPx(px);
+      return `${d.ft}' ${d.inch}\"`;
+    }
+
+    function snapPx(px){
+      if (!State.snapOn || !State.pxPerFt) return px;
+      const stepPx = State.snapStepFt * State.pxPerFt;
+      return roundTo(px, stepPx);
+    }
+
+    function toast(msg){
+      const el = UI.toast;
+      el.textContent = msg;
+      el.style.display = 'block';
+      clearTimeout(toast._t);
+      toast._t = setTimeout(()=> el.style.display='none', 1800);
+    }
+
+    function deepCopy(obj){ return JSON.parse(JSON.stringify(obj)); }
+
+    function encodeProjectToURL(project){
+      const json = JSON.stringify(project);
+      const b64 = btoa(unescape(encodeURIComponent(json)));
+      // keep reasonably short; if huge background stored, this could get too big.
+      return `${location.origin}${location.pathname}#p=${b64}`;
+    }
+
+    function decodeProjectFromURL(){
+      const h = location.hash || '';
+      const m = h.match(/#p=([A-Za-z0-9+/=]+)/);
+      if (!m) return null;
+      try{
+        const json = decodeURIComponent(escape(atob(m[1])));
+        return JSON.parse(json);
+      } catch(_){
+        return null;
+      }
+    }
+
+    /* =========================================================
+       OBJECT DEFINITIONS
+       ========================================================= */
+    const COLORS = [
+      { key:'brand', name:'Purple', hex:'#8b5cf6' },
+      { key:'pink',  name:'Pink',   hex:'#ff4fa3' },
+      { key:'black', name:'Black',  hex:'#0b1020' },
+      { key:'white', name:'White',  hex:'#ffffff' },
+      { key:'gold',  name:'Gold',   hex:'#f5c86b' },
+      { key:'blue',  name:'Blue',   hex:'#40a2ff' },
+      { key:'green', name:'Green',  hex:'#22c55e' },
     ];
 
-    const DefByKey = Object.fromEntries(PaletteDefs.map(d => [d.key, d]));
+    const ObjectDefs = [
+      { type:'dj_booth',     name:'DJ Booth',        note:'6ft',   wFt:6,  hFt:3,  color:'brand' },
+      { type:'speaker_pair', name:'Speaker Pair',    note:'L/R',   wFt:2.5,hFt:2,  color:'blue', meta:{pair:true} },
+      { type:'dance_floor',  name:'Dance Floor',     note:'12×12', wFt:12, hFt:12, color:'gold' },
+      { type:'photo_booth',  name:'Photobooth',      note:'8×8',   wFt:8,  hFt:8,  color:'pink' },
+      { type:'round_48',     name:'Round Table',     note:'48"',   wFt:4,  hFt:4,  color:'green', shape:'circle' },
+      { type:'round_60',     name:'Round Table',     note:'60"',   wFt:5,  hFt:5,  color:'green', shape:'circle' },
+      { type:'round_72',     name:'Round Table',     note:'72"',   wFt:6,  hFt:6,  color:'green', shape:'circle' },
+      { type:'rect_6',       name:'Rect Table',      note:'6ft',   wFt:6,  hFt:2.5,color:'green' },
+      { type:'bar',          name:'Bar',             note:'',      wFt:12, hFt:3,  color:'blue' },
+      { type:'stage',        name:'Stage',           note:'',      wFt:16, hFt:8,  color:'brand' },
+      { type:'cocktail',     name:'Cocktail Table',  note:'High',  wFt:2.5,hFt:2.5,color:'green', shape:'circle' },
+      { type:'sweetheart',   name:'Sweetheart',      note:'B&G',   wFt:6,  hFt:2.5,color:'pink' },
+      { type:'head_table',   name:'Head Table',      note:'Long',  wFt:18, hFt:3,  color:'pink' },
+      { type:'arch',         name:'Ceremony Arch',   note:'',      wFt:10, hFt:2,  color:'gold' },
+      { type:'uplight',      name:'Uplight',         note:'',      wFt:0.5,hFt:0.5,color:'purple', shape:'circle', meta:{fixture:'uplight'} },
+      { type:'moving_head',  name:'Moving Head',     note:'',      wFt:1,  hFt:1,  color:'purple', shape:'circle', meta:{fixture:'moving'} },
+      { type:'truss',        name:'Truss',           note:'10ft',  wFt:10, hFt:1,  color:'black' },
+      { type:'custom_rect',  name:'Custom Rect',     note:'',      wFt:6,  hFt:4,  color:'brand' },
+    ].map(d=>({ ...d, color: d.color === 'purple' ? 'brand' : d.color }));
+
+    function defByType(t){ return ObjectDefs.find(o=>o.type===t); }
 
     /* =========================================================
-       CANVAS ENGINE
-       - Single canvas, draws background + grid + objects + handles
-       - World coordinate system in pixels
-       - Convert feet -> pixels via scale.pxPerFoot
+       UI REFERENCES
        ========================================================= */
+    const UI = {
+      viewport: document.getElementById('viewport'),
+      stageLayer: document.getElementById('stageLayer'),
+      room: document.getElementById('room'),
+      bgImage: document.getElementById('bgImage'),
+      palette: document.getElementById('palette'),
+      paletteMobile: document.getElementById('paletteMobile'),
+      sidebar: document.getElementById('sidebar'),
+      toast: document.getElementById('toast'),
 
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
+      eventName: document.getElementById('eventName'),
+      eventNotes: document.getElementById('eventNotes'),
+      roomW: document.getElementById('roomW'),
+      roomH: document.getElementById('roomH'),
+      gridStep: document.getElementById('gridStep'),
+      gear: document.getElementById('gear'),
 
-    const DPR = () => Math.max(1, Math.min(2.5, window.devicePixelRatio || 1));
+      btnApplyRoom: document.getElementById('btnApplyRoom'),
+      btnFit: document.getElementById('btnFit'),
+      btnSetScale: document.getElementById('btnSetScale'),
+      btnClear: document.getElementById('btnClear'),
 
-    function resizeCanvas(){
-      const rect = canvas.getBoundingClientRect();
-      const dpr = DPR();
-      canvas.width = Math.floor(rect.width * dpr);
-      canvas.height = Math.floor(rect.height * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      scheduleRender();
-    }
+      btnBgUpload: document.getElementById('btnBgUpload'),
+      btnBgFit: document.getElementById('btnBgFit'),
+      chipBgLock: document.getElementById('chipBgLock'),
+      chipShowGrid: document.getElementById('chipShowGrid'),
+      chipSnap: document.getElementById('chipSnap'),
 
-    const scheduleRender = rafThrottle(() => render());
+      btnSaveLocal: document.getElementById('btnSaveLocal'),
+      btnLoadLocal: document.getElementById('btnLoadLocal'),
+      btnDownload: document.getElementById('btnDownload'),
+      btnUpload: document.getElementById('btnUpload'),
+      btnShare: document.getElementById('btnShare'),
+      btnExportPNG: document.getElementById('btnExportPNG'),
+      btnExportPDF: document.getElementById('btnExportPDF'),
 
-    function worldToScreen(x, y){
-      return {
-        x: (x + State.view.panX) * State.view.zoom,
-        y: (y + State.view.panY) * State.view.zoom,
-      };
-    }
+      btnTools: document.getElementById('btnTools'),
 
-    function screenToWorld(x, y){
-      return {
-        x: x / State.view.zoom - State.view.panX,
-        y: y / State.view.zoom - State.view.panY,
-      };
-    }
+      toggleTheme: document.getElementById('toggleTheme'),
+      toggleGrid: document.getElementById('toggleGrid'),
+      toggleSnap: document.getElementById('toggleSnap'),
+      swTheme: document.getElementById('swTheme'),
+      swGrid: document.getElementById('swGrid'),
+      swSnap: document.getElementById('swSnap'),
 
-    function feetToPx(ft){
-      return ft * State.scale.pxPerFoot;
-    }
+      help: document.getElementById('help'),
+      btnHelpHide: document.getElementById('btnHelpHide'),
+      scaleNote: document.getElementById('scaleNote'),
 
-    function pxToFeet(px){
-      return px / State.scale.pxPerFoot;
-    }
+      fileUpload: document.getElementById('fileUpload'),
+      bgUpload: document.getElementById('bgUpload'),
 
-    function getObjectById(id){
-      return State.objects.find(o => o.id === id) || null;
-    }
+      // selected
+      selEmpty: document.getElementById('selEmpty'),
+      selPanel: document.getElementById('selPanel'),
+      selLabel: document.getElementById('selLabel'),
+      selW: document.getElementById('selW'),
+      selH: document.getElementById('selH'),
+      chipLock: document.getElementById('chipLock'),
+      chipDuplicate: document.getElementById('chipDuplicate'),
+      chipDelete: document.getElementById('chipDelete'),
+      colorChips: document.getElementById('colorChips'),
+      chipAlignL: document.getElementById('chipAlignL'),
+      chipAlignC: document.getElementById('chipAlignC'),
+      chipAlignR: document.getElementById('chipAlignR'),
+      chipDistH: document.getElementById('chipDistH'),
 
-    function isSelected(id){
-      return State.selection.ids.includes(id);
-    }
-
-    function setSelection(ids){
-      State.selection.ids = Array.from(new Set(ids));
-      updateSelectedPanel();
-      scheduleRender();
-    }
-
-    function addSelection(id){
-      if (!isSelected(id)) State.selection.ids.push(id);
-      updateSelectedPanel();
-      scheduleRender();
-    }
-
-    function toggleSelection(id){
-      if (isSelected(id)) State.selection.ids = State.selection.ids.filter(x => x !== id);
-      else State.selection.ids.push(id);
-      updateSelectedPanel();
-      scheduleRender();
-    }
-
-    function clearSelection(){
-      if (State.selection.ids.length === 0) return;
-      State.selection.ids = [];
-      updateSelectedPanel();
-      scheduleRender();
-    }
-
-    function setTheme(theme){
-      State.ui.theme = theme;
-      localStorage.setItem('se_theme', theme);
-      document.documentElement.setAttribute('data-theme', theme);
-      scheduleRender();
-    }
-
-    /* -------------------------
-       Object model
-       -------------------------
-       x,y: center position in world px
-       w,h: dimensions in world px
-       rot: radians
-    */
-    function createObject(typeKey, atWorld){
-      const def = DefByKey[typeKey];
-      const w = feetToPx(def.default.wFt);
-      const h = feetToPx(def.default.hFt);
-      const o = {
-        id: uid(),
-        type: typeKey,
-        label: def.title,
-        x: atWorld.x,
-        y: atWorld.y,
-        w,
-        h,
-        rot: 0,
-        round: !!def.default.round,
-        locked: false,
-      };
-      State.objects.push(o);
-      State.meta.updatedAt = new Date().toISOString();
-      computeGearSummary();
-      setSelection([o.id]);
-      scheduleRender();
-      return o;
-    }
-
-    function duplicateSelected(){
-      if (State.selection.ids.length === 0) return;
-      const ids = State.selection.ids.slice();
-      const created = [];
-      for (const id of ids){
-        const src = getObjectById(id);
-        if (!src) continue;
-        const o = { ...structuredClone(src), id: uid(), x: src.x + 20, y: src.y + 20, label: src.label };
-        State.objects.push(o);
-        created.push(o.id);
-      }
-      State.meta.updatedAt = new Date().toISOString();
-      computeGearSummary();
-      setSelection(created);
-    }
-
-    function deleteSelected(){
-      if (State.selection.ids.length === 0) return;
-      const kill = new Set(State.selection.ids);
-      State.objects = State.objects.filter(o => !kill.has(o.id));
-      State.selection.ids = [];
-      State.meta.updatedAt = new Date().toISOString();
-      computeGearSummary();
-      updateSelectedPanel();
-      scheduleRender();
-    }
-
-    /* =========================================================
-       HIT TESTING + HANDLES
-       ========================================================= */
-
-    function getObjectCorners(o){
-      const hw = o.w/2, hh = o.h/2;
-      const cx = o.x, cy = o.y;
-      const pts = [
-        {x: cx - hw, y: cy - hh},
-        {x: cx + hw, y: cy - hh},
-        {x: cx + hw, y: cy + hh},
-        {x: cx - hw, y: cy + hh},
-      ];
-      return pts.map(p => pointRotate(p.x, p.y, cx, cy, o.rot));
-    }
-
-    function pointInPoly(pt, poly){
-      // ray-casting
-      let inside = false;
-      for (let i=0, j=poly.length-1; i<poly.length; j=i++){
-        const xi = poly[i].x, yi = poly[i].y;
-        const xj = poly[j].x, yj = poly[j].y;
-        const intersect = ((yi > pt.y) !== (yj > pt.y)) && (pt.x < (xj - xi) * (pt.y - yi) / ((yj - yi) || 1e-9) + xi);
-        if (intersect) inside = !inside;
-      }
-      return inside;
-    }
-
-    function hitTestObject(worldPt){
-      // topmost first
-      for (let i=State.objects.length-1; i>=0; i--){
-        const o = State.objects[i];
-        const poly = getObjectCorners(o);
-        if (pointInPoly(worldPt, poly)) return o;
-      }
-      return null;
-    }
-
-    function getHandles(o){
-      // In world coords. 8 resize handles + rotate handle.
-      const hw = o.w/2, hh = o.h/2;
-      const cx = o.x, cy = o.y;
-      const base = {
-        nw: {x: cx-hw, y: cy-hh},
-        ne: {x: cx+hw, y: cy-hh},
-        se: {x: cx+hw, y: cy+hh},
-        sw: {x: cx-hw, y: cy+hh},
-        n:  {x: cx,    y: cy-hh},
-        e:  {x: cx+hw, y: cy},
-        s:  {x: cx,    y: cy+hh},
-        w:  {x: cx-hw, y: cy},
-      };
-      const rotHandle = { x: cx, y: cy - hh - Math.max(18, Math.min(40, hh*0.25)) };
-      const out = {};
-      for (const k of Object.keys(base)) out[k] = pointRotate(base[k].x, base[k].y, cx, cy, o.rot);
-      out.rot = pointRotate(rotHandle.x, rotHandle.y, cx, cy, o.rot);
-      return out;
-    }
-
-    function hitTestHandle(o, worldPt){
-      const h = getHandles(o);
-      const radius = 10 / State.view.zoom; // scale with zoom
-      const hit = (p) => (Math.hypot(p.x - worldPt.x, p.y - worldPt.y) <= radius);
-      for (const key of ['nw','n','ne','e','se','s','sw','w']){
-        if (hit(h[key])) return { type:'resize', key };
-      }
-      if (hit(h.rot)) return { type:'rotate', key:'rot' };
-      return null;
-    }
+      // mobile
+      fab: document.getElementById('fab'),
+      sheetBackdrop: document.getElementById('sheetBackdrop'),
+      sheet: document.getElementById('sheet'),
+      btnSheetClose: document.getElementById('btnSheetClose'),
+      mSetScale: document.getElementById('mSetScale'),
+      mFit: document.getElementById('mFit'),
+      mBgUpload: document.getElementById('mBgUpload'),
+      mBgFit: document.getElementById('mBgFit'),
+      mDemoWedding: document.getElementById('mDemoWedding'),
+      mDemoMitzvah: document.getElementById('mDemoMitzvah'),
+      mToggleTheme: document.getElementById('mToggleTheme'),
+      mToggleGrid: document.getElementById('mToggleGrid'),
+      mToggleSnap: document.getElementById('mToggleSnap'),
+      mExportPNG: document.getElementById('mExportPNG'),
+      mExportPDF: document.getElementById('mExportPDF'),
+      mShare: document.getElementById('mShare'),
+      mDownload: document.getElementById('mDownload'),
+      mSaveLocal: document.getElementById('mSaveLocal'),
+      mLoadLocal: document.getElementById('mLoadLocal'),
+      mUpload: document.getElementById('mUpload'),
+      mClear: document.getElementById('mClear'),
+    };
 
     /* =========================================================
        RENDERING
        ========================================================= */
-
-    function render(){
-      const rect = canvas.getBoundingClientRect();
-      const w = rect.width;
-      const h = rect.height;
-
-      ctx.clearRect(0,0,w,h);
-
-      // background
-      drawBackground(w,h);
-
-      // room boundary
-      drawRoomBoundary(w,h);
-
-      // grid
-      if (State.ui.grid) drawGrid(w,h);
-
-      // objects
-      for (const o of State.objects) drawObject(o);
-
-      // selection + handles
-      drawSelection();
-
-      // scale tool overlay
-      drawScaleOverlay();
-
-      updateReadouts();
+    function applyTheme(){
+      document.body.setAttribute('data-theme', State.theme);
+      const on = State.theme === 'dark';
+      UI.swTheme.classList.toggle('on', on);
+      UI.toggleTheme.querySelector('span').textContent = on ? 'Dark' : 'Light';
+      UI.mToggleTheme.classList.toggle('on', true);
     }
 
-    function drawBackground(w,h){
-      const img = State.background.image;
-      if (!img) return;
-
-      ctx.save();
-      // apply camera
-      ctx.translate(State.view.panX * State.view.zoom, State.view.panY * State.view.zoom);
-      ctx.scale(State.view.zoom, State.view.zoom);
-
-      // background transform in world
-      const bx = State.background.offsetX;
-      const by = State.background.offsetY;
-      const bs = State.background.scale;
-
-      // draw centered
-      const iw = img.naturalWidth || img.width;
-      const ih = img.naturalHeight || img.height;
-
-      ctx.globalAlpha = 1;
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-
-      ctx.translate(bx, by);
-      ctx.scale(bs, bs);
-
-      // Fit-to-canvas is handled on load; here we draw at 0,0
-      ctx.drawImage(img, 0, 0, iw, ih);
-      ctx.restore();
+    function applyRoom(){
+      const w = clamp(parseFloat(UI.roomW.value)||State.roomFt.w, 5, 400);
+      const h = clamp(parseFloat(UI.roomH.value)||State.roomFt.h, 5, 400);
+      State.roomFt.w = w; State.roomFt.h = h;
+      const pxW = w * State.pxPerFt;
+      const pxH = h * State.pxPerFt;
+      UI.room.style.width = pxW + 'px';
+      UI.room.style.height = pxH + 'px';
+      UI.stageLayer.style.width = pxW + 'px';
+      UI.stageLayer.style.height = pxH + 'px';
+      // Ensure bg stays in bounds visually (not strict)
+      renderBg();
+      renderGrid();
+      renderItems();
+      updateGear();
+      updateScaleNote();
     }
 
-    function drawRoomBoundary(w,h){
-      if (!State.room.enabled) return;
-      const rw = feetToPx(State.room.widthFt);
-      const rh = feetToPx(State.room.heightFt);
-
-      // room anchored at origin (0,0)
-      ctx.save();
-      ctx.translate(State.view.panX * State.view.zoom, State.view.panY * State.view.zoom);
-      ctx.scale(State.view.zoom, State.view.zoom);
-
-      ctx.lineWidth = 2 / State.view.zoom;
-      ctx.strokeStyle = (getComputedStyle(document.documentElement).getPropertyValue('--border') || '#22304a').trim();
-      ctx.setLineDash([10/State.view.zoom, 8/State.view.zoom]);
-      ctx.strokeRect(0,0,rw,rh);
-      ctx.setLineDash([]);
-
-      // label
-      ctx.font = `700 ${12/State.view.zoom}px ${State.ui.theme === 'light' ? 'var(--sans)' : 'var(--sans)'}`;
-      ctx.fillStyle = (getComputedStyle(document.documentElement).getPropertyValue('--muted') || '#a9b4cf').trim();
-      ctx.fillText(`${State.room.widthFt}×${State.room.heightFt} ft`, 10/State.view.zoom, -10/State.view.zoom);
-
-      ctx.restore();
+    function renderGrid(){
+      UI.room.classList.toggle('gridBold', true);
+      UI.room.style.display = State.gridOn ? 'block' : 'block';
+      const stepPx = State.gridStepFt * State.pxPerFt;
+      UI.room.style.backgroundSize = `${stepPx}px ${stepPx}px, ${stepPx}px ${stepPx}px, ${stepPx*5}px ${stepPx*5}px, ${stepPx*5}px ${stepPx*5}px`;
+      UI.swGrid.classList.toggle('on', State.gridOn);
+      UI.swSnap.classList.toggle('on', State.snapOn);
+      UI.chipShowGrid.classList.toggle('on', State.gridOn);
+      UI.chipSnap.classList.toggle('on', State.snapOn);
+      UI.mToggleGrid.classList.toggle('on', State.gridOn);
+      UI.mToggleSnap.classList.toggle('on', State.snapOn);
+      UI.toggleGrid.querySelector('span').textContent = State.gridOn ? 'Grid' : 'Grid';
+      UI.toggleSnap.querySelector('span').textContent = State.snapOn ? 'Snap' : 'Snap';
     }
 
-    function drawGrid(w,h){
-      // grid is in world units. Use 1ft as minor, 5ft major.
-      const pxPerFt = State.scale.pxPerFoot;
-      const minor = pxPerFt * (State.ui.snapStepFt || 1);
-      const major = pxPerFt * 5;
+    function applyView(){
+      const z = State.view.zoom;
+      const x = State.view.panX;
+      const y = State.view.panY;
+      UI.stageLayer.style.transform = `translate(${x}px, ${y}px) scale(${z})`;
+    }
 
-      const minorCol = getComputedStyle(document.documentElement).getPropertyValue('--grid-minor').trim() || 'rgba(255,255,255,.05)';
-      const majorCol = getComputedStyle(document.documentElement).getPropertyValue('--grid-major').trim() || 'rgba(255,255,255,.09)';
+    function screenToRoomPoint(clientX, clientY){
+      const rect = UI.viewport.getBoundingClientRect();
+      const sx = clientX - rect.left;
+      const sy = clientY - rect.top;
 
-      // Visible world bounds
-      const topLeft = screenToWorld(0,0);
-      const botRight = screenToWorld(w,h);
+      // stageLayer transform: translate(panX, panY) then scale(zoom) around center
+      // We set stageLayer transform with translate + scale, but stageLayer is positioned with left:50%,top:50% translate(-50%,-50%) in CSS.
+      // To keep it stable, we compute based on DOM matrix.
+      const m = new DOMMatrix(getComputedStyle(UI.stageLayer).transform);
+      // invert transform
+      const inv = m.inverse();
+      const p = new DOMPoint(sx, sy).matrixTransform(inv);
+      return { x: p.x, y: p.y };
+    }
 
-      const startX = Math.floor(topLeft.x / minor) * minor;
-      const endX = Math.ceil(botRight.x / minor) * minor;
-      const startY = Math.floor(topLeft.y / minor) * minor;
-      const endY = Math.ceil(botRight.y / minor) * minor;
+    function roomToScreenPoint(x,y){
+      const m = new DOMMatrix(getComputedStyle(UI.stageLayer).transform);
+      const p = new DOMPoint(x,y).matrixTransform(m);
+      return { x: p.x, y: p.y };
+    }
 
-      ctx.save();
-      ctx.translate(State.view.panX * State.view.zoom, State.view.panY * State.view.zoom);
-      ctx.scale(State.view.zoom, State.view.zoom);
-
-      ctx.lineWidth = 1 / State.view.zoom;
-
-      for (let x = startX; x <= endX; x += minor){
-        ctx.strokeStyle = (Math.abs(x % major) < 0.001) ? majorCol : minorCol;
-        ctx.beginPath();
-        ctx.moveTo(x, startY);
-        ctx.lineTo(x, endY);
-        ctx.stroke();
+    function renderBg(){
+      if (!State.bg.src){
+        UI.bgImage.style.display = 'none';
+        return;
       }
-      for (let y = startY; y <= endY; y += minor){
-        ctx.strokeStyle = (Math.abs(y % major) < 0.001) ? majorCol : minorCol;
-        ctx.beginPath();
-        ctx.moveTo(startX, y);
-        ctx.lineTo(endX, y);
-        ctx.stroke();
-      }
-
-      ctx.restore();
+      UI.bgImage.style.display = 'block';
+      UI.bgImage.src = State.bg.src;
+      UI.bgImage.style.transform = `translate(${State.bg.x}px, ${State.bg.y}px) scale(${State.bg.scale})`;
+      UI.chipBgLock.classList.toggle('on', State.bg.locked);
     }
 
-    function drawObject(o){
-      const def = DefByKey[o.type];
-      const a = def.style.fillA, b = def.style.fillB;
+    function clearItemsDom(){
+      const els = UI.room.querySelectorAll('.item');
+      els.forEach(e=>e.remove());
+    }
 
-      ctx.save();
-      // camera
-      ctx.translate(State.view.panX * State.view.zoom, State.view.panY * State.view.zoom);
-      ctx.scale(State.view.zoom, State.view.zoom);
+    function colorHex(key){
+      const c = COLORS.find(c=>c.key===key);
+      return c ? c.hex : '#8b5cf6';
+    }
 
-      // object transform
-      ctx.translate(o.x, o.y);
-      ctx.rotate(o.rot);
+    function computeItemStyle(it){
+      const hex = colorHex(it.color || 'brand');
+      const bg = `linear-gradient(135deg, ${hex}, rgba(255,255,255,.06))`;
+      return { hex, bg };
+    }
 
-      // shadow
-      ctx.shadowColor = 'rgba(0,0,0,.25)';
-      ctx.shadowBlur = 18;
-      ctx.shadowOffsetY = 8;
+    function renderItems(){
+      clearItemsDom();
+      for (const it of State.items){
+        const el = document.createElement('div');
+        el.className = 'item';
+        el.dataset.id = it.id;
+        const d = defByType(it.type);
+        if (d?.shape === 'circle') el.style.borderRadius = '999px';
 
-      // fill
-      const grad = ctx.createLinearGradient(-o.w/2, -o.h/2, o.w/2, o.h/2);
-      grad.addColorStop(0, a);
-      grad.addColorStop(1, b);
-      ctx.fillStyle = grad;
-      ctx.strokeStyle = 'rgba(15,23,42,.55)';
-      ctx.lineWidth = 1.5;
+        const { bg } = computeItemStyle(it);
+        el.style.background = bg;
 
-      const r = 10;
-      if (o.round){
-        const rad = Math.min(o.w, o.h)/2;
-        ctx.beginPath();
-        ctx.arc(0,0, rad, 0, Math.PI*2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.strokeStyle = 'rgba(255,255,255,.08)';
-        ctx.stroke();
+        el.style.left = it.x + 'px';
+        el.style.top  = it.y + 'px';
+        el.style.width = it.w + 'px';
+        el.style.height= it.h + 'px';
+        el.style.transform = `rotate(${it.rot}deg)`;
+
+        el.classList.toggle('selected', State.selected.has(it.id));
+        el.classList.toggle('locked', !!it.locked);
+
+        el.textContent = it.label || (d?.name || 'Object');
+
+        // handles
+        const br = document.createElement('div'); br.className='handle br';
+        const bl = document.createElement('div'); bl.className='handle bl';
+        const tr = document.createElement('div'); tr.className='handle tr';
+        const tl = document.createElement('div'); tl.className='handle tl';
+        const rot = document.createElement('div'); rot.className='rotHandle';
+        const badge = document.createElement('div'); badge.className='badgeDim';
+
+        const wTxt = fmtFtIn(it.w);
+        const hTxt = fmtFtIn(it.h);
+        badge.textContent = `${wTxt} × ${hTxt}`;
+
+        el.appendChild(br); el.appendChild(bl); el.appendChild(tr); el.appendChild(tl);
+        el.appendChild(rot);
+        el.appendChild(badge);
+
+        // pointer interactions
+        el.addEventListener('pointerdown', (e)=>onItemPointerDown(e, it.id));
+        br.addEventListener('pointerdown', (e)=>onHandleDown(e, it.id, 'br'));
+        bl.addEventListener('pointerdown', (e)=>onHandleDown(e, it.id, 'bl'));
+        tr.addEventListener('pointerdown', (e)=>onHandleDown(e, it.id, 'tr'));
+        tl.addEventListener('pointerdown', (e)=>onHandleDown(e, it.id, 'tl'));
+        rot.addEventListener('pointerdown', (e)=>onRotateDown(e, it.id));
+
+        UI.room.appendChild(el);
+      }
+      updateSelectedPanel();
+      updateGear();
+    }
+
+    function updateScaleNote(){
+      UI.scaleNote.textContent = State.pxPerFt ? `Scale: 1 ft = ${Math.round(State.pxPerFt)} px • Grid ${State.gridStepFt}ft • Snap ${State.snapStepFt}ft` : 'Scale not set — use Set Scale.';
+    }
+
+    /* =========================================================
+       SELECTION + EDIT
+       ========================================================= */
+    function getItem(id){ return State.items.find(i=>i.id===id) || null; }
+
+    function clearSelection(){ State.selected.clear(); }
+
+    function selectOnly(id){ State.selected.clear(); if (id) State.selected.add(id); }
+
+    function toggleSelection(id){
+      if (State.selected.has(id)) State.selected.delete(id);
+      else State.selected.add(id);
+    }
+
+    function updateSelectedPanel(){
+      const ids = [...State.selected];
+      if (ids.length === 1){
+        const it = getItem(ids[0]);
+        UI.selEmpty.classList.add('hide');
+        UI.selPanel.classList.remove('hide');
+        UI.selLabel.value = it.label || '';
+        UI.selW.textContent = fmtFtIn(it.w);
+        UI.selH.textContent = fmtFtIn(it.h);
+        UI.chipLock.classList.toggle('on', !!it.locked);
+        buildColorChips(it.color || 'brand');
       } else {
-        roundRect(ctx, -o.w/2, -o.h/2, o.w, o.h, r);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.strokeStyle = 'rgba(255,255,255,.10)';
-        ctx.stroke();
+        UI.selEmpty.classList.remove('hide');
+        UI.selPanel.classList.add('hide');
+      }
+    }
+
+    function buildColorChips(activeKey){
+      UI.colorChips.innerHTML = '';
+      for (const c of COLORS){
+        const chip = document.createElement('div');
+        chip.className = 'chip';
+        chip.innerHTML = `<span class="swatch" style="background:${c.hex}"></span>${c.name}`;
+        chip.classList.toggle('on', c.key === activeKey);
+        chip.addEventListener('click', ()=>{
+          const ids = [...State.selected];
+          if (ids.length !== 1) return;
+          const it = getItem(ids[0]);
+          it.color = c.key;
+          renderItems();
+        });
+        UI.colorChips.appendChild(chip);
+      }
+    }
+
+    function deleteSelected(){
+      const ids = new Set(State.selected);
+      State.items = State.items.filter(i=>!ids.has(i.id));
+      clearSelection();
+      renderItems();
+      toast('Deleted');
+    }
+
+    function duplicateSelected(){
+      const ids = [...State.selected];
+      if (!ids.length) return;
+      const newIds = [];
+      for (const id of ids){
+        const src = getItem(id);
+        const copy = deepCopy(src);
+        copy.id = uid();
+        copy.x += 20; copy.y += 20;
+        copy.label = (copy.label || defByType(copy.type)?.name || 'Object');
+        State.items.push(copy);
+        newIds.push(copy.id);
+      }
+      State.selected = new Set(newIds);
+      renderItems();
+      toast('Duplicated');
+    }
+
+    function toggleLockSelected(){
+      const ids = [...State.selected];
+      if (ids.length !== 1) return;
+      const it = getItem(ids[0]);
+      it.locked = !it.locked;
+      renderItems();
+      toast(it.locked ? 'Locked' : 'Unlocked');
+    }
+
+    function alignSelected(mode){
+      const ids = [...State.selected];
+      if (ids.length < 2) return;
+      const items = ids.map(getItem).filter(Boolean);
+      if (!items.length) return;
+      if (mode==='L'){
+        const minX = Math.min(...items.map(i=>i.x));
+        items.forEach(i=>{ if(!i.locked) i.x = minX; });
+      }
+      if (mode==='C'){
+        const minX = Math.min(...items.map(i=>i.x));
+        const maxX = Math.max(...items.map(i=>i.x + i.w));
+        const center = (minX + maxX)/2;
+        items.forEach(i=>{ if(!i.locked) i.x = center - i.w/2; });
+      }
+      if (mode==='R'){
+        const maxX = Math.max(...items.map(i=>i.x + i.w));
+        items.forEach(i=>{ if(!i.locked) i.x = maxX - i.w; });
+      }
+      renderItems();
+      toast('Aligned');
+    }
+
+    function distributeSelected(){
+      const ids = [...State.selected];
+      if (ids.length < 3) return;
+      const items = ids.map(getItem).filter(Boolean).sort((a,b)=>a.x-b.x);
+      const first = items[0];
+      const last = items[items.length-1];
+      const span = (last.x - first.x);
+      const step = span/(items.length-1);
+      items.forEach((i,idx)=>{ if(idx===0||idx===items.length-1) return; if(!i.locked) i.x = first.x + step*idx; });
+      renderItems();
+      toast('Distributed');
+    }
+
+    /* =========================================================
+       ITEMS: CREATE
+       ========================================================= */
+    function addItem(type, at){
+      const d = defByType(type);
+      if (!d) return;
+      const id = uid();
+      const w = d.wFt * State.pxPerFt;
+      const h = d.hFt * State.pxPerFt;
+      const x = snapPx(clamp(at.x - w/2, 0, State.roomFt.w*State.pxPerFt - w));
+      const y = snapPx(clamp(at.y - h/2, 0, State.roomFt.h*State.pxPerFt - h));
+      const it = {
+        id,
+        type,
+        label: d.name,
+        x, y,
+        w, h,
+        rot: 0,
+        locked:false,
+        color: d.color || 'brand'
+      };
+      State.items.push(it);
+      selectOnly(id);
+      renderItems();
+      toast(`Added ${d.name}`);
+    }
+
+    function buildPalette(){
+      UI.palette.innerHTML = '';
+      UI.paletteMobile.innerHTML = '';
+      for (const d of ObjectDefs){
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.innerHTML = `<div><div class="name">${d.name}</div><div class="note">${d.note||''}</div></div><div class="swatch" style="background:${colorHex(d.color||'brand')}"></div>`;
+        tile.addEventListener('click', ()=>{
+          // center of room
+          addItem(d.type, { x: (State.roomFt.w*State.pxPerFt)/2, y: (State.roomFt.h*State.pxPerFt)/2 });
+          closeSheet();
+        });
+        UI.palette.appendChild(tile);
+
+        const tileM = tile.cloneNode(true);
+        tileM.addEventListener('click', ()=>{
+          addItem(d.type, { x: (State.roomFt.w*State.pxPerFt)/2, y: (State.roomFt.h*State.pxPerFt)/2 });
+          closeSheet();
+        });
+        UI.paletteMobile.appendChild(tileM);
+      }
+    }
+
+    /* =========================================================
+       GEAR SUMMARY
+       ========================================================= */
+    function updateGear(){
+      const counts = new Map();
+      for (const it of State.items){
+        const d = defByType(it.type);
+        const key = d?.name || it.type;
+        // Special case: speaker pair counts as 2 speakers
+        if (it.type === 'speaker_pair'){
+          counts.set('Speakers', (counts.get('Speakers')||0) + 2);
+          continue;
+        }
+        // Uplights and moving heads
+        if (it.type === 'uplight'){
+          counts.set('Uplights', (counts.get('Uplights')||0) + 1);
+          continue;
+        }
+        if (it.type === 'moving_head'){
+          counts.set('Moving Heads', (counts.get('Moving Heads')||0) + 1);
+          continue;
+        }
+
+        counts.set(key, (counts.get(key)||0) + 1);
       }
 
-      // text
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = 'rgba(255,255,255,.92)';
-      ctx.textAlign = 'center';
+      const lines = [];
+      if (!State.items.length){
+        UI.gear.textContent = 'No objects yet.';
+        return;
+      }
+      for (const [k,v] of [...counts.entries()].sort((a,b)=>a[0].localeCompare(b[0]))){
+        lines.push(`• ${k}: ${v}`);
+      }
+      UI.gear.textContent = lines.join('\n');
+    }
+
+    /* =========================================================
+       INTERACTIONS
+       ========================================================= */
+    function setMode(m){ State.mode = m; }
+
+    function isPanKey(){ return Key.space; }
+
+    const Key = { space:false, shift:false, meta:false, ctrl:false };
+
+    window.addEventListener('keydown', (e)=>{
+      if (e.code === 'Space') Key.space = true;
+      if (e.key === 'Shift') Key.shift = true;
+      if (e.metaKey) Key.meta = true;
+      if (e.ctrlKey) Key.ctrl = true;
+
+      // shortcuts
+      const isCmd = e.metaKey || e.ctrlKey;
+      if (isCmd && e.key.toLowerCase() === 'd'){
+        e.preventDefault();
+        duplicateSelected();
+      }
+      if (e.key === 'Backspace' || e.key === 'Delete'){
+        if (document.activeElement && ['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        deleteSelected();
+      }
+      if (e.key.toLowerCase() === 'l'){
+        if (document.activeElement && ['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        toggleLockSelected();
+      }
+    });
+
+    window.addEventListener('keyup', (e)=>{
+      if (e.code === 'Space') Key.space = false;
+      if (e.key === 'Shift') Key.shift = false;
+      Key.meta = e.metaKey;
+      Key.ctrl = e.ctrlKey;
+    });
+
+    function onItemPointerDown(e, id){
+      e.preventDefault();
+      const it = getItem(id);
+      if (!it) return;
+
+      // selection
+      if (Key.shift) toggleSelection(id);
+      else selectOnly(id);
+
+      if (it.locked){
+        renderItems();
+        return;
+      }
+
+      // start drag
+      setMode('dragging');
+      State.pointer.id = e.pointerId;
+      PointerCapture.safeCapture(e.currentTarget, e.pointerId);
+
+      const p = screenToRoomPoint(e.clientX, e.clientY);
+      State.drag = {
+        kind:'move',
+        id,
+        start: { x: p.x, y: p.y },
+        orig: { x: it.x, y: it.y }
+      };
+
+      renderItems();
+    }
+
+    function onHandleDown(e, id, corner){
+      e.preventDefault();
+      e.stopPropagation();
+      const it = getItem(id);
+      if (!it || it.locked) return;
+      selectOnly(id);
+      setMode('resizing');
+      State.pointer.id = e.pointerId;
+      PointerCapture.safeCapture(e.currentTarget, e.pointerId);
+      const p = screenToRoomPoint(e.clientX, e.clientY);
+      State.drag = {
+        kind:'resize',
+        id,
+        corner,
+        start: { x:p.x, y:p.y },
+        orig: { x: it.x, y: it.y, w: it.w, h: it.h }
+      };
+      renderItems();
+    }
+
+    function onRotateDown(e, id){
+      e.preventDefault();
+      e.stopPropagation();
+      const it = getItem(id);
+      if (!it || it.locked) return;
+      selectOnly(id);
+      setMode('rotating');
+      State.pointer.id = e.pointerId;
+      PointerCapture.safeCapture(e.currentTarget, e.pointerId);
+      const p = screenToRoomPoint(e.clientX, e.clientY);
+      const cx = it.x + it.w/2;
+      const cy = it.y + it.h/2;
+      const ang0 = Math.atan2(p.y - cy, p.x - cx) * 180/Math.PI;
+      State.drag = {
+        kind:'rotate',
+        id,
+        center:{x:cx,y:cy},
+        ang0,
+        origRot: it.rot
+      };
+      renderItems();
+    }
+
+    UI.viewport.addEventListener('pointerdown', (e)=>{
+      // Click empty space: selection clear (unless shift)
+      const inRoom = e.target === UI.room || e.target === UI.viewport || e.target === UI.scene || e.target === UI.stageLayer;
+      const isItem = e.target.closest && e.target.closest('.item');
+
+      // scale tool
+      if (State.mode === 'setScale'){
+        e.preventDefault();
+        const p = screenToRoomPoint(e.clientX, e.clientY);
+        if (State.scaleTool.step === 0){
+          State.scaleTool.p1 = p;
+          State.scaleTool.step = 1;
+          toast('Scale: click second point');
+        } else {
+          State.scaleTool.p2 = p;
+          const px = dist(State.scaleTool.p1, State.scaleTool.p2);
+          const ft = prompt('Enter real-world length in feet (e.g., 20):', '20');
+          const ftNum = parseFloat(ft||'');
+          if (ftNum && ftNum > 0){
+            State.pxPerFt = px / ftNum;
+            toast(`Scale set: 1ft = ${Math.round(State.pxPerFt)}px`);
+            // update sizes proportionally? we keep existing pixels as-is
+            applyRoom();
+          } else {
+            toast('Scale cancelled');
+          }
+          State.scaleTool.step = 0;
+          State.scaleTool.p1 = null;
+          State.scaleTool.p2 = null;
+          setMode('idle');
+        }
+        return;
+      }
+
+      if (!isItem && inRoom){
+        if (!Key.shift) clearSelection();
+        renderItems();
+      }
+
+      // pan
+      if (isPanKey()){
+        e.preventDefault();
+        setMode('panning');
+        State.pointer.id = e.pointerId;
+        PointerCapture.safeCapture(UI.viewport, e.pointerId);
+        State.pointer.startX = e.clientX;
+        State.pointer.startY = e.clientY;
+        State.pointer.lastX = e.clientX;
+        State.pointer.lastY = e.clientY;
+      }
+    });
+
+    UI.viewport.addEventListener('pointermove', (e)=>{
+      if (State.pointer.id !== e.pointerId) return;
+
+      // panning
+      if (State.mode === 'panning'){
+        const dx = e.clientX - State.pointer.lastX;
+        const dy = e.clientY - State.pointer.lastY;
+        State.pointer.lastX = e.clientX;
+        State.pointer.lastY = e.clientY;
+        State.view.panX += dx;
+        State.view.panY += dy;
+        applyView();
+        return;
+      }
+
+      // item interactions
+      if (!State.drag) return;
+      const it = getItem(State.drag.id);
+      if (!it) return;
+      const p = screenToRoomPoint(e.clientX, e.clientY);
+
+      if (State.drag.kind === 'move'){
+        const dx = p.x - State.drag.start.x;
+        const dy = p.y - State.drag.start.y;
+        let nx = State.drag.orig.x + dx;
+        let ny = State.drag.orig.y + dy;
+        nx = clamp(nx, 0, State.roomFt.w*State.pxPerFt - it.w);
+        ny = clamp(ny, 0, State.roomFt.h*State.pxPerFt - it.h);
+        it.x = snapPx(nx);
+        it.y = snapPx(ny);
+        renderItems();
+      }
+
+      if (State.drag.kind === 'resize'){
+        const o = State.drag.orig;
+        let nx=o.x, ny=o.y, nw=o.w, nh=o.h;
+        const dx = p.x - State.drag.start.x;
+        const dy = p.y - State.drag.start.y;
+        const min = State.pxPerFt * 0.5;
+
+        if (State.drag.corner==='br'){
+          nw = clamp(o.w + dx, min, State.roomFt.w*State.pxPerFt);
+          nh = clamp(o.h + dy, min, State.roomFt.h*State.pxPerFt);
+        }
+        if (State.drag.corner==='tr'){
+          nw = clamp(o.w + dx, min, State.roomFt.w*State.pxPerFt);
+          nh = clamp(o.h - dy, min, State.roomFt.h*State.pxPerFt);
+          ny = o.y + (o.h - nh);
+        }
+        if (State.drag.corner==='bl'){
+          nw = clamp(o.w - dx, min, State.roomFt.w*State.pxPerFt);
+          nh = clamp(o.h + dy, min, State.roomFt.h*State.pxPerFt);
+          nx = o.x + (o.w - nw);
+        }
+        if (State.drag.corner==='tl'){
+          nw = clamp(o.w - dx, min, State.roomFt.w*State.pxPerFt);
+          nh = clamp(o.h - dy, min, State.roomFt.h*State.pxPerFt);
+          nx = o.x + (o.w - nw);
+          ny = o.y + (o.h - nh);
+        }
+
+        // clamp to room
+        nx = clamp(nx, 0, State.roomFt.w*State.pxPerFt - nw);
+        ny = clamp(ny, 0, State.roomFt.h*State.pxPerFt - nh);
+        it.x = snapPx(nx);
+        it.y = snapPx(ny);
+        it.w = Math.max(min, snapPx(nw));
+        it.h = Math.max(min, snapPx(nh));
+        renderItems();
+      }
+
+      if (State.drag.kind === 'rotate'){
+        const cx = State.drag.center.x;
+        const cy = State.drag.center.y;
+        const ang = Math.atan2(p.y - cy, p.x - cx) * 180/Math.PI;
+        it.rot = normalizeAngle(State.drag.origRot + (ang - State.drag.ang0));
+        renderItems();
+      }
+    });
+
+    UI.viewport.addEventListener('pointerup', (e) => {
+      if (State.pointer.id !== e.pointerId) return;
+      PointerCapture.reset(e.pointerId);
+      State.pointer.id = null;
+      State.drag = null;
+      if (State.mode !== 'setScale') setMode('idle');
+      updateSelectedPanel();
+    });
+
+    UI.viewport.addEventListener('pointercancel', (e) => {
+      if (State.pointer.id === e.pointerId){
+        PointerCapture.reset(e.pointerId);
+        State.pointer.id = null;
+        State.drag = null;
+        if (State.mode !== 'setScale') setMode('idle');
+        updateSelectedPanel();
+      }
+    });
+
+    // zoom
+    UI.viewport.addEventListener('wheel', (e)=>{
+      e.preventDefault();
+      const delta = -e.deltaY;
+      const factor = delta > 0 ? 1.08 : 0.92;
+      const newZoom = clamp(State.view.zoom * factor, 0.25, 4);
+      State.view.zoom = newZoom;
+      applyView();
+    }, { passive:false });
+
+    /* =========================================================
+       BACKGROUND
+       ========================================================= */
+    function bgFit(){
+      if (!State.bg.src){ toast('No background'); return; }
+      // fit within room (contain)
+      const img = UI.bgImage;
+      const rw = State.roomFt.w * State.pxPerFt;
+      const rh = State.roomFt.h * State.pxPerFt;
+      const iw = img.naturalWidth || rw;
+      const ih = img.naturalHeight || rh;
+      const s = Math.min(rw/iw, rh/ih);
+      State.bg.scale = s;
+      State.bg.x = (rw - iw*s)/2;
+      State.bg.y = (rh - ih*s)/2;
+      renderBg();
+      toast('Background fit');
+    }
+
+    UI.bgUpload.addEventListener('change', async (e)=>{
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      const data = await fileToDataURL(f);
+      State.bg.src = data;
+      // wait for image to load
+      UI.bgImage.onload = ()=>{ bgFit(); };
+      renderBg();
+      UI.bgUpload.value = '';
+    });
+
+    function fileToDataURL(file){
+      return new Promise((res,rej)=>{
+        const r = new FileReader();
+        r.onload = ()=>res(r.result);
+        r.onerror = rej;
+        r.readAsDataURL(file);
+      });
+    }
+
+    /* =========================================================
+       SAVE / LOAD
+       ========================================================= */
+    function getProject(){
+      return {
+        version: State.version,
+        eventName: State.eventName,
+        eventNotes: State.eventNotes,
+        theme: State.theme,
+        roomFt: State.roomFt,
+        pxPerFt: State.pxPerFt,
+        gridOn: State.gridOn,
+        snapOn: State.snapOn,
+        gridStepFt: State.gridStepFt,
+        snapStepFt: State.snapStepFt,
+        bg: State.bg,
+        view: State.view,
+        items: State.items,
+      };
+    }
+
+    function loadProject(p){
+      if (!p || typeof p !== 'object') return;
+      State.version = p.version || 1;
+      State.eventName = p.eventName || '';
+      State.eventNotes = p.eventNotes || '';
+      State.theme = p.theme || 'dark';
+      State.roomFt = p.roomFt || {w:60,h:40};
+      State.pxPerFt = p.pxPerFt || 40;
+      State.gridOn = (p.gridOn !== undefined) ? p.gridOn : true;
+      State.snapOn = (p.snapOn !== undefined) ? p.snapOn : true;
+      State.gridStepFt = p.gridStepFt || 2;
+      State.snapStepFt = p.snapStepFt || State.gridStepFt;
+      State.bg = p.bg || State.bg;
+      State.view = p.view || State.view;
+      State.items = Array.isArray(p.items) ? p.items : [];
+      clearSelection();
+
+      // sync UI
+      UI.eventName.value = State.eventName;
+      UI.eventNotes.value = State.eventNotes;
+      UI.roomW.value = State.roomFt.w;
+      UI.roomH.value = State.roomFt.h;
+      UI.gridStep.value = String(State.gridStepFt);
+      State.snapStepFt = State.gridStepFt;
+
+      applyTheme();
+      renderBg();
+      applyRoom();
+      applyView();
+      renderItems();
+      renderGrid();
+      updateGear();
+      updateScaleNote();
+
+      toast('Loaded');
+    }
+
+    function downloadProject(){
+      const p = getProject();
+      const name = safeFile(State.eventName || 'SleeveEvents_RoomPlan') || 'SleeveEvents_RoomPlan';
+      const blob = new Blob([JSON.stringify(p, null, 2)], { type:'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${name}.json`;
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 800);
+      toast('Downloaded project');
+    }
+
+    function uploadProject(){
+      UI.fileUpload.click();
+    }
+
+    UI.fileUpload.addEventListener('change', async (e)=>{
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      const txt = await f.text();
+      try{
+        const p = JSON.parse(txt);
+        loadProject(p);
+      } catch(err){
+        alert('Invalid JSON file');
+      }
+      UI.fileUpload.value = '';
+    });
+
+    function saveLocal(){
+      const p = getProject();
+      localStorage.setItem('sleeve_room_planner_v1', JSON.stringify(p));
+      toast('Saved locally');
+    }
+
+    function loadLocal(){
+      const txt = localStorage.getItem('sleeve_room_planner_v1');
+      if (!txt){ toast('No local save'); return; }
+      try{
+        loadProject(JSON.parse(txt));
+      } catch(_){
+        toast('Local save corrupted');
+      }
+    }
+
+    /* =========================================================
+       SHARE LINK
+       ========================================================= */
+    async function copyShareLink(){
+      const url = encodeProjectToURL(getProject());
+      try{
+        await navigator.clipboard.writeText(url);
+        toast('Share link copied');
+      } catch(_){
+        prompt('Copy link:', url);
+      }
+    }
+
+    /* =========================================================
+       DEMOS
+       ========================================================= */
+    function demoWedding(){
+      const p = getProject();
+      p.eventName = 'Demo Wedding';
+      p.eventNotes = 'Demo layout: tables, sweetheart table, DJ, dance floor, uplights.';
+      p.roomFt = { w: 80, h: 50 };
+      p.gridStepFt = 2;
+      p.snapStepFt = 2;
+      p.items = [];
+      // place DJ + dance floor
+      const px = p.pxPerFt;
+      const add = (type, xFt, yFt, rot=0, label=null)=>{
+        const d = defByType(type);
+        p.items.push({
+          id: uid(),
+          type,
+          label: label || d.name,
+          x: xFt*px,
+          y: yFt*px,
+          w: d.wFt*px,
+          h: d.hFt*px,
+          rot,
+          locked:false,
+          color: d.color
+        });
+      };
+      add('dj_booth', 36, 6, 0);
+      add('speaker_pair', 28, 6, 0, 'Speakers');
+      add('dance_floor', 34, 16, 0);
+      add('sweetheart', 36, 32, 0);
+      add('photo_booth', 64, 10, 0);
+
+      // rounds grid
+      for (let r=0;r<3;r++){
+        for (let c=0;c<5;c++){
+          add('round_60', 10 + c*10, 10 + r*10, 0);
+        }
+      }
+
+      // uplights around perimeter
+      for (let i=0;i<14;i++) add('uplight', 2 + i*5, 2);
+      for (let i=0;i<10;i++) add('uplight', 2, 5 + i*4);
+      for (let i=0;i<14;i++) add('uplight', 2 + i*5, 48);
+      for (let i=0;i<10;i++) add('uplight', 78, 5 + i*4);
+
+      loadProject(p);
+      toast('Loaded demo wedding');
+    }
+
+    function demoMitzvah(){
+      const p = getProject();
+      p.eventName = 'Demo Bar Mitzvah';
+      p.eventNotes = 'Demo layout: dance floor center, DJ & stage, lounge + tables.';
+      p.roomFt = { w: 70, h: 45 };
+      p.gridStepFt = 2;
+      p.snapStepFt = 2;
+      p.items = [];
+      const px = p.pxPerFt;
+      const add = (type, xFt, yFt, rot=0, label=null)=>{
+        const d = defByType(type);
+        p.items.push({ id: uid(), type, label: label || d.name, x:xFt*px, y:yFt*px, w:d.wFt*px, h:d.hFt*px, rot, locked:false, color:d.color });
+      };
+      add('stage', 28, 4);
+      add('dj_booth', 32, 10);
+      add('speaker_pair', 20, 10, 0, 'Speakers');
+      add('dance_floor', 28, 18);
+      add('photo_booth', 56, 8);
+      add('bar', 50, 32);
+
+      // rounds
+      for (let r=0;r<2;r++){
+        for (let c=0;c<4;c++) add('round_72', 8 + c*12, 30 + r*12);
+      }
+
+      // cocktail
+      for (let i=0;i<6;i++) add('cocktail', 12 + i*6, 8);
+
+      // moving heads (like lighting positions)
+      for (let i=0;i<6;i++) add('moving_head', 6 + i*10, 2);
+
+      loadProject(p);
+      toast('Loaded demo mitzvah');
+    }
+
+    /* =========================================================
+       EXPORT
+       ========================================================= */
+
+    function withExportMode(fn){
+      document.body.classList.add('exporting');
+      // lock help off
+      UI.help.style.display = 'none';
+      try{ fn(); }
+      finally{
+        document.body.classList.remove('exporting');
+        UI.help.style.display = '';
+      }
+    }
+
+    function drawExportFooter(ctx, w, h, scale){
+      const pad = 24 * scale;
+      const fontSize = 16 * scale;
+      ctx.save();
+      ctx.globalAlpha = 0.88;
+      ctx.fillStyle = State.theme === 'dark' ? 'rgba(0,0,0,.55)' : 'rgba(255,255,255,.75)';
+      const boxH = 54 * scale;
+      ctx.fillRect(0, h - boxH, w, boxH);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = State.theme === 'dark' ? 'rgba(255,255,255,.92)' : 'rgba(17,24,39,.92)';
+      ctx.font = `900 ${fontSize}px ${getComputedStyle(document.body).fontFamily}`;
       ctx.textBaseline = 'middle';
-      const fontSize = clamp(Math.min(o.w, o.h) * 0.16, 10, 16);
-      ctx.font = `800 ${fontSize}px ${State.ui.theme === 'light' ? State.ui.theme : State.ui.theme}`;
-      const label = (o.label || def.title).toUpperCase();
+      const left = pad;
+      const y = h - (boxH/2);
+      const title = ExportBrand.site;
+      ctx.fillText(title, left, y);
 
-      // label fit
-      const maxWidth = o.w * 0.82;
-      const lines = wrapText(ctx, label, maxWidth);
-      const lineH = fontSize * 1.15;
-      const totalH = lines.length * lineH;
-      const y0 = -totalH/2 + lineH/2;
-      for (let i=0; i<lines.length; i++){
-        ctx.fillText(lines[i], 0, y0 + i*lineH);
-      }
-
-      // dim label (if calibrated)
-      if (State.scale.calibrated){
-        const dim = `${formatFeetIn(pxToFeet(o.w))} × ${formatFeetIn(pxToFeet(o.h))}`;
-        ctx.font = `700 ${Math.max(10, fontSize-4)}px ${State.ui.theme === 'light' ? State.ui.theme : State.ui.theme}`;
-        ctx.fillStyle = 'rgba(255,255,255,.72)';
-        ctx.fillText(dim, 0, (o.round ? (o.h*0.18) : (o.h*0.30)));
-      }
-
+      ctx.font = `800 ${Math.round(fontSize*0.88)}px ${getComputedStyle(document.body).fontFamily}`;
+      const meta = `${ExportBrand.tagline}  •  ${ExportBrand.email}`;
+      const metaW = ctx.measureText(meta).width;
+      ctx.fillText(meta, w - pad - metaW, y);
       ctx.restore();
     }
 
-    function wrapText(ctx, text, maxWidth){
-      const words = String(text).split(/\s+/).filter(Boolean);
-      if (words.length <= 1) return [text];
-      const lines = [];
-      let line = words[0];
-      for (let i=1;i<words.length;i++){
-        const test = line + " " + words[i];
-        if (ctx.measureText(test).width <= maxWidth) line = test;
-        else { lines.push(line); line = words[i]; }
+    async function exportPNG(){
+      // Render room to canvas at high res
+      const scale = 2; // hi-res
+      const roomW = State.roomFt.w * State.pxPerFt;
+      const roomH = State.roomFt.h * State.pxPerFt;
+      const c = document.createElement('canvas');
+      c.width = Math.round(roomW * scale);
+      c.height = Math.round(roomH * scale);
+      const ctx = c.getContext('2d');
+      ctx.scale(scale, scale);
+
+      // Background
+      ctx.fillStyle = getComputedStyle(UI.viewport).backgroundColor || '#ffffff';
+      ctx.fillRect(0,0,roomW,roomH);
+
+      // bg image
+      if (State.bg.src){
+        await ensureImageLoaded(UI.bgImage);
+        const iw = UI.bgImage.naturalWidth;
+        const ih = UI.bgImage.naturalHeight;
+        ctx.save();
+        ctx.globalAlpha = 0.95;
+        ctx.translate(State.bg.x, State.bg.y);
+        ctx.scale(State.bg.scale, State.bg.scale);
+        ctx.drawImage(UI.bgImage, 0, 0, iw, ih);
+        ctx.restore();
       }
-      lines.push(line);
-      // keep it max 2 lines for cleanliness
-      if (lines.length > 2){
-        const joined = lines.join(' ');
-        return [joined];
+
+      // grid (optional)
+      if (State.gridOn){
+        const step = State.gridStepFt * State.pxPerFt;
+        ctx.save();
+        ctx.strokeStyle = State.theme==='dark' ? 'rgba(255,255,255,.06)' : 'rgba(17,24,39,.06)';
+        ctx.lineWidth = 1;
+        for (let x=0; x<=roomW; x+=step){
+          ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,roomH); ctx.stroke();
+        }
+        for (let y=0; y<=roomH; y+=step){
+          ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(roomW,y); ctx.stroke();
+        }
+        ctx.restore();
       }
-      return lines;
+
+      // room border
+      ctx.save();
+      ctx.strokeStyle = State.theme==='dark' ? 'rgba(255,255,255,.22)' : 'rgba(17,24,39,.25)';
+      ctx.lineWidth = 2;
+      roundRect(ctx, 0, 0, roomW, roomH, 14);
+      ctx.stroke();
+      ctx.restore();
+
+      // items
+      for (const it of State.items){
+        drawItem(ctx, it);
+      }
+
+      // footer branding
+      drawExportFooter(ctx, roomW, roomH, 1);
+
+      const blob = await new Promise(res=>c.toBlob(res, 'image/png'));
+      const name = safeFile(State.eventName || 'SleeveEvents_RoomPlan') || 'SleeveEvents_RoomPlan';
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${name}.png`;
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 800);
+      toast('Exported PNG');
     }
 
-    function roundRect(ctx, x, y, w, h, r){
+    function roundRect(ctx, x,y,w,h,r){
       const rr = Math.min(r, w/2, h/2);
       ctx.beginPath();
       ctx.moveTo(x+rr, y);
@@ -1139,1148 +2164,398 @@
       ctx.closePath();
     }
 
-    function drawSelection(){
-      if (State.selection.ids.length === 0) return;
-      // Only draw handles for the active (first) selection
-      const id = State.selection.ids[State.selection.ids.length - 1];
-      const o = getObjectById(id);
-      if (!o) return;
-
-      const corners = getObjectCorners(o);
-
-      ctx.save();
-      ctx.translate(State.view.panX * State.view.zoom, State.view.panY * State.view.zoom);
-      ctx.scale(State.view.zoom, State.view.zoom);
-
-      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--selection').trim() || 'rgba(251,191,36,.9)';
-      ctx.lineWidth = 2 / State.view.zoom;
-      ctx.setLineDash([6/State.view.zoom, 5/State.view.zoom]);
-
-      ctx.beginPath();
-      ctx.moveTo(corners[0].x, corners[0].y);
-      for (let i=1;i<corners.length;i++) ctx.lineTo(corners[i].x, corners[i].y);
-      ctx.closePath();
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // handles
-      const handles = getHandles(o);
-      const r = 6 / State.view.zoom;
-      const fill = getComputedStyle(document.documentElement).getPropertyValue('--handle').trim() || 'rgba(251,191,36,.95)';
-
-      for (const key of ['nw','n','ne','e','se','s','sw','w']){
-        const p = handles[key];
-        ctx.fillStyle = fill;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, r, 0, Math.PI*2);
-        ctx.fill();
-      }
-      // rotate handle
-      ctx.strokeStyle = fill;
-      ctx.lineWidth = 2 / State.view.zoom;
-      ctx.beginPath();
-      ctx.moveTo(handles.n.x, handles.n.y);
-      ctx.lineTo(handles.rot.x, handles.rot.y);
-      ctx.stroke();
-      ctx.fillStyle = fill;
-      ctx.beginPath();
-      ctx.arc(handles.rot.x, handles.rot.y, r, 0, Math.PI*2);
-      ctx.fill();
-
-      ctx.restore();
+    async function ensureImageLoaded(img){
+      if (!img || !img.src) return;
+      if (img.complete && img.naturalWidth) return;
+      await new Promise(res=>{ img.onload = ()=>res(); img.onerror=()=>res(); });
     }
 
-    function drawScaleOverlay(){
-      const I = State.interaction;
-      if (I.tool !== 'setScale') return;
-
-      const p1 = I.scaleP1;
-      const p2 = I.scaleP2 || I.last;
-      if (!p1 || !p2) return;
-
-      const s1 = worldToScreen(p1.x, p1.y);
-      const s2 = worldToScreen(p2.x, p2.y);
-
+    function drawItem(ctx, it){
+      const d = defByType(it.type);
+      const hex = colorHex(it.color || 'brand');
       ctx.save();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = '#fbbf24';
-      ctx.fillStyle = '#fbbf24';
+      // rotate around center
+      const cx = it.x + it.w/2;
+      const cy = it.y + it.h/2;
+      ctx.translate(cx, cy);
+      ctx.rotate((it.rot||0) * Math.PI/180);
+      ctx.translate(-cx, -cy);
 
-      ctx.beginPath();
-      ctx.moveTo(s1.x, s1.y);
-      ctx.lineTo(s2.x, s2.y);
-      ctx.stroke();
+      // body
+      ctx.fillStyle = hex;
+      ctx.globalAlpha = State.theme==='dark' ? 0.28 : 0.16;
+      if (d?.shape === 'circle'){
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, it.w/2, it.h/2, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.globalAlpha = 0.85;
+        ctx.strokeStyle = State.theme==='dark' ? 'rgba(255,255,255,.16)' : 'rgba(17,24,39,.16)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      } else {
+        roundRect(ctx, it.x, it.y, it.w, it.h, 12);
+        ctx.fill();
+        ctx.globalAlpha = 0.85;
+        ctx.strokeStyle = State.theme==='dark' ? 'rgba(255,255,255,.16)' : 'rgba(17,24,39,.16)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
 
-      ctx.beginPath();
-      ctx.arc(s1.x, s1.y, 4, 0, Math.PI*2);
-      ctx.arc(s2.x, s2.y, 4, 0, Math.PI*2);
-      ctx.fill();
-
-      const dx = s2.x - s1.x;
-      const dy = s2.y - s1.y;
-      const distPx = Math.hypot(dx, dy) / State.view.zoom;
-      const distFt = pxToFeet(distPx);
-
-      const midX = (s1.x + s2.x)/2;
-      const midY = (s1.y + s2.y)/2;
-      ctx.font = `700 12px ${State.ui.theme === 'light' ? 'var(--sans)' : 'var(--sans)'}`;
-      ctx.fillStyle = '#111827';
-      const label = State.scale.calibrated ? `${formatFeetIn(distFt)} (current)` : `${Math.round(distPx)} px`;
-      const pad = 6;
-      const tw = ctx.measureText(label).width;
-      ctx.fillStyle = 'rgba(17,24,39,.85)';
-      ctx.beginPath();
-      roundRect(ctx, midX - tw/2 - pad, midY - 10 - pad, tw + pad*2, 20 + pad*2, 10);
-      ctx.fill();
-      ctx.fillStyle = '#fbbf24';
+      // label
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = State.theme==='dark' ? 'rgba(255,255,255,.92)' : 'rgba(17,24,39,.92)';
+      ctx.font = `900 12px ${getComputedStyle(document.body).fontFamily}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(label, midX, midY);
+      const label = it.label || d?.name || '';
+      ctx.fillText(label, cx, cy);
 
       ctx.restore();
-    }
-
-    /* =========================================================
-       INPUT / INTERACTION
-       - Smooth move, resize, rotate
-       - Zoom + Pan
-       - Background pan/zoom (when unlocked)
-       ========================================================= */
-
-    function getCanvasXY(evt){
-      const rect = canvas.getBoundingClientRect();
-      return {
-        x: evt.clientX - rect.left,
-        y: evt.clientY - rect.top,
-      };
-    }
-
-    function beginPointer(evt){
-      State.interaction.pointerDown = true;
-      State.interaction.dragging = false;
-
-      const s = getCanvasXY(evt);
-      const w = screenToWorld(s.x, s.y);
-      State.interaction.start = {x: w.x, y: w.y};
-      State.interaction.last = {x: w.x, y: w.y};
-
-      const spaceDown = Keys.space;
-
-      // Scale tool
-      if (State.interaction.tool === 'setScale'){
-        if (!State.interaction.scaleP1){
-          State.interaction.scaleP1 = {x: w.x, y: w.y};
-          State.interaction.scaleP2 = null;
-          scheduleRender();
-          return;
-        }
-        if (!State.interaction.scaleP2){
-          State.interaction.scaleP2 = {x: w.x, y: w.y};
-          scheduleRender();
-          // Prompt user for real length
-          const pxDist = Math.hypot(State.interaction.scaleP2.x - State.interaction.scaleP1.x, State.interaction.scaleP2.y - State.interaction.scaleP1.y);
-          const val = prompt("Enter the real-world length between the two points (feet). Examples: 12, 12.5, 12'6\"", "12");
-          const feet = parseFeetInput(val);
-          if (isFinite(feet) && feet > 0.001){
-            State.scale.pxPerFoot = pxDist / feet;
-            State.scale.calibrated = true;
-            document.getElementById('scaleHint').innerHTML = `Scale set: <b>1 ft = ${Math.round(State.scale.pxPerFoot)} px</b> • Object dimensions now show feet/in.`;
-            State.meta.updatedAt = new Date().toISOString();
-            scheduleRender();
-          } else {
-            alert("Scale not set — invalid length.");
-          }
-          // Exit scale tool
-          State.interaction.tool = 'select';
-          document.getElementById('btnSetScale').classList.remove('on');
-          State.interaction.scaleP1 = null;
-          State.interaction.scaleP2 = null;
-          return;
-        }
-      }
-
-      // Pan if holding space
-      if (spaceDown){
-        State.interaction.dragMode = 'pan';
-        return;
-      }
-
-      // Hit object
-      const hit = hitTestObject(w);
-      if (!hit){
-        clearSelection();
-        // background move (if exists and unlocked)
-        if (State.background.image && !State.ui.backgroundLocked){
-          State.interaction.dragMode = 'bg';
-          State.interaction.objStart = { bx: State.background.offsetX, by: State.background.offsetY };
-        } else {
-          State.interaction.dragMode = 'pan';
-        }
-        return;
-      }
-
-      // Select logic
-      const shift = evt.shiftKey;
-      if (shift) toggleSelection(hit.id);
-      else if (!isSelected(hit.id)) setSelection([hit.id]);
-
-      State.interaction.activeId = hit.id;
-
-      // Handle test for active
-      const active = getObjectById(State.selection.ids[State.selection.ids.length-1]);
-      const handle = active ? hitTestHandle(active, w) : null;
-      if (active && handle){
-        if (handle.type === 'rotate'){
-          State.interaction.dragMode = 'rotate';
-          const ang = Math.atan2(w.y - active.y, w.x - active.x);
-          State.interaction.objStart = { rot: active.rot, startAng: ang };
-          return;
-        }
-        if (handle.type === 'resize'){
-          State.interaction.dragMode = 'resize';
-          State.interaction.objStart = { w: active.w, h: active.h, x: active.x, y: active.y, rot: active.rot, handle: handle.key };
-          return;
-        }
-      }
-
-      // Move
-      State.interaction.dragMode = 'move';
-      State.interaction.objStart = State.selection.ids.map(id => {
-        const o = getObjectById(id);
-        return o ? { id, x:o.x, y:o.y } : null;
-      }).filter(Boolean);
-    }
-
-    function movePointer(evt){
-      const s = getCanvasXY(evt);
-      const w = screenToWorld(s.x, s.y);
-      State.interaction.last = {x: w.x, y: w.y};
-
-      if (!State.interaction.pointerDown){
-        // hover handle
-        const active = State.selection.ids.length ? getObjectById(State.selection.ids[State.selection.ids.length-1]) : null;
-        State.interaction.hoverHandle = active ? hitTestHandle(active, w) : null;
-        canvas.style.cursor = State.interaction.hoverHandle ? (State.interaction.hoverHandle.type === 'rotate' ? 'grab' : 'nwse-resize') : 'default';
-        scheduleRender();
-        return;
-      }
-
-      const dx = w.x - State.interaction.start.x;
-      const dy = w.y - State.interaction.start.y;
-      if (Math.hypot(dx,dy) > (2 / State.view.zoom)) State.interaction.dragging = true;
-
-      const mode = State.interaction.dragMode;
-      if (mode === 'pan'){
-        State.view.panX += (w.x - State.interaction.last.x) ? 0 : 0;
-        // We implement pan in screen space for smoother feel
-        // Convert screen delta to world delta
-        const rect = canvas.getBoundingClientRect();
-        const sx = evt.movementX;
-        const sy = evt.movementY;
-        State.view.panX += sx / State.view.zoom;
-        State.view.panY += sy / State.view.zoom;
-        scheduleRender();
-        return;
-      }
-
-      if (mode === 'bg'){
-        const start = State.interaction.objStart;
-        State.background.offsetX = start.bx + dx;
-        State.background.offsetY = start.by + dy;
-        scheduleRender();
-        return;
-      }
-
-      const active = State.selection.ids.length ? getObjectById(State.selection.ids[State.selection.ids.length-1]) : null;
-      if (!active) return;
-
-      if (mode === 'move'){
-        const start = State.interaction.objStart;
-        const stepFt = State.ui.snap ? State.ui.snapStepFt : 0;
-        for (const item of start){
-          const o = getObjectById(item.id);
-          if (!o) continue;
-          let nx = item.x + dx;
-          let ny = item.y + dy;
-          if (State.ui.snap && stepFt > 0){
-            const stepPx = feetToPx(stepFt);
-            nx = Math.round(nx / stepPx) * stepPx;
-            ny = Math.round(ny / stepPx) * stepPx;
-          }
-          o.x = nx;
-          o.y = ny;
-        }
-        State.meta.updatedAt = new Date().toISOString();
-        scheduleRender();
-        updateSelectedPanelLive();
-        return;
-      }
-
-      if (mode === 'rotate'){
-        const start = State.interaction.objStart;
-        const ang = Math.atan2(w.y - active.y, w.x - active.x);
-        const delta = ang - start.startAng;
-        active.rot = start.rot + delta;
-        // snap rotation to 5° with shift
-        if (evt.shiftKey){
-          const step = toRadians(5);
-          active.rot = Math.round(active.rot / step) * step;
-        }
-        State.meta.updatedAt = new Date().toISOString();
-        scheduleRender();
-        updateSelectedPanelLive();
-        return;
-      }
-
-      if (mode === 'resize'){
-        // Resize in object-local space for predictable behavior
-        const s0 = State.interaction.objStart;
-        const local = worldToObjectLocal(active, w);
-        const handle = s0.handle;
-
-        let newW = s0.w;
-        let newH = s0.h;
-
-        // local coords: (-w/2..w/2, -h/2..h/2)
-        // handle defines which edges move
-        if (handle.includes('e')) newW = clamp((local.x + s0.w/2) * 2, feetToPx(1), feetToPx(200));
-        if (handle.includes('w')) newW = clamp((s0.w/2 - local.x) * 2, feetToPx(1), feetToPx(200));
-        if (handle.includes('s')) newH = clamp((local.y + s0.h/2) * 2, feetToPx(1), feetToPx(200));
-        if (handle.includes('n')) newH = clamp((s0.h/2 - local.y) * 2, feetToPx(1), feetToPx(200));
-
-        // Keep aspect ratio with shift
-        if (evt.shiftKey){
-          const ar = s0.w / s0.h;
-          if (Math.abs(newW - s0.w) > Math.abs(newH - s0.h)) newH = newW / ar;
-          else newW = newH * ar;
-        }
-
-        // Snap to feet step if calibrated + snap
-        if (State.scale.calibrated && State.ui.snap){
-          const stepFt = State.ui.snapStepFt || 1;
-          const wFt = roundToStep(pxToFeet(newW), stepFt);
-          const hFt = roundToStep(pxToFeet(newH), stepFt);
-          newW = feetToPx(wFt);
-          newH = feetToPx(hFt);
-        }
-
-        active.w = newW;
-        active.h = newH;
-        State.meta.updatedAt = new Date().toISOString();
-        scheduleRender();
-        updateSelectedPanelLive();
-        return;
-      }
-    }
-
-    function endPointer(){
-      State.interaction.pointerDown = false;
-      State.interaction.dragging = false;
-      State.interaction.dragMode = null;
-      State.interaction.activeId = null;
-      State.interaction.objStart = null;
-      scheduleRender();
-    }
-
-    function worldToObjectLocal(o, worldPt){
-      // translate into object space then rotate by -rot
-      const dx = worldPt.x - o.x;
-      const dy = worldPt.y - o.y;
-      const s = Math.sin(-o.rot), c = Math.cos(-o.rot);
-      return { x: dx*c - dy*s, y: dx*s + dy*c };
-    }
-
-    function onWheel(evt){
-      evt.preventDefault();
-      const s = getCanvasXY(evt);
-      const before = screenToWorld(s.x, s.y);
-
-      const delta = -evt.deltaY;
-      const zoomFactor = Math.pow(1.0015, delta);
-      const nextZoom = clamp(State.view.zoom * zoomFactor, State.view.minZoom, State.view.maxZoom);
-
-      // zoom to cursor
-      State.view.zoom = nextZoom;
-      const after = screenToWorld(s.x, s.y);
-      State.view.panX += (after.x - before.x);
-      State.view.panY += (after.y - before.y);
-
-      scheduleRender();
-    }
-
-    /* =========================================================
-       UI BINDINGS
-       ========================================================= */
-
-    const $ = (id) => document.getElementById(id);
-
-    function buildPalette(){
-      const el = $('palette');
-      el.innerHTML = '';
-      for (const def of PaletteDefs){
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.dataset.key = def.key;
-        card.innerHTML = `<div class="t">${escapeHtml(def.title)}</div><div class="m">${escapeHtml(def.note)}</div>`;
-        card.addEventListener('click', () => {
-          const center = screenToWorld(canvas.getBoundingClientRect().width/2, canvas.getBoundingClientRect().height/2);
-          createObject(def.key, center);
-        });
-        // drag to canvas
-        card.draggable = true;
-        card.addEventListener('dragstart', (e) => {
-          e.dataTransfer.setData('text/plain', def.key);
-          e.dataTransfer.effectAllowed = 'copy';
-        });
-        el.appendChild(card);
-      }
-    }
-
-    function escapeHtml(s){
-      return String(s).replace(/[&<>\"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
-    }
-
-    function bindUI(){
-      // theme
-      $('btnTheme').addEventListener('click', () => {
-        setTheme(State.ui.theme === 'dark' ? 'light' : 'dark');
-      });
-
-      // grid
-      $('btnGrid').addEventListener('click', () => {
-        State.ui.grid = !State.ui.grid;
-        $('btnGrid').classList.toggle('on', State.ui.grid);
-        scheduleRender();
-      });
-
-      // snap
-      $('btnSnap').addEventListener('click', () => {
-        State.ui.snap = !State.ui.snap;
-        $('btnSnap').classList.toggle('on', State.ui.snap);
-        scheduleRender();
-      });
-
-      // snap step
-      $('snapStep').addEventListener('change', (e) => {
-        State.ui.snapStepFt = parseInt(e.target.value, 10) || 1;
-        scheduleRender();
-      });
-
-      // room preset
-      $('roomPreset').addEventListener('change', (e) => {
-        const v = e.target.value;
-        if (!v){
-          State.room.enabled = false;
-        } else {
-          const [w,h] = v.split('x').map(n => parseInt(n,10));
-          State.room.enabled = true;
-          State.room.widthFt = w;
-          State.room.heightFt = h;
-          // position camera so room is visible
-          fitRoomToView();
-        }
-        scheduleRender();
-      });
-
-      // set scale
-      $('btnSetScale').addEventListener('click', () => {
-        const on = State.interaction.tool === 'setScale';
-        State.interaction.tool = on ? 'select' : 'setScale';
-        $('btnSetScale').classList.toggle('on', !on);
-        State.interaction.scaleP1 = null;
-        State.interaction.scaleP2 = null;
-        scheduleRender();
-      });
-
-      // background upload
-      $('btnBg').addEventListener('click', () => $('fileBg').click());
-      $('fileBg').addEventListener('change', handleBgFile);
-
-      // lock bg
-      $('btnLockBg').addEventListener('click', () => {
-        State.ui.backgroundLocked = !State.ui.backgroundLocked;
-        $('btnLockBg').classList.toggle('on', State.ui.backgroundLocked);
-        scheduleRender();
-      });
-
-      // project meta
-      $('eventName').addEventListener('input', (e) => {
-        State.meta.eventName = e.target.value;
-        State.meta.updatedAt = new Date().toISOString();
-      });
-      $('eventNotes').addEventListener('input', (e) => {
-        State.meta.notes = e.target.value;
-        State.meta.updatedAt = new Date().toISOString();
-      });
-
-      // selection UI
-      $('selLabel').addEventListener('input', (e) => {
-        const id = State.selection.ids[State.selection.ids.length-1];
-        const o = getObjectById(id);
-        if (!o) return;
-        o.label = e.target.value;
-        State.meta.updatedAt = new Date().toISOString();
-        computeGearSummary();
-        scheduleRender();
-      });
-      $('btnDuplicate').addEventListener('click', duplicateSelected);
-      $('btnDelete').addEventListener('click', deleteSelected);
-
-      // Save/Load
-      $('btnDownload').addEventListener('click', downloadProject);
-      $('btnUpload').addEventListener('click', () => $('fileJson').click());
-      $('fileJson').addEventListener('change', handleJsonFile);
-
-      $('btnSaveLocal').addEventListener('click', saveLocal);
-      $('btnLoadLocal').addEventListener('click', loadLocal);
-
-      // Export
-      $('btnExportPng').addEventListener('click', () => exportPNG(3));
-      $('btnExportPdf').addEventListener('click', () => exportPDF());
-
-      // Canvas drag/drop
-      canvas.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
-      canvas.addEventListener('drop', (e) => {
-        e.preventDefault();
-        const key = e.dataTransfer.getData('text/plain');
-        if (!key || !DefByKey[key]) return;
-        const rect = canvas.getBoundingClientRect();
-        const s = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-        const w = screenToWorld(s.x, s.y);
-        createObject(key, w);
-      });
-
-      // Canvas pointer events
-      canvas.addEventListener('pointerdown', (e) => { canvas.setPointerCapture(e.pointerId); beginPointer(e); });
-      canvas.addEventListener('pointermove', movePointer);
-      canvas.addEventListener('pointerup', endPointer);
-      canvas.addEventListener('pointercancel', endPointer);
-
-      // Zoom
-      canvas.addEventListener('wheel', onWheel, { passive:false });
-
-      // Shortcuts
-      window.addEventListener('keydown', onKeyDown);
-      window.addEventListener('keyup', onKeyUp);
-
-      // Initialize button states
-      $('btnGrid').classList.toggle('on', State.ui.grid);
-      $('btnSnap').classList.toggle('on', State.ui.snap);
-      $('btnLockBg').classList.toggle('on', State.ui.backgroundLocked);
-    }
-
-    function fitRoomToView(){
-      if (!State.room.enabled) return;
-      const rect = canvas.getBoundingClientRect();
-      const rw = feetToPx(State.room.widthFt);
-      const rh = feetToPx(State.room.heightFt);
-      const pad = 60;
-      const scaleX = (rect.width - pad) / rw;
-      const scaleY = (rect.height - pad) / rh;
-      State.view.zoom = clamp(Math.min(scaleX, scaleY), State.view.minZoom, State.view.maxZoom);
-      // center room
-      const cx = rw/2;
-      const cy = rh/2;
-      const screenCx = rect.width/2;
-      const screenCy = rect.height/2;
-      State.view.panX = (screenCx / State.view.zoom) - cx;
-      State.view.panY = (screenCy / State.view.zoom) - cy;
-      scheduleRender();
-    }
-
-    function updateReadouts(){
-      $('zoomReadout').textContent = `${Math.round(State.view.zoom * 100)}%`;
-      $('scaleReadout').textContent = State.scale.calibrated ? `1 ft = ${Math.round(State.scale.pxPerFoot)} px` : 'Uncalibrated';
-    }
-
-    function updateSelectedPanel(){
-      const id = State.selection.ids[State.selection.ids.length-1];
-      const o = id ? getObjectById(id) : null;
-      const has = !!o;
-      $('selectedNone').style.display = has ? 'none' : 'block';
-      $('selectedUI').style.display = has ? 'block' : 'none';
-      if (!o) return;
-      $('selLabel').value = o.label || '';
-      updateSelectedPanelLive();
-    }
-
-    function updateSelectedPanelLive(){
-      const id = State.selection.ids[State.selection.ids.length-1];
-      const o = id ? getObjectById(id) : null;
-      if (!o) return;
-      $('selSize').textContent = State.scale.calibrated
-        ? `${formatFeetIn(pxToFeet(o.w))} × ${formatFeetIn(pxToFeet(o.h))}`
-        : `${Math.round(o.w)}×${Math.round(o.h)} px`;
-      $('selRot').textContent = `${Math.round(toDegrees(o.rot))}°`;
-      $('selPos').textContent = State.scale.calibrated
-        ? `${formatFeetIn(pxToFeet(o.x))}, ${formatFeetIn(pxToFeet(o.y))}`
-        : `${Math.round(o.x)}, ${Math.round(o.y)} px`;
-    }
-
-    /* =========================================================
-       BACKGROUND IMPORT (PNG/JPG)
-       - Fit-to-canvas in world space
-       - Zoom + pan via camera; background can be moved if unlocked
-       - Performance: keep Image element, avoid re-decoding
-       ========================================================= */
-
-    async function handleBgFile(e){
-      const file = e.target.files && e.target.files[0];
-      e.target.value = '';
-      if (!file) return;
-
-      const url = URL.createObjectURL(file);
-      const img = new Image();
-      img.decoding = 'async';
-      img.loading = 'eager';
-      img.src = url;
-      await img.decode().catch(() => new Promise((res) => { img.onload = res; img.onerror = res; }));
-
-      State.background.image = img;
-      State.background.src = await fileToDataUrl(file);
-
-      // Fit-to-view: background at (0,0) with scale so it fits initial view
-      State.background.offsetX = 0;
-      State.background.offsetY = 0;
-      State.background.scale = 1;
-
-      fitBackgroundToView();
-      State.meta.updatedAt = new Date().toISOString();
-      scheduleRender();
-      URL.revokeObjectURL(url);
-    }
-
-    function fitBackgroundToView(){
-      const img = State.background.image;
-      if (!img) return;
-      const rect = canvas.getBoundingClientRect();
-      const iw = img.naturalWidth || img.width;
-      const ih = img.naturalHeight || img.height;
-
-      // place background in world such that it visually fits the viewport initially
-      // We choose world background scale so that image fits a decent portion of view.
-      const targetW = rect.width / State.view.zoom;
-      const targetH = rect.height / State.view.zoom;
-
-      const scale = Math.min(targetW / iw, targetH / ih);
-      State.background.scale = scale;
-
-      // center it in world at current view
-      const centerWorld = screenToWorld(rect.width/2, rect.height/2);
-      const bw = iw * scale;
-      const bh = ih * scale;
-      State.background.offsetX = centerWorld.x - bw/2;
-      State.background.offsetY = centerWorld.y - bh/2;
-    }
-
-    function fileToDataUrl(file){
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
-    /* =========================================================
-       SAVE / LOAD
-       ========================================================= */
-
-    function serializeProject(){
-      return {
-        version: State.version,
-        meta: {
-          ...State.meta,
-          eventName: $('eventName').value,
-          notes: $('eventNotes').value,
-          updatedAt: new Date().toISOString(),
-        },
-        ui: { ...State.ui },
-        scale: { ...State.scale },
-        view: { ...State.view },
-        room: { ...State.room },
-        background: {
-          src: State.background.src,
-          offsetX: State.background.offsetX,
-          offsetY: State.background.offsetY,
-          scale: State.background.scale,
-        },
-        objects: State.objects.map(o => ({...o})),
-      };
-    }
-
-    async function hydrateProject(data){
-      if (!data || typeof data !== 'object') throw new Error('Invalid project');
-
-      State.version = data.version || 1;
-      State.meta = data.meta || State.meta;
-      State.ui = { ...State.ui, ...(data.ui || {}) };
-      State.scale = { ...State.scale, ...(data.scale || {}) };
-      State.view = { ...State.view, ...(data.view || {}) };
-      State.room = { ...State.room, ...(data.room || {}) };
-      State.objects = Array.isArray(data.objects) ? data.objects.map(o => ({...o})) : [];
-      State.selection.ids = [];
-
-      // background
-      State.background.src = data.background?.src || null;
-      State.background.offsetX = data.background?.offsetX || 0;
-      State.background.offsetY = data.background?.offsetY || 0;
-      State.background.scale = data.background?.scale || 1;
-      State.background.image = null;
-      if (State.background.src){
-        const img = new Image();
-        img.decoding = 'async';
-        img.src = State.background.src;
-        await img.decode().catch(() => new Promise((res) => { img.onload=res; img.onerror=res; }));
-        State.background.image = img;
-      }
-
-      // UI
-      setTheme(State.ui.theme || 'dark');
-      $('btnGrid').classList.toggle('on', !!State.ui.grid);
-      $('btnSnap').classList.toggle('on', !!State.ui.snap);
-      $('btnLockBg').classList.toggle('on', !!State.ui.backgroundLocked);
-      $('snapStep').value = String(State.ui.snapStepFt || 1);
-
-      // meta
-      $('eventName').value = State.meta.eventName || '';
-      $('eventNotes').value = State.meta.notes || '';
-
-      // room preset select
-      $('roomPreset').value = '';
-      if (State.room.enabled){
-        $('roomPreset').value = `${State.room.widthFt}x${State.room.heightFt}`;
-      }
-
-      computeGearSummary();
-      updateSelectedPanel();
-      scheduleRender();
-    }
-
-    function downloadProject(){
-      const data = serializeProject();
-      const name = (data.meta.eventName || 'SleeveEvents_Project').replace(/[^a-z0-9_-]+/gi,'_');
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      downloadBlob(`${name}.json`, blob);
-    }
-
-    async function handleJsonFile(e){
-      const file = e.target.files && e.target.files[0];
-      e.target.value = '';
-      if (!file) return;
-      const txt = await file.text();
-      let data;
-      try { data = JSON.parse(txt); }
-      catch { alert('Invalid JSON file'); return; }
-      try { await hydrateProject(data); }
-      catch (err){ console.error(err); alert('Could not load project'); }
-    }
-
-    function saveLocal(){
-      const data = serializeProject();
-      localStorage.setItem('se_room_planner_project', JSON.stringify(data));
-      toast('Saved to this browser.');
-    }
-
-    async function loadLocal(){
-      const txt = localStorage.getItem('se_room_planner_project');
-      if (!txt){ toast('No local save found.'); return; }
-      try {
-        const data = JSON.parse(txt);
-        await hydrateProject(data);
-        toast('Loaded local save.');
-      } catch {
-        toast('Local save is corrupted.');
-      }
-    }
-
-    /* =========================================================
-       GEAR SUMMARY
-       - Based on object types
-       ========================================================= */
-
-    function computeGearSummary(){
-      const counts = new Map();
-      for (const o of State.objects){
-        const def = DefByKey[o.type];
-        const gear = def.gear || {};
-        for (const [k,v] of Object.entries(gear)){
-          counts.set(k, (counts.get(k) || 0) + v);
-        }
-      }
-
-      const lines = [];
-      const sorted = Array.from(counts.entries()).sort((a,b) => a[0].localeCompare(b[0]));
-      for (const [k,v] of sorted){
-        lines.push(`• ${k}: ${v}`);
-      }
-
-      $('gearSummary').textContent = lines.length ? lines.join('\n') : 'Place objects to generate a summary.';
-    }
-
-    /* =========================================================
-       EXPORT
-       - PNG: render offscreen at higher scale
-       - PDF: embed exported JPEG into a minimal single-page PDF
-       ========================================================= */
-
-    async function exportPNG(mult = 3){
-      const rect = canvas.getBoundingClientRect();
-      const w = Math.floor(rect.width * mult);
-      const h = Math.floor(rect.height * mult);
-
-      const off = document.createElement('canvas');
-      off.width = w;
-      off.height = h;
-      const octx = off.getContext('2d');
-
-      await renderToContext(octx, rect.width, rect.height, mult);
-
-      off.toBlob((blob) => {
-        if (!blob) return;
-        const name = (State.meta.eventName || 'SleeveEvents_Plan').replace(/[^a-z0-9_-]+/gi,'_');
-        downloadBlob(`${name}.png`, blob);
-      }, 'image/png', 1.0);
     }
 
     async function exportPDF(){
-      // 1) Render high-res image
-      const rect = canvas.getBoundingClientRect();
-      const mult = 3;
-      const w = Math.floor(rect.width * mult);
-      const h = Math.floor(rect.height * mult);
+      // Lightweight: generate PNG then wrap in a printable page
+      // NOTE: true PDF generation in vanilla JS without libs is limited; we use a print-to-PDF path.
+      // This is stable and produces high quality.
+      const scale = 2;
+      const roomW = State.roomFt.w * State.pxPerFt;
+      const roomH = State.roomFt.h * State.pxPerFt;
+      const c = document.createElement('canvas');
+      c.width = Math.round(roomW * scale);
+      c.height = Math.round(roomH * scale);
+      const ctx = c.getContext('2d');
+      ctx.scale(scale, scale);
 
-      const off = document.createElement('canvas');
-      off.width = w;
-      off.height = h;
-      const octx = off.getContext('2d');
-      await renderToContext(octx, rect.width, rect.height, mult);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0,0,roomW,roomH);
 
-      // 2) JPEG for smaller PDF size
-      const jpgDataUrl = off.toDataURL('image/jpeg', 0.92);
-
-      // 3) Build minimal PDF with embedded JPEG
-      const pdfBytes = buildSingleImagePdfFromJpegDataUrl(jpgDataUrl, w, h, 150);
-
-      const blob = new Blob([pdfBytes], { type:'application/pdf' });
-      const name = (State.meta.eventName || 'SleeveEvents_Plan').replace(/[^a-z0-9_-]+/gi,'_');
-      downloadBlob(`${name}.pdf`, blob);
-    }
-
-    async function renderToContext(targetCtx, viewW, viewH, mult){
-      // Render same scene, but scaled.
-      targetCtx.save();
-      targetCtx.setTransform(mult,0,0,mult,0,0);
-      targetCtx.clearRect(0,0,viewW,viewH);
-
-      // background
-      if (State.background.image){
-        targetCtx.save();
-        targetCtx.translate(State.view.panX * State.view.zoom, State.view.panY * State.view.zoom);
-        targetCtx.scale(State.view.zoom, State.view.zoom);
-        const img = State.background.image;
-        const iw = img.naturalWidth || img.width;
-        const ih = img.naturalHeight || img.height;
-        targetCtx.translate(State.background.offsetX, State.background.offsetY);
-        targetCtx.scale(State.background.scale, State.background.scale);
-        targetCtx.drawImage(img, 0, 0, iw, ih);
-        targetCtx.restore();
+      if (State.bg.src){
+        await ensureImageLoaded(UI.bgImage);
+        const iw = UI.bgImage.naturalWidth;
+        const ih = UI.bgImage.naturalHeight;
+        ctx.save();
+        ctx.translate(State.bg.x, State.bg.y);
+        ctx.scale(State.bg.scale, State.bg.scale);
+        ctx.drawImage(UI.bgImage, 0, 0, iw, ih);
+        ctx.restore();
       }
 
-      // room boundary
-      if (State.room.enabled){
-        targetCtx.save();
-        targetCtx.translate(State.view.panX * State.view.zoom, State.view.panY * State.view.zoom);
-        targetCtx.scale(State.view.zoom, State.view.zoom);
-        targetCtx.lineWidth = 2 / State.view.zoom;
-        targetCtx.strokeStyle = 'rgba(0,0,0,.55)';
-        if (State.ui.theme === 'dark') targetCtx.strokeStyle = 'rgba(255,255,255,.25)';
-        targetCtx.setLineDash([10/State.view.zoom, 8/State.view.zoom]);
-        targetCtx.strokeRect(0,0, feetToPx(State.room.widthFt), feetToPx(State.room.heightFt));
-        targetCtx.setLineDash([]);
-        targetCtx.restore();
+      if (State.gridOn){
+        const step = State.gridStepFt * State.pxPerFt;
+        ctx.save();
+        ctx.strokeStyle = 'rgba(17,24,39,.06)';
+        ctx.lineWidth = 1;
+        for (let x=0; x<=roomW; x+=step){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,roomH); ctx.stroke(); }
+        for (let y=0; y<=roomH; y+=step){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(roomW,y); ctx.stroke(); }
+        ctx.restore();
       }
 
-      // grid
-      if (State.ui.grid){
-        // reuse grid logic but write directly here
-        const pxPerFt = State.scale.pxPerFoot;
-        const minor = pxPerFt * (State.ui.snapStepFt || 1);
-        const major = pxPerFt * 5;
-        const minorCol = State.ui.theme === 'dark' ? 'rgba(255,255,255,.05)' : 'rgba(16,24,40,.06)';
-        const majorCol = State.ui.theme === 'dark' ? 'rgba(255,255,255,.09)' : 'rgba(16,24,40,.10)';
+      ctx.save();
+      ctx.strokeStyle = 'rgba(17,24,39,.25)';
+      ctx.lineWidth = 2;
+      roundRect(ctx, 0, 0, roomW, roomH, 14);
+      ctx.stroke();
+      ctx.restore();
 
-        const topLeft = screenToWorld(0,0);
-        const botRight = screenToWorld(viewW, viewH);
-
-        const startX = Math.floor(topLeft.x / minor) * minor;
-        const endX = Math.ceil(botRight.x / minor) * minor;
-        const startY = Math.floor(topLeft.y / minor) * minor;
-        const endY = Math.ceil(botRight.y / minor) * minor;
-
-        targetCtx.save();
-        targetCtx.translate(State.view.panX * State.view.zoom, State.view.panY * State.view.zoom);
-        targetCtx.scale(State.view.zoom, State.view.zoom);
-        targetCtx.lineWidth = 1 / State.view.zoom;
-
-        for (let x = startX; x <= endX; x += minor){
-          targetCtx.strokeStyle = (Math.abs(x % major) < 0.001) ? majorCol : minorCol;
-          targetCtx.beginPath();
-          targetCtx.moveTo(x, startY);
-          targetCtx.lineTo(x, endY);
-          targetCtx.stroke();
-        }
-        for (let y = startY; y <= endY; y += minor){
-          targetCtx.strokeStyle = (Math.abs(y % major) < 0.001) ? majorCol : minorCol;
-          targetCtx.beginPath();
-          targetCtx.moveTo(startX, y);
-          targetCtx.lineTo(endX, y);
-          targetCtx.stroke();
-        }
-
-        targetCtx.restore();
+      for (const it of State.items){
+        drawItem(ctx, { ...it, color: it.color || 'brand' });
       }
 
-      // objects
-      for (const o of State.objects){
-        drawObjectToContext(targetCtx, o);
+      // footer
+      drawExportFooter(ctx, roomW, roomH, 1);
+
+      const dataUrl = c.toDataURL('image/png');
+      const win = window.open('', '_blank');
+      if (!win){
+        alert('Popup blocked. Allow popups to export PDF.');
+        return;
       }
-
-      // watermark / branding
-      targetCtx.save();
-      targetCtx.font = `700 12px ${State.ui.theme === 'dark' ? 'system-ui' : 'system-ui'}`;
-      targetCtx.fillStyle = State.ui.theme === 'dark' ? 'rgba(255,255,255,.55)' : 'rgba(16,24,40,.6)';
-      targetCtx.textAlign = 'right';
-      targetCtx.textBaseline = 'bottom';
-      targetCtx.fillText('SLEEVE EVENTS • ROOM PLANNER', viewW - 14, viewH - 12);
-      targetCtx.restore();
-
-      targetCtx.restore();
+      const title = (State.eventName || 'Sleeve Events Room Plan');
+      win.document.write(`<!doctype html><html><head><title>${escapeHtml(title)}</title>
+        <style>
+          html,body{ margin:0; padding:0; background:#fff; }
+          .wrap{ padding: 24px; }
+          img{ width:100%; height:auto; display:block; }
+          .meta{ font-family: ui-sans-serif, system-ui; color:#111827; margin: 0 0 10px; }
+          @media print{ .wrap{ padding:0; } }
+        </style>
+      </head><body>
+        <div class="wrap">
+          <div class="meta"><b>${escapeHtml(title)}</b></div>
+          <img src="${dataUrl}" />
+        </div>
+        <script>window.onload=()=>{ setTimeout(()=>{ window.print(); }, 250); }<\/script>
+      </body></html>`);
+      win.document.close();
+      toast('Opened print dialog');
     }
 
-    function drawObjectToContext(targetCtx, o){
-      const def = DefByKey[o.type];
-      const a = def.style.fillA, b = def.style.fillB;
-
-      targetCtx.save();
-      targetCtx.translate(State.view.panX * State.view.zoom, State.view.panY * State.view.zoom);
-      targetCtx.scale(State.view.zoom, State.view.zoom);
-
-      targetCtx.translate(o.x, o.y);
-      targetCtx.rotate(o.rot);
-
-      const grad = targetCtx.createLinearGradient(-o.w/2, -o.h/2, o.w/2, o.h/2);
-      grad.addColorStop(0, a);
-      grad.addColorStop(1, b);
-      targetCtx.fillStyle = grad;
-
-      if (o.round){
-        targetCtx.beginPath();
-        targetCtx.arc(0,0, Math.min(o.w,o.h)/2, 0, Math.PI*2);
-        targetCtx.fill();
-      } else {
-        roundRect(targetCtx, -o.w/2, -o.h/2, o.w, o.h, 10);
-        targetCtx.fill();
-      }
-
-      // text
-      targetCtx.fillStyle = 'rgba(255,255,255,.94)';
-      targetCtx.textAlign = 'center';
-      targetCtx.textBaseline = 'middle';
-      const fontSize = clamp(Math.min(o.w, o.h) * 0.16, 10, 16);
-      targetCtx.font = `800 ${fontSize}px system-ui`;
-      const label = (o.label || def.title).toUpperCase();
-      const maxWidth = o.w * 0.82;
-      const lines = wrapText(targetCtx, label, maxWidth);
-      const lineH = fontSize * 1.15;
-      const totalH = lines.length * lineH;
-      const y0 = -totalH/2 + lineH/2;
-      for (let i=0;i<lines.length;i++) targetCtx.fillText(lines[i], 0, y0 + i*lineH);
-
-      if (State.scale.calibrated){
-        const dim = `${formatFeetIn(pxToFeet(o.w))} × ${formatFeetIn(pxToFeet(o.h))}`;
-        targetCtx.font = `700 ${Math.max(10, fontSize-4)}px system-ui`;
-        targetCtx.fillStyle = 'rgba(255,255,255,.75)';
-        targetCtx.fillText(dim, 0, (o.round ? (o.h*0.18) : (o.h*0.30)));
-      }
-
-      targetCtx.restore();
-    }
-
-    function buildSingleImagePdfFromJpegDataUrl(jpegDataUrl, pxW, pxH, dpi){
-      // Minimal PDF generator embedding JPEG with /DCTDecode.
-      // Page size in points: points = inches * 72 = (px/dpi)*72
-      const ptsW = (pxW / dpi) * 72;
-      const ptsH = (pxH / dpi) * 72;
-
-      const base64 = jpegDataUrl.split(',')[1] || '';
-      const jpegBytes = base64ToBytes(base64);
-
-      const chunks = [];
-      const push = (s) => chunks.push(typeof s === 'string' ? strToBytes(s) : s);
-
-      // PDF header
-      push('%PDF-1.4\n');
-
-      const offsets = [];
-      const obj = (n, bodyBytes) => {
-        offsets[n] = byteLength(chunks);
-        push(`${n} 0 obj\n`);
-        push(bodyBytes);
-        push('\nendobj\n');
-      };
-
-      // 1: Catalog
-      obj(1, strToBytes('<< /Type /Catalog /Pages 2 0 R >>'));
-
-      // 2: Pages
-      obj(2, strToBytes('<< /Type /Pages /Kids [3 0 R] /Count 1 >>'));
-
-      // 3: Page
-      obj(3, strToBytes(`<< /Type /Page /Parent 2 0 R /Resources << /XObject << /Im0 4 0 R >> >> /MediaBox [0 0 ${ptsW.toFixed(2)} ${ptsH.toFixed(2)}] /Contents 5 0 R >>`));
-
-      // 4: Image XObject
-      const imgDict = `<< /Type /XObject /Subtype /Image /Name /Im0 /Width ${pxW} /Height ${pxH} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBytes.length} >>\nstream\n`;
-      const imgEnd = '\nendstream';
-      const imgBody = concatBytes([strToBytes(imgDict), jpegBytes, strToBytes(imgEnd)]);
-      obj(4, imgBody);
-
-      // 5: Content stream (draw image)
-      // q ... cm ... Do Q
-      const content = `q\n${ptsW.toFixed(2)} 0 0 ${ptsH.toFixed(2)} 0 0 cm\n/Im0 Do\nQ\n`;
-      const contentBytes = strToBytes(content);
-      const contentObj = concatBytes([strToBytes(`<< /Length ${contentBytes.length} >>\nstream\n`), contentBytes, strToBytes('\nendstream')]);
-      obj(5, contentObj);
-
-      // xref
-      const xrefOffset = byteLength(chunks);
-      push('xref\n');
-      push('0 6\n');
-      push('0000000000 65535 f \n');
-      for (let i=1;i<=5;i++){
-        const off = (offsets[i] || 0).toString().padStart(10,'0');
-        push(`${off} 00000 n \n`);
-      }
-
-      // trailer
-      push(`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`);
-
-      return concatBytes(chunks);
-    }
-
-    function strToBytes(str){
-      return new TextEncoder().encode(str);
-    }
-
-    function base64ToBytes(b64){
-      const bin = atob(b64);
-      const bytes = new Uint8Array(bin.length);
-      for (let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
-      return bytes;
-    }
-
-    function concatBytes(arrays){
-      const total = arrays.reduce((sum,a)=>sum + a.length, 0);
-      const out = new Uint8Array(total);
-      let offset = 0;
-      for (const a of arrays){ out.set(a, offset); offset += a.length; }
-      return out;
-    }
-
-    function byteLength(chunks){
-      let sum = 0;
-      for (const c of chunks) sum += c.length;
-      return sum;
+    function escapeHtml(str){
+      return String(str).replace(/[&<>\"']/g, s=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[s]));
     }
 
     /* =========================================================
-       KEYBOARD SHORTCUTS
+       UI WIRING
        ========================================================= */
-
-    const Keys = { space:false };
-
-    function onKeyDown(e){
-      if (e.code === 'Space'){
-        Keys.space = true;
-        // prevent page scroll
-        e.preventDefault();
-      }
-      const cmd = e.metaKey || e.ctrlKey;
-
-      if (cmd && e.key.toLowerCase() === 'd'){
-        e.preventDefault();
-        duplicateSelected();
-      }
-
-      if (e.key === 'Delete' || e.key === 'Backspace'){
-        if (document.activeElement && ['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
-        deleteSelected();
-      }
-
-      if (e.key === 'Escape'){
-        State.interaction.tool = 'select';
-        $('btnSetScale').classList.remove('on');
-        State.interaction.scaleP1 = null;
-        State.interaction.scaleP2 = null;
-        clearSelection();
-        scheduleRender();
-      }
+    function toggleTheme(){
+      State.theme = (State.theme === 'dark') ? 'light' : 'dark';
+      applyTheme();
+      renderItems();
+      renderGrid();
+      toast(State.theme === 'dark' ? 'Dark mode' : 'Light mode');
     }
 
-    function onKeyUp(e){
-      if (e.code === 'Space') Keys.space = false;
+    function toggleGrid(){
+      State.gridOn = !State.gridOn;
+      renderGrid();
+      toast(State.gridOn ? 'Grid on' : 'Grid off');
     }
+
+    function toggleSnap(){
+      State.snapOn = !State.snapOn;
+      renderGrid();
+      toast(State.snapOn ? 'Snap on' : 'Snap off');
+    }
+
+    function openSheet(){
+      UI.sheetBackdrop.style.display = 'block';
+      UI.sheet.style.display = 'block';
+    }
+
+    function closeSheet(){
+      UI.sheetBackdrop.style.display = 'none';
+      UI.sheet.style.display = 'none';
+    }
+
+    UI.btnSheetClose.addEventListener('click', closeSheet);
+    UI.sheetBackdrop.addEventListener('click', closeSheet);
+
+    UI.btnTools.addEventListener('click', openSheet);
+    UI.fab.addEventListener('click', openSheet);
+
+    UI.toggleTheme.addEventListener('click', toggleTheme);
+    UI.toggleGrid.addEventListener('click', toggleGrid);
+    UI.toggleSnap.addEventListener('click', toggleSnap);
+
+    UI.btnHelpHide.addEventListener('click', ()=>{ UI.help.style.display='none'; toast('Help hidden'); });
+
+    // Project bindings
+    UI.eventName.addEventListener('input', ()=>{ State.eventName = UI.eventName.value; });
+    UI.eventNotes.addEventListener('input', ()=>{ State.eventNotes = UI.eventNotes.value; });
+    UI.gridStep.addEventListener('change', ()=>{
+      State.gridStepFt = parseFloat(UI.gridStep.value)||2;
+      State.snapStepFt = State.gridStepFt;
+      renderGrid();
+      toast(`Grid ${State.gridStepFt}ft`);
+    });
+
+    UI.btnApplyRoom.addEventListener('click', ()=>{ applyRoom(); toast('Room updated'); });
+
+    UI.btnFit.addEventListener('click', ()=>fitToView());
+
+    function fitToView(){
+      const roomW = State.roomFt.w * State.pxPerFt;
+      const roomH = State.roomFt.h * State.pxPerFt;
+      const rect = UI.viewport.getBoundingClientRect();
+      const pad = 24;
+      const zx = (rect.width - pad*2) / roomW;
+      const zy = (rect.height - pad*2) / roomH;
+      State.view.zoom = clamp(Math.min(zx, zy), 0.25, 3);
+      // center
+      State.view.panX = rect.width/2 - (roomW*State.view.zoom)/2;
+      State.view.panY = rect.height/2 - (roomH*State.view.zoom)/2;
+      applyView();
+      toast('Fit view');
+    }
+
+    UI.btnSetScale.addEventListener('click', ()=>{
+      State.scaleTool.step = 0;
+      State.scaleTool.p1 = null;
+      State.scaleTool.p2 = null;
+      setMode('setScale');
+      toast('Scale: click first point');
+    });
+
+    UI.btnClear.addEventListener('click', ()=>{
+      if (!confirm('Clear all items?')) return;
+      State.items = [];
+      clearSelection();
+      renderItems();
+      updateGear();
+      toast('Cleared');
+    });
+
+    // background
+    UI.btnBgUpload.addEventListener('click', ()=>UI.bgUpload.click());
+    UI.btnBgFit.addEventListener('click', ()=>bgFit());
+
+    UI.chipBgLock.addEventListener('click', ()=>{ State.bg.locked = !State.bg.locked; renderBg(); toast(State.bg.locked ? 'BG locked' : 'BG unlocked'); });
+    UI.chipShowGrid.addEventListener('click', toggleGrid);
+    UI.chipSnap.addEventListener('click', toggleSnap);
+
+    // saving/export
+    UI.btnSaveLocal.addEventListener('click', saveLocal);
+    UI.btnLoadLocal.addEventListener('click', loadLocal);
+    UI.btnDownload.addEventListener('click', downloadProject);
+    UI.btnUpload.addEventListener('click', uploadProject);
+    UI.btnShare.addEventListener('click', copyShareLink);
+    UI.btnExportPNG.addEventListener('click', exportPNG);
+    UI.btnExportPDF.addEventListener('click', exportPDF);
+
+    // selected actions
+    UI.selLabel.addEventListener('input', ()=>{
+      const ids = [...State.selected];
+      if (ids.length !== 1) return;
+      const it = getItem(ids[0]);
+      it.label = UI.selLabel.value;
+      renderItems();
+    });
+
+    UI.chipLock.addEventListener('click', toggleLockSelected);
+    UI.chipDuplicate.addEventListener('click', duplicateSelected);
+    UI.chipDelete.addEventListener('click', deleteSelected);
+
+    UI.chipAlignL.addEventListener('click', ()=>alignSelected('L'));
+    UI.chipAlignC.addEventListener('click', ()=>alignSelected('C'));
+    UI.chipAlignR.addEventListener('click', ()=>alignSelected('R'));
+    UI.chipDistH.addEventListener('click', distributeSelected);
+
+    // mobile controls
+    UI.mSetScale.addEventListener('click', ()=>{ closeSheet(); UI.btnSetScale.click(); });
+    UI.mFit.addEventListener('click', ()=>{ closeSheet(); fitToView(); });
+    UI.mBgUpload.addEventListener('click', ()=>{ closeSheet(); UI.btnBgUpload.click(); });
+    UI.mBgFit.addEventListener('click', ()=>{ closeSheet(); bgFit(); });
+    UI.mDemoWedding.addEventListener('click', ()=>{ closeSheet(); demoWedding(); });
+    UI.mDemoMitzvah.addEventListener('click', ()=>{ closeSheet(); demoMitzvah(); });
+    UI.mToggleTheme.addEventListener('click', ()=>{ toggleTheme(); });
+    UI.mToggleGrid.addEventListener('click', ()=>{ toggleGrid(); });
+    UI.mToggleSnap.addEventListener('click', ()=>{ toggleSnap(); });
+    UI.mExportPNG.addEventListener('click', ()=>{ closeSheet(); exportPNG(); });
+    UI.mExportPDF.addEventListener('click', ()=>{ closeSheet(); exportPDF(); });
+    UI.mShare.addEventListener('click', ()=>{ copyShareLink(); });
+    UI.mDownload.addEventListener('click', ()=>{ downloadProject(); });
+    UI.mSaveLocal.addEventListener('click', ()=>{ saveLocal(); });
+    UI.mLoadLocal.addEventListener('click', ()=>{ loadLocal(); });
+    UI.mUpload.addEventListener('click', ()=>{ uploadProject(); });
+    UI.mClear.addEventListener('click', ()=>{ UI.btnClear.click(); });
+
+    // Extra: demo in desktop via Tools button (simple)
+    UI.btnTools.addEventListener('dblclick', ()=>demoWedding());
+
+    // sheet triggers
+    UI.fab.addEventListener('click', openSheet);
+
+    // background panning when unlocked
+    UI.viewport.addEventListener('pointerdown', (e)=>{
+      if (State.bg.src && !State.bg.locked && !e.target.closest('.item') && !isPanKey() && State.mode==='idle'){
+        // start bg drag
+        setMode('dragging');
+        State.pointer.id = e.pointerId;
+        PointerCapture.safeCapture(UI.viewport, e.pointerId);
+        const p = screenToRoomPoint(e.clientX, e.clientY);
+        State.drag = {
+          kind:'bg',
+          start:{x:p.x,y:p.y},
+          orig:{x:State.bg.x, y:State.bg.y}
+        };
+      }
+    });
+
+    UI.viewport.addEventListener('pointermove', (e)=>{
+      if (State.pointer.id !== e.pointerId) return;
+      if (State.drag && State.drag.kind==='bg'){
+        const p = screenToRoomPoint(e.clientX, e.clientY);
+        const dx = p.x - State.drag.start.x;
+        const dy = p.y - State.drag.start.y;
+        State.bg.x = State.drag.orig.x + dx;
+        State.bg.y = State.drag.orig.y + dy;
+        renderBg();
+      }
+    });
+
+    UI.viewport.addEventListener('pointerup', (e)=>{
+      if (State.drag && State.drag.kind==='bg'){
+        State.drag = null;
+        setMode('idle');
+      }
+    });
 
     /* =========================================================
-       TOAST
+       TESTS (optional)
        ========================================================= */
-
-    let toastTimer = null;
-    function toast(msg){
-      const hint = $('hint');
-      const prev = hint.innerHTML;
-      hint.innerHTML = `<div style="font-weight:750; letter-spacing:.02em">${escapeHtml(msg)}</div>` +
-        `<div class="small" style="margin-top:6px">(This will fade.)</div>`;
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
-        hint.innerHTML = prev;
-      }, 1800);
+    function runTests(){
+      const assert = (cond, msg) => { if (!cond) throw new Error('Test failed: ' + msg); };
+      assert(normalizeAngle(0) === 0, 'normalizeAngle 0');
+      assert(normalizeAngle(360) === 0, 'normalizeAngle 360');
+      assert(normalizeAngle(-10) === 350, 'normalizeAngle -10');
+      assert(safeFile('Hello World!') === 'Hello_World_', 'safeFile basic');
+      assert(safeFile('') === '', 'safeFile empty');
+      const prevSnap = State.snapOn;
+      const prevScale = State.pxPerFt;
+      State.snapOn = false; State.pxPerFt = 40;
+      assert(snapPx(53) === 53, 'snapPx off');
+      State.snapOn = true; State.snapStepFt = 1;
+      assert(snapPx(53) === 40, 'snapPx on rounds');
+      State.snapOn = prevSnap; State.pxPerFt = prevScale;
+      assert(PointerCapture.safeCapture(null, 1) === false, 'PointerCapture null el');
+      assert(PointerCapture.safeCapture(document.createElement('div'), 1) === false, 'PointerCapture disconnected el');
+      console.log('[Sleeve Planner] Tests OK');
     }
 
     /* =========================================================
        INIT
        ========================================================= */
-
     function init(){
-      setTheme(State.ui.theme);
+      // palette
       buildPalette();
-      bindUI();
-      resizeCanvas();
 
-      // default camera nice framing
-      const rect = canvas.getBoundingClientRect();
-      State.view.zoom = 1;
-      State.view.panX = rect.width * 0.15;
-      State.view.panY = rect.height * 0.15;
-
-      // hydrate from local save (non-destructive prompt)
-      const local = localStorage.getItem('se_room_planner_project');
-      if (local){
-        // Do not auto-load; but keep easy load via button.
+      // load from URL if present
+      const fromUrl = decodeProjectFromURL();
+      if (fromUrl){
+        loadProject(fromUrl);
+        // clear hash to avoid reloading unexpectedly
+        history.replaceState(null, '', location.pathname + location.search);
+      } else {
+        // defaults
+        State.eventName = UI.eventName.value;
+        State.eventNotes = UI.eventNotes.value;
+        State.gridStepFt = parseFloat(UI.gridStep.value)||2;
+        State.snapStepFt = State.gridStepFt;
+        applyTheme();
+        applyRoom();
+        applyView();
+        fitToView();
+        renderItems();
+        renderBg();
+        renderGrid();
+        updateGear();
+        updateScaleNote();
       }
 
-      computeGearSummary();
-      scheduleRender();
+      // responsive: show help on desktop
+      if (window.innerWidth <= 560){
+        UI.help.style.display = 'none';
+      }
+
+      // iOS: prevent page scroll while using the planner
+      document.addEventListener('touchmove', (e)=>{
+        if (e.target.closest && e.target.closest('#viewport')) e.preventDefault();
+      }, { passive:false });
+
+      // tools click on mobile
+      UI.btnTools.addEventListener('click', ()=>{
+        if (window.innerWidth <= 560) openSheet();
+      });
+
+      // demo shortcuts in sheet already
+
+      // Debug tests
+      if (location.search.includes('test=1')){
+        try{ runTests(); } catch(err){ console.error(err); alert(err.message); }
+      }
     }
 
-    window.addEventListener('resize', () => {
-      resizeCanvas();
-      scheduleRender();
-    });
-
     init();
-
-  })();
   </script>
 </body>
 </html>
