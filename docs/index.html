@@ -642,9 +642,7 @@
 
       <div class="canvasCard">
         <div class="viewport" id="viewport">
-          <div class="infiniteGrid" id="infiniteGrid" aria-hidden="true"></div>
-
-          <!-- Mini HUD (prominent controls) -->
+<!-- Mini HUD (prominent controls) -->
           <div class="hud" id="hud">
             <button class="btnTiny" id="hudPan" title="Pan tool">✋ Pan</button>
             <button class="btnTiny" id="hudScale" title="Set scale">📏 Scale</button>
@@ -661,7 +659,8 @@
           </div>
 
           <div class="stageLayer" id="stageLayer">
-            <img class="bgImage" id="bgImage" alt="" />
+            <div class="infiniteGrid" id="infiniteGrid" aria-hidden="true"></div>
+            <img class="bgImage" id="bgImage" alt="" \/>
             <div class="room" id="room">
               <div class="rulerTop" id="rulerTop"></div>
               <div class="rulerLeft" id="rulerLeft"></div>
@@ -1401,20 +1400,15 @@ function hexToRgba(hex, a=1){
       if (!UI.infiniteGrid) return;
       if (!State.gridOn){ UI.infiniteGrid.style.display = 'none'; return; }
 
+      // Grid lives INSIDE the stageLayer (so it automatically pans/zooms with the room).
+      // That means we can use world sizes directly — no screen math / modulo offsets.
       const stepWorld = Math.max(2, State.gridStepFt * State.pxPerFt);
       const boldWorld = stepWorld * 5;
 
-      const stepScreen = stepWorld * State.view.zoom;
-      const boldScreen = boldWorld * State.view.zoom;
-
-      const mod = (n, m) => ((n % m) + m) % m;
-      const offX = -mod(State.view.panX, stepScreen);
-      const offY = -mod(State.view.panY, stepScreen);
-
-      UI.infiniteGrid.style.setProperty('--gStep', `${stepScreen}px`);
-      UI.infiniteGrid.style.setProperty('--gBold', `${boldScreen}px`);
-      UI.infiniteGrid.style.setProperty('--gOffX', `${offX}px`);
-      UI.infiniteGrid.style.setProperty('--gOffY', `${offY}px`);
+      UI.infiniteGrid.style.setProperty('--gStep', `${stepWorld}px`);
+      UI.infiniteGrid.style.setProperty('--gBold', `${boldWorld}px`);
+      UI.infiniteGrid.style.setProperty('--gOffX', `0px`);
+      UI.infiniteGrid.style.setProperty('--gOffY', `0px`);
       UI.infiniteGrid.style.display = 'block';
     }
 
