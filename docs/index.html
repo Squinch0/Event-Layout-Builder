@@ -936,9 +936,21 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
         panTool: false,
       },
       gesture: {
-$1
+        pointers: new Map(),
+        active: false,
+        startDist: 0,
+        startZoom: 1,
+        startPanX: 0,
+        startPanY: 0,
+        startMid: { x: 0, y: 0 },
+        // Background gesture (when BG is unlocked)
+        startBgScale: 1,
+        startBgX: 0,
+        startBgY: 0,
+        startMidRoom: null,
       }
     };
+
 
     const ExportBrand = {
       site: 'SleeveEvents.com',
@@ -2970,85 +2982,67 @@ function hexToRgba(hex, a=1){
 
     UI.mSetScale.addEventListener('click', ()=>{ closeSheet(); UI.btnSetScale.click(); });
     UI.mFit.addEventListener('click', ()=>{ closeSheet(); fitToView(); });
-    UI.mBgUpload.addEventListener('click', ()=>{ closeSheet(); UI.btnBgUpload.click(); });
+
+    // Mobile: background controls
+    UI.mBgUpload.addEventListener('click', ()=>{ closeSheet(); UI.bgUpload.click(); });
     UI.mBgFit.addEventListener('click', ()=>{ closeSheet(); bgFit(); });
     UI.mBgClear.addEventListener('click', ()=>{ closeSheet(); clearBg(); });
+
+    // Mobile: demos
     UI.mDemoWedding.addEventListener('click', ()=>{ closeSheet(); demoWedding(); });
     UI.mDemoMitzvah.addEventListener('click', ()=>{ closeSheet(); demoMitzvah(); });
+
+    // Mobile: exports
     UI.mExportPNG.addEventListener('click', ()=>{ closeSheet(); exportPNG(); });
     UI.mExportPDF.addEventListener('click', ()=>{ closeSheet(); exportPDF(); });
-    UI.mShare.addEventListener('click', ()=>{ copyShareLink(); });
-    UI.mDownload.addEventListener('click', ()=>{ downloadProject(); });
-    UI.mSaveLocal.addEventListener('click', ()=>{ saveLocal(); });
-    UI.mLoadLocal.addEventListener('click', ()=>{ loadLocal(); });
-    UI.mUpload.addEventListener('click', ()=>{ uploadProject(); });
-    UI.mClear.addEventListener('click', ()=>{ UI.btnClear.click(); });
 
-    /* =========================================================
-       iOS SCROLL SAFETY
-       ========================================================= */
-    let touchStartInViewport = false;
-    const isIn = (el, selector)=> !!(el && el.closest && el.closest(selector));
+    // Mobile: share/save/load
+    UI.mShare.addEventListener('click', ()=>{ closeSheet(); copyShareLink(); });
+    UI.mDownload.addEventListener('click', ()=>{ closeSheet(); downloadProject(); });
+    UI.mSaveLocal.addEventListener('click', ()=>{ closeSheet(); saveLocal(); });
+    UI.mLoadLocal.addEventListener('click', ()=>{ closeSheet(); loadLocal(); });
+    UI.mUpload.addEventListener('click', ()=>{ closeSheet(); uploadProject(); });
 
-    document.addEventListener('touchstart', (e)=>{
-      const t = e.target;
-      const inViewport = isIn(t, '#viewport');
-      const inSheet = isIn(t, '#sheet');
-      const inSidebar = isIn(t, '#sidebar');
-      touchStartInViewport = inViewport && !inSheet && !inSidebar;
-    }, { passive:true, capture:true });
+    UI.mClear.addEventListener('click', ()=>{
+      closeSheet();
+      if (!confirm('Clear all items?')) return;
+      History.push('clear');
+      State.items = [];
+      clearSelection();
+      renderItems();
+      updateGear();
+      toast('Cleared');
+    });
 
-    document.addEventListener('touchmove', (e)=>{
-      if (!touchStartInViewport) return;
-      if (!e.cancelable) return;
-      const t = e.target;
-      if (isIn(t, '#sheet') || isIn(t, '#sidebar')) return;
-      e.preventDefault();
-    }, { passive:false, capture:true });
-
-    document.addEventListener('touchend', ()=>{ touchStartInViewport = false; }, { passive:true, capture:true });
-    document.addEventListener('touchcancel', ()=>{ touchStartInViewport = false; }, { passive:true, capture:true });
+    // Topbar Tools button already opens sheet; add a quick “hide help” toggle if desired
 
     /* =========================================================
        INIT
        ========================================================= */
     function init(){
-      // Prime UI from State
-      UI.eventName.value = State.eventName;
-      UI.eventNotes.value = State.eventNotes;
-      UI.roomW.value = State.roomFt.w;
-      UI.roomH.value = State.roomFt.h;
-      UI.gridStep.value = String(State.gridStepFt);
-
-      applyTheme();
       buildPalette();
+      applyTheme();
       applyRoom();
-      fitToView();
-      renderBg();
       renderGrid();
+      renderBg();
       renderItems();
       updateUndoRedoButtons();
 
-      // Load from share link (hash) if present
-      const shared = decodeProjectFromURL();
-      if (shared){
-        loadProject(shared);
-        // Keep fit reasonable after load
-        setTimeout(()=>fitToView(), 50);
+      // Try to load from URL hash (share links)
+      const fromUrl = decodeProjectFromURL();
+      if (fromUrl){
+        loadProject(fromUrl);
+        // Fit after load so it looks right on first open
+        setTimeout(()=>fitToView(), 0);
+        toast('Loaded from link');
+      } else {
+        fitToView();
       }
 
-      // Responsive: refit on resize/orientation changes
-      window.addEventListener('resize', ()=>{
-        // Don’t fight the user while actively interacting
-        if (State.mode === 'idle') fitToView();
-      });
-
-      // Prevent accidental context menu on long press (mobile) on canvas
-      UI.viewport.addEventListener('contextmenu', (e)=>{
-        if (!isEditableTarget(e.target)) e.preventDefault();
-      });
-
-      toast('Ready');
+      // Start with a clean history baseline
+      History.past.length = 0;
+      History.future.length = 0;
+      updateUndoRedoButtons();
     }
 
     init();
