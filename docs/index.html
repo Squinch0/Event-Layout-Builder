@@ -784,6 +784,7 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
             <div class="row">
               <button class="btn" id="btnBgUpload" style="flex:1;">Upload</button>
               <button class="btn" id="btnBgFit" style="flex:1;">Fit</button>
+              <button class="btn danger" id="btnBgClear" style="flex:1;" title="Remove background">Remove</button>
             </div>
             <div style="height:8px"></div>
             <div class="chips">
@@ -837,6 +838,7 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
           <div class="row">
             <button class="btn" id="mBgUpload" style="flex:1;">BG Upload</button>
             <button class="btn" id="mBgFit" style="flex:1;">BG Fit</button>
+            <button class="btn danger" id="mBgClear" style="flex:1;">BG Remove</button>
           </div>
           <div style="height:8px"></div>
           <div class="row">
@@ -1264,6 +1266,7 @@ function hexToRgba(hex, a=1){
       btnClear: document.getElementById('btnClear'),
       btnBgUpload: document.getElementById('btnBgUpload'),
       btnBgFit: document.getElementById('btnBgFit'),
+      btnBgClear: document.getElementById('btnBgClear'),
       chipBgLock: document.getElementById('chipBgLock'),
       chipShowGrid: document.getElementById('chipShowGrid'),
       chipSnap: document.getElementById('chipSnap'),
@@ -1295,6 +1298,7 @@ function hexToRgba(hex, a=1){
       mFit: document.getElementById('mFit'),
       mBgUpload: document.getElementById('mBgUpload'),
       mBgFit: document.getElementById('mBgFit'),
+      mBgClear: document.getElementById('mBgClear'),
       mDemoWedding: document.getElementById('mDemoWedding'),
       mDemoMitzvah: document.getElementById('mDemoMitzvah'),
       mExportPNG: document.getElementById('mExportPNG'),
@@ -1634,20 +1638,41 @@ function hexToRgba(hex, a=1){
       }
     };
 
-    function bgFit(){
+    function bgFit(mode){
       if (!State.bg.src){ toast('No background'); return; }
+
+      // Default behavior: scale UP so the image fills the room ("cover").
+      // This makes it easy to start with a full-bleed background; users can then
+      // adjust Room Size or unlock BG to fine-tune.
+      const fitMode = (mode || State.bg.fitMode || 'cover'); // 'cover' | 'contain'
+      State.bg.fitMode = fitMode;
+
       const img = UI.bgImage;
       const rw = State.roomFt.w * State.pxPerFt;
       const rh = State.roomFt.h * State.pxPerFt;
       const iw = img.naturalWidth || rw;
       const ih = img.naturalHeight || rh;
-      const s = Math.min(rw/iw, rh/ih);
+
+      const sContain = Math.min(rw/iw, rh/ih);
+      const sCover   = Math.max(rw/iw, rh/ih);
+      const s = (fitMode === 'contain') ? sContain : sCover;
+
       State.bg.scale = s;
       State.bg.x = (rw - iw*s)/2;
       State.bg.y = (rh - ih*s)/2;
+
       renderBg();
       History.push('bg-fit');
-      toast('Background fit');
+      toast(fitMode === 'contain' ? 'Background fit (contain)' : 'Background fit (cover)');
+    }
+
+    function clearBg(){
+      if (!State.bg.src){ toast('No background to remove'); return; }
+      History.push('bg-clear');
+      State.bg = { src: '', locked: true, fitMode: 'cover', x: 0, y: 0, scale: 1 };
+      UI.bgImage.src = '';
+      renderBg();
+      toast('Background removed');
     }
 
     UI.bgUpload.addEventListener('change', async (e)=>{
@@ -2820,6 +2845,7 @@ function hexToRgba(hex, a=1){
 
     UI.btnBgUpload.addEventListener('click', ()=>UI.bgUpload.click());
     UI.btnBgFit.addEventListener('click', ()=>bgFit());
+    UI.btnBgClear.addEventListener('click', ()=>clearBg());
 
     UI.chipBgLock.addEventListener('click', ()=>{
       History.push('bg-lock');
@@ -2860,6 +2886,7 @@ function hexToRgba(hex, a=1){
     UI.mFit.addEventListener('click', ()=>{ closeSheet(); fitToView(); });
     UI.mBgUpload.addEventListener('click', ()=>{ closeSheet(); UI.btnBgUpload.click(); });
     UI.mBgFit.addEventListener('click', ()=>{ closeSheet(); bgFit(); });
+    UI.mBgClear.addEventListener('click', ()=>{ closeSheet(); clearBg(); });
     UI.mDemoWedding.addEventListener('click', ()=>{ closeSheet(); demoWedding(); });
     UI.mDemoMitzvah.addEventListener('click', ()=>{ closeSheet(); demoMitzvah(); });
     UI.mExportPNG.addEventListener('click', ()=>{ closeSheet(); exportPNG(); });
