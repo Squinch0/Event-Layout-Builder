@@ -780,15 +780,33 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
 
             <div style="height:10px"></div>
             <label class="small">Background</label>
-            <div class="footerNote" style="margin:-2px 0 8px;">Upload PNG/JPG or PDF (imports page 1). Toggle Lock BG to move it.</div>
+            <div class="footerNote" style="margin:-2px 0 8px;">Upload PNG/JPG or PDF (imports page 1). Toggle Lock BG to move/scale it.</div>
             <div class="row">
               <button class="btn" id="btnBgUpload" style="flex:1;">Upload</button>
               <button class="btn" id="btnBgFit" style="flex:1;">Fit</button>
               <button class="btn danger" id="btnBgClear" style="flex:1;" title="Remove background">Remove</button>
             </div>
+
+            <div style="height:8px"></div>
+            <div class="row" style="align-items:center;">
+              <button class="btn" id="btnBgMinus" style="width:46px;justify-content:center;">−</button>
+              <div class="col">
+                <label class="small" style="margin:0 0 6px;">BG Size</label>
+                <input id="bgScale" type="range" min="0.05" max="6" step="0.01" value="1" />
+                <div class="footerNote" id="bgScaleVal" style="margin-top:6px;">100%</div>
+              </div>
+              <button class="btn" id="btnBgPlus" style="width:46px;justify-content:center;">+</button>
+            </div>
+
+            <div style="height:8px"></div>
+            <div class="row">
+              <button class="btn" id="btnBgContain" style="flex:1;">Contain</button>
+              <button class="btn" id="btnBgCover" style="flex:1;">Cover</button>
+            </div>
+
             <div style="height:8px"></div>
             <div class="chips">
-              <div class="chip on" id="chipBgLock"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Lock BG</div>
+              <div class="chip on" id="chipBgLock"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Lock BG</div><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Lock BG</div>
               <div class="chip on" id="chipShowGrid"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Show Grid</div>
               <div class="chip on" id="chipSnap"><span class="swatch" style="background:rgba(255,255,255,.12)"></span>Snap</div>
             </div>
@@ -924,6 +942,12 @@ Multi-select: Shift+click. You can nudge, move, duplicate, delete, and lock mult
         startPanX: 0,
         startPanY: 0,
         startMid: null,
+        // Background gesture (when BG unlocked)
+        startBgScale: 1,
+        startBgX: 0,
+        startBgY: 0,
+        startMidRoom: null,
+      }
       }
     };
 
@@ -1267,6 +1291,12 @@ function hexToRgba(hex, a=1){
       btnBgUpload: document.getElementById('btnBgUpload'),
       btnBgFit: document.getElementById('btnBgFit'),
       btnBgClear: document.getElementById('btnBgClear'),
+      bgScale: document.getElementById('bgScale'),
+      bgScaleVal: document.getElementById('bgScaleVal'),
+      btnBgMinus: document.getElementById('btnBgMinus'),
+      btnBgPlus: document.getElementById('btnBgPlus'),
+      btnBgContain: document.getElementById('btnBgContain'),
+      btnBgCover: document.getElementById('btnBgCover'),
       chipBgLock: document.getElementById('chipBgLock'),
       chipShowGrid: document.getElementById('chipShowGrid'),
       chipSnap: document.getElementById('chipSnap'),
@@ -1562,11 +1592,23 @@ function hexToRgba(hex, a=1){
        BACKGROUND
        ========================================================= */
     function renderBg(){
-      if (!State.bg.src){ UI.bgImage.style.display = 'none'; return; }
+      if (!State.bg.src){
+        UI.bgImage.style.display = 'none';
+        if (UI.bgScale) UI.bgScale.value = 1;
+        if (UI.bgScaleVal) UI.bgScaleVal.textContent = '100%';
+        UI.chipBgLock.classList.toggle('on', true);
+        return;
+      }
       UI.bgImage.style.display = 'block';
       UI.bgImage.src = State.bg.src;
       UI.bgImage.style.transform = `translate(${State.bg.x}px, ${State.bg.y}px) scale(${State.bg.scale})`;
       UI.chipBgLock.classList.toggle('on', State.bg.locked);
+      if (UI.bgScale){
+        UI.bgScale.value = String(clamp(State.bg.scale || 1, 0.05, 6));
+      }
+      if (UI.bgScaleVal){
+        UI.bgScaleVal.textContent = `${Math.round((State.bg.scale || 1) * 100)}%`;
+      }
     }
 
     function fileToDataURL(file){
@@ -1642,8 +1684,6 @@ function hexToRgba(hex, a=1){
       if (!State.bg.src){ toast('No background'); return; }
 
       // Default behavior: scale UP so the image fills the room ("cover").
-      // This makes it easy to start with a full-bleed background; users can then
-      // adjust Room Size or unlock BG to fine-tune.
       const fitMode = (mode || State.bg.fitMode || 'cover'); // 'cover' | 'contain'
       State.bg.fitMode = fitMode;
 
@@ -2143,8 +2183,10 @@ function hexToRgba(hex, a=1){
       if (pts.length < 2) return;
       const a = pts[0];
       const b = pts[1];
-      const mid = { x:(a.clientX+b.clientX)/2, y:(a.clientY+b.clientY)/2 };
+      const midClient = { x:(a.clientX+b.clientX)/2, y:(a.clientY+b.clientY)/2 };
       const d = Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY);
+
+      const bgGesture = (State.bg.src && !State.bg.locked);
 
       if (!State.gesture.active){
         State.gesture.active = true;
@@ -2152,15 +2194,46 @@ function hexToRgba(hex, a=1){
         State.gesture.startZoom = State.view.zoom;
         State.gesture.startPanX = State.view.panX;
         State.gesture.startPanY = State.view.panY;
-        State.gesture.startMid = mid;
+        State.gesture.startMid = midClient;
+
+        // BG gesture init
+        State.gesture.startBgScale = State.bg.scale || 1;
+        State.gesture.startBgX = State.bg.x || 0;
+        State.gesture.startBgY = State.bg.y || 0;
+        State.gesture.startMidRoom = screenToRoomPoint(midClient.x, midClient.y);
         return;
       }
 
       const factor = d / (State.gesture.startDist || d);
-      const targetZoom = clamp(State.gesture.startZoom * factor, 0.25, 4);
 
-      const dx = mid.x - State.gesture.startMid.x;
-      const dy = mid.y - State.gesture.startMid.y;
+      if (bgGesture){
+        // Pinch to scale + drag to move the background (when unlocked)
+        const targetScale = clamp(State.gesture.startBgScale * factor, 0.05, 10);
+        const midRoomNow = screenToRoomPoint(midClient.x, midClient.y);
+        const midRoomStart = State.gesture.startMidRoom || midRoomNow;
+
+        // Move BG with midpoint drag (in room/world coords)
+        const dxRoom = midRoomNow.x - midRoomStart.x;
+        const dyRoom = midRoomNow.y - midRoomStart.y;
+
+        // Scale around the midpoint in room coords
+        const anchor = midRoomNow;
+        const old = State.gesture.startBgScale || 1;
+        const sx = (anchor.x - State.gesture.startBgX) / old;
+        const sy = (anchor.y - State.gesture.startBgY) / old;
+
+        State.bg.scale = targetScale;
+        State.bg.x = (anchor.x - sx * targetScale) + dxRoom;
+        State.bg.y = (anchor.y - sy * targetScale) + dyRoom;
+
+        renderBg();
+        return;
+      }
+
+      // Default gesture: pan + zoom the view
+      const targetZoom = clamp(State.gesture.startZoom * factor, 0.25, 4);
+      const dx = midClient.x - State.gesture.startMid.x;
+      const dy = midClient.y - State.gesture.startMid.y;
 
       State.view.panX = State.gesture.startPanX + dx;
       State.view.panY = State.gesture.startPanY + dy;
@@ -2846,6 +2919,30 @@ function hexToRgba(hex, a=1){
     UI.btnBgUpload.addEventListener('click', ()=>UI.bgUpload.click());
     UI.btnBgFit.addEventListener('click', ()=>bgFit());
     UI.btnBgClear.addEventListener('click', ()=>clearBg());
+
+    // BG size slider + buttons
+    UI.bgScale.addEventListener('input', ()=>{
+      if (!State.bg.src) return;
+      History.push('bg-scale');
+      State.bg.scale = clamp(parseFloat(UI.bgScale.value)||1, 0.05, 10);
+      renderBg();
+    });
+    UI.btnBgMinus.addEventListener('click', ()=>{
+      if (!State.bg.src) return;
+      History.push('bg-scale');
+      State.bg.scale = clamp((State.bg.scale||1) * 0.9, 0.05, 10);
+      renderBg();
+    });
+    UI.btnBgPlus.addEventListener('click', ()=>{
+      if (!State.bg.src) return;
+      History.push('bg-scale');
+      State.bg.scale = clamp((State.bg.scale||1) * 1.1, 0.05, 10);
+      renderBg();
+    });
+
+    // Explicit fit modes
+    UI.btnBgContain.addEventListener('click', ()=>bgFit('contain'));
+    UI.btnBgCover.addEventListener('click', ()=>bgFit('cover'));
 
     UI.chipBgLock.addEventListener('click', ()=>{
       History.push('bg-lock');
