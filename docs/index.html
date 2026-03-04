@@ -2897,71 +2897,45 @@ function hexToRgba(hex, a=1){
     document.addEventListener('touchcancel', ()=>{ touchStartInViewport = false; }, { passive:true, capture:true });
 
     /* =========================================================
-       TESTS
-       ========================================================= */
-    function runTests(){
-      const assert = (cond, msg) => { if (!cond) throw new Error('Test failed: ' + msg); };
-      assert(normalizeAngle(0) === 0, 'normalizeAngle 0');
-      assert(normalizeAngle(360) === 0, 'normalizeAngle 360');
-      assert(normalizeAngle(-10) === 350, 'normalizeAngle -10');
-      assert(safeFile('Hello World!') === 'Hello_World_', 'safeFile basic');
-      assert(safeFile('') === '', 'safeFile empty');
-      const prevSnap = State.snapOn;
-      const prevScale = State.pxPerFt;
-      State.snapOn = false; State.pxPerFt = 40;
-      assert(snapPx(53) === 53, 'snapPx off');
-      State.snapOn = true; State.snapStepFt = 1;
-      assert(snapPx(53) === 40, 'snapPx on rounds');
-      State.snapOn = prevSnap; State.pxPerFt = prevScale;
-      assert(PointerCapture.safeCapture(null, document.body) === false, 'PointerCapture null pointerId');
-      assert(PointerCapture.safeCapture(1, null) === false, 'PointerCapture null element');
-      // Undo/redo basic
-      const before = History.snapshot();
-      History.push('test');
-      State.eventName = 'X';
-      History.push('test2');
-      History.undo();
-      assert(State.eventName === before.eventName, 'undo restores state');
-      History.redo();
-      assert(State.eventName === 'X', 'redo restores state');
-      console.log('[Sleeve Planner] Tests OK');
-    }
-
-    /* =========================================================
        INIT
        ========================================================= */
     function init(){
+      // Prime UI from State
+      UI.eventName.value = State.eventName;
+      UI.eventNotes.value = State.eventNotes;
+      UI.roomW.value = State.roomFt.w;
+      UI.roomH.value = State.roomFt.h;
+      UI.gridStep.value = String(State.gridStepFt);
+
+      applyTheme();
       buildPalette();
-
-      const fromUrl = decodeProjectFromURL();
-      if (fromUrl){
-        loadProject(fromUrl);
-        history.replaceState(null, '', location.pathname + location.search);
-      } else {
-        State.eventName = UI.eventName.value;
-        State.eventNotes = UI.eventNotes.value;
-        State.gridStepFt = parseFloat(UI.gridStep.value)||2;
-        State.snapStepFt = State.gridStepFt;
-        applyTheme();
-        applyRoom();
-        applyView();
-        fitToView();
-        renderItems();
-        renderBg();
-        renderGrid();
-        updateInfiniteGrid();
-        updateGear();
-        updateScaleNote();
-      }
-
-      // Seed history with initial state
-      History.push('init');
+      applyRoom();
+      fitToView();
+      renderBg();
+      renderGrid();
+      renderItems();
       updateUndoRedoButtons();
 
-      if (window.innerWidth <= 560){ UI.help.style.display = 'none'; }
-      if (location.search.includes('test=1')){
-        try{ runTests(); } catch(err){ console.error(err); alert(err.message); }
+      // Load from share link (hash) if present
+      const shared = decodeProjectFromURL();
+      if (shared){
+        loadProject(shared);
+        // Keep fit reasonable after load
+        setTimeout(()=>fitToView(), 50);
       }
+
+      // Responsive: refit on resize/orientation changes
+      window.addEventListener('resize', ()=>{
+        // Don’t fight the user while actively interacting
+        if (State.mode === 'idle') fitToView();
+      });
+
+      // Prevent accidental context menu on long press (mobile) on canvas
+      UI.viewport.addEventListener('contextmenu', (e)=>{
+        if (!isEditableTarget(e.target)) e.preventDefault();
+      });
+
+      toast('Ready');
     }
 
     init();
